@@ -52,7 +52,12 @@ try {
     if (roles[index] === 'doctor') {
       await click('.app-sidebar a[href="/patients"]'); await wait(`!!document.querySelector('a[href^="/patients/"]')`)
       await click('a[href^="/patients/"]'); await wait(`!!document.querySelector('.summary-facts')`)
+      await evaluate(`[...document.querySelectorAll('[data-testid="patient-summary"] button')].find(e=>e.textContent==='Ver resumo completo').click();true`)
       assert.ok(await evaluate(`document.querySelector('[data-testid="patient-summary"]').textContent.includes('Última evolução')`))
+      await evaluate(`document.querySelector('.clinical-quick-actions button').click();true`)
+      await wait(`!!document.querySelector('.workflow-form textarea')`)
+      assert.ok(await evaluate(`[...document.querySelectorAll('.workflow-form textarea, .workflow-form button.btn-success')].every(e=>e.disabled)`))
+
       await writeFile(path.join(root, 'node_modules/.cache/demo-record.png'), Buffer.from((await send('Page.captureScreenshot', { format: 'png' })).data, 'base64'))
     }
     await send('Page.reload'); await pause(600); await wait(`!!document.querySelector('.demo-disclosure button')`)

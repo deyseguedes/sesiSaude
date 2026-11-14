@@ -27,6 +27,7 @@ test('public demo is opt-in and keeps profile selection separate from real authe
     assert.equal((await demoRequest('/api/v1/nursing/worklist?deadline=overdue')).data.items[0].id, 3)
     assert.equal((await demoRequest('/api/v1/nursing/worklist?status=all&professional_id=2')).data.items.length, 1)
     assert.equal((await demoRequest('/api/v1/nursing/worklist?team_id=2')).data.metrics.total, 0)
+    assert.equal((await demoRequest('/api/v1/nursing/worklist?help_requested=1')).data.items.length, 1)
     await assert.rejects(demoRequest('/api/v1/care-plans', { method: 'POST' }), /somente para consulta/)
     await demoRequest('/api/v1/auth/demo', { method: 'POST', body: '{"role":"manager"}' })
     await assert.rejects(demoRequest('/api/v1/clinical/patients'), /Acesso restrito/)

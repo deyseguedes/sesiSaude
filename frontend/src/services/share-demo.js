@@ -37,6 +37,7 @@ export async function demoRequest(url, options = {}) {
     payload.data.items = payload.data.items.filter(item => {
       if (status === 'active' && item.status === 'resolved') return false
       if (!['active', 'all'].includes(status) && item.status !== status) return false
+      if (parsed.searchParams.get('help_requested') === '1' && !Number(item.help_requested)) return false
       for (const field of ['team_id', 'professional_id', 'service_unit_id', 'assigned_to']) if (parsed.searchParams.get(field) && Number(item[field]) !== Number(parsed.searchParams.get(field))) return false
       if (deadline === 'overdue' && !item.overdue) return false
       if (deadline === 'today' && item.due_at.slice(0, 10) !== day) return false

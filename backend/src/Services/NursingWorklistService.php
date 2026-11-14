@@ -8,6 +8,18 @@ final class NursingWorklistService
 {
     public function __construct(private readonly CareService $care) {}
     private function authorize(): void { $this->care->access->roles(['doctor','nurse']); }
+    private function shortcuts(array $row): array
+    {
+        $own=(int)$this->care->user['id'];
+        $teamAllowed=!$row['team_id'] || $this->care->store->one('SELECT user_id FROM team_members WHERE team_id=? AND user_id=?',[$row['team_id'],$own]);
+        $row['can_take']=$row['status']!=='resolved' && $teamAllowed && (!$row['assigned_to'] || (int)$row['assigned_to']===$own);
+        $row['can_confirm']=false;
+        if($row['source_type']==='case') {
+            $appointment=$this->care->store->one('SELECT a.status,a.scheduled_at FROM continuity_cases c JOIN appointments a ON a.id=c.appointment_id AND a.company_id=c.company_id AND a.patient_id=c.patient_id WHERE c.id=? AND c.company_id=? AND c.patient_id=?',[$row['source_id'],$row['company_id'],$row['patient_id']]);
+            $row['can_confirm']=$row['status']!=='resolved' && $appointment && $appointment['status']==='expected' && $appointment['scheduled_at']>=date('Y-m-d H:i:s');
+        }
+        return $row;
+    }
     private function event(int $id,string $type,string $note='',array $payload=[]): void
     {
         $this->care->store->insert('care_pending_events',['item_id'=>$id,'author_id'=>$this->care->user['id'],'event_type'=>$type,'note'=>Crypto::encrypt($note),'payload'=>Crypto::encrypt(json_encode($payload,JSON_THROW_ON_ERROR)),'created_at'=>date('Y-m-d H:i:s')]);
@@ -103,6 +115,7 @@ final class NursingWorklistService
         $this->authorize(); $patients=$this->care->access->patients();$ids=array_column($patients,'id');
         $status=$filter['status']??'active'; if(!in_array($status,['active','open','in_progress','resolved','all'],true)) Input::fail('status');
         $deadline=$filter['deadline']??''; if(!in_array($deadline,['','overdue','today','next7'],true)) Input::fail('deadline');
+        if(!in_array($filter['help_requested']??'',['','1'],true)) Input::fail('help_requested');
         foreach(['team_id','professional_id','service_unit_id','assigned_to'] as $key) if(isset($filter[$key]) && $filter[$key]!=='' && (!ctype_digit((string)$filter[$key]) || (int)$filter[$key]<1)) Input::fail($key);
         $rows=[];
         if($ids) {
@@ -116,6 +129,7 @@ final class NursingWorklistService
         $rows=array_values(array_filter($rows,function($row)use($filter,$status,$deadline,$now,$today){
             if($status==='active' && $row['status']==='resolved') return false;
             if(!in_array($status,['active','all'],true) && $row['status']!==$status) return false;
+            if(($filter['help_requested']??'')==='1' && !(int)$row['help_requested']) return false;
             foreach(['team_id','professional_id','service_unit_id','assigned_to'] as $key) if(!empty($filter[$key]) && (int)$row[$key] !== (int)$filter[$key]) return false;
             return match($deadline){'overdue'=>$row['due_at']<$now,'today'=>substr($row['due_at'],0,10)===$today,'next7'=>$row['due_at']>=$now && $row['due_at']<=date('Y-m-d',time()+7*86400).' 23:59:59',default=>true};
         }));
@@ -123,6 +137,7 @@ final class NursingWorklistService
         usort($rows,fn($a,$b)=>strcmp($a['due_at'],$b['due_at']) ?: (int)$b['help_requested']<=>(int)$a['help_requested'] ?: strcmp($a['kind'],$b['kind']) ?: strcmp($a['created_at'],$b['created_at']) ?: (int)$a['id']<=>(int)$b['id']);
         $returns=[];
         foreach($rows as &$row) {
+            $row=$this->shortcuts($row);
             $patientId=(int)$row['patient_id'];
             if(!array_key_exists($patientId,$returns)) $returns[$patientId]=$this->care->store->one('SELECT MIN(scheduled_at) next_at FROM appointments WHERE patient_id=? AND company_id=? AND status IN (?,?) AND scheduled_at>=?',[$patientId,$this->care->user['company_id'],'expected','confirmed',$now])['next_at']??null;
             $row['next_return_at']=$returns[$patientId];
@@ -136,7 +151,7 @@ final class NursingWorklistService
     }
     public function detail(int $id): array
     {
-        $item=$this->item($id);$s=$this->care->store;$patient=(int)$item['patient_id'];
+        $item=$this->shortcuts($this->item($id));$s=$this->care->store;$patient=(int)$item['patient_id'];
         $item['professionals']=$this->professionals($patient);
         $item['history']=$s->all('SELECT e.*,u.name AS author_name FROM care_pending_events e JOIN users u ON u.id=e.author_id WHERE e.item_id=? ORDER BY e.created_at DESC,e.id DESC',[$id]);
         foreach($item['history'] as &$event) { $event['note']=Crypto::decrypt($event['note']);$event['payload']=json_decode(Crypto::decrypt($event['payload']),true); } unset($event);
@@ -163,7 +178,7 @@ final class NursingWorklistService
     public function action(int $id,array $d): array
     {
         $this->authorize();$version=Input::id($d,'version');
-        $type=Input::choice($d,'type',['contact','assign','start','resolve','reopen','attendance','confirm','reschedule','difficulty','refer_doctor','nursing_record']);
+        $type=Input::choice($d,'type',['contact','assign','take','start','resolve','reopen','attendance','confirm','reschedule','difficulty','refer_doctor','nursing_record']);
         $note=Input::text($d,'note',1000,!in_array($type,['resolve','reopen','contact','refer_doctor','nursing_record'],true));
         return $this->care->store->transaction(function()use($id,$d,$version,$type,$note){
             $item=$this->item($id,true);$s=$this->care->store;
@@ -171,9 +186,11 @@ final class NursingWorklistService
             if($item['status']==='resolved' && $type!=='reopen') throw new HttpException(409,'ITEM_RESOLVED','Reabra a pendência antes de registrar ações.');
             if($type==='reopen' && $item['status']!=='resolved') throw new HttpException(409,'ITEM_OPEN','A pendência já está aberta.');
             $status=$item['status'];$assigned=$item['assigned_to'];$payload=[];
-            if($type==='assign') {
-                $assigned=Input::id($d,'assigned_to');$eligible=array_filter($this->professionals((int)$item['patient_id']),fn($u)=>(int)$u['id']===$assigned && (!$item['team_id'] || (int)$u['team_id']===(int)$item['team_id']));
+            if(in_array($type,['assign','take'],true)) {
+                if($type==='take' && $assigned && (int)$assigned!==(int)$this->care->user['id']) throw new HttpException(409,'ALREADY_ASSIGNED','Caso já atribuído a outro profissional. Reabra a ficha para conferir.');
+                $assigned=$type==='take'?(int)$this->care->user['id']:Input::id($d,'assigned_to');$eligible=array_filter($this->professionals((int)$item['patient_id']),fn($u)=>(int)$u['id']===$assigned && (!$item['team_id'] || (int)$u['team_id']===(int)$item['team_id']));
                 if(!$eligible) Input::fail('profissional vinculado à equipe');$payload['assigned_to']=$assigned;
+                if($type==='take') $status='in_progress';
             }
             if($type==='start') $status='in_progress';
             if($type==='resolve') $status='resolved';

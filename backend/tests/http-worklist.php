@@ -21,6 +21,13 @@ if($closed['status']!=='resolved' || $closed['history'][0]['note']!=='Acompanham
 callApi('POST','/nursing/worklist/'.$item['id'].'/actions',201,['version'=>$result['version'],'type'=>'reopen','note'=>'Novo acompanhamento necessário.']);
 $task=callApi('POST','/nursing/worklist/tasks',201,['patient_id'=>(int)$item['patient_id'],'team_id'=>1,'assigned_to'=>(int)$nurse['id'],'kind'=>'reschedule_request','title'=>'Verificar novo horário fictício','due_date'=>date('Y-m-d'),'note'=>'Pedido administrativo fictício.']);
 callApi('GET','/nursing/worklist/'.$task['id'],200);
+callApi('POST','/nursing/worklist/'.$task['id'].'/actions',403,['version'=>1,'type'=>'take'],false);
+$taken=callApi('POST','/nursing/worklist/'.$task['id'].'/actions',201,['version'=>1,'type'=>'take','assigned_to'=>99999]);
+$takenDetail=callApi('GET','/nursing/worklist/'.$task['id'],200);
+if((int)$takenDetail['assigned_to']!==(int)$nurse['id'] || $takenDetail['status']!=='in_progress') throw new RuntimeException('Take must use the session identity');
+login('doctor');callApi('POST','/nursing/worklist/'.$task['id'].'/actions',409,['version'=>$taken['version'],'type'=>'take']);
+login('nurse');
+callApi('GET','/nursing/worklist?help_requested=1',200);
 callApi('POST','/nursing/worklist/tasks',404,['patient_id'=>$unlinked,'team_id'=>1,'assigned_to'=>(int)$nurse['id'],'kind'=>'manual_task','title'=>'Fora do vínculo','due_date'=>date('Y-m-d')]);
 $s->execute('UPDATE care_team_assignments SET active=0 WHERE patient_id=?',[$item['patient_id']]);
 callApi('GET','/nursing/worklist/'.$item['id'],404);

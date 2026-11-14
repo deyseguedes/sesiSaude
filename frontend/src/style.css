@@ -239,3 +239,8 @@ summary { cursor: pointer; }
 .task-strip > div span { color: var(--elo-muted); font-size: .8rem; }
 @media (max-width: 1100px) { .worklist-row { grid-template-columns: 36px 1fr; } .worklist-reason, .worklist-deadline { grid-column: 2; } .worklist-filters { grid-template-columns: repeat(2, minmax(0,1fr)); } }
 @media (max-width: 600px) { .worklist-filters { grid-template-columns: 1fr; } }
+.worklist-more { position: relative; }
+.filter-chips .btn-success { background: var(--elo-teal); color: white; border-color: var(--elo-teal); }
+.worklist-more summary { list-style: none; }
+.worklist-more-menu { display: flex; flex-direction: column; position: absolute; top: 100%; right: 0; min-width: 230px; padding: 10px; background: white; border: 1px solid var(--elo-line); border-radius: 12px; box-shadow: 0 8px 28px #174c4020; z-index: 5; }
+.form-actions { flex-wrap: wrap; }

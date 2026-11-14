@@ -13,6 +13,8 @@ verify($worklist->sync()['created']===0,'Worklist synchronization is idempotent'
 $returnItem=array_values(array_filter($patientItems,fn($i)=>$i['source_type']==='case'))[0];
 $reviewItem=array_values(array_filter($patientItems,fn($i)=>$i['source_type']==='plan'))[0];
 verify(str_contains($returnItem['priority_reason'],'não representa risco clínico'),'Administrative priority is explicit');
+verify($returnItem['can_take'] && $returnItem['can_confirm'],'Eligible shortcuts are provided by the backend');
+denied(fn()=>$worklist->queue(['help_requested'=>'invalid']),422);
 foreach([$admin,$manager,$navigator,$worker,$dependent] as $actor) {
     $deniedService=new NursingWorklistService(new CareService($s,$actor));
     denied(fn()=>$deniedService->queue(),403);denied(fn()=>$deniedService->detail((int)$returnItem['id']),403);denied(fn()=>$deniedService->sync(),403);
@@ -52,9 +54,15 @@ $worklist->sync();verify($worklist->detail((int)$returnItem['id'])['status']==='
 $s->insert('continuity_actions',['case_id'=>$returnItem['source_id'],'author_id'=>2,'action_type'=>'support_requested','administrative_note'=>Crypto::encrypt('Pedido fictício sem motivo obrigatório.'),'payload'=>'{}','created_at'=>date('Y-m-d H:i:s')]);
 $worklist->sync();$current=$worklist->detail((int)$returnItem['id']);
 verify($current['status']==='open' && (int)$current['help_requested']===1,'New explicit help reopens corresponding case');
+verify(!array_filter($worklist->queue(['help_requested'=>'1'])['items'],fn($i)=>!(int)$i['help_requested']),'Help quick filter does not include unrelated cases');
 $taskData=['patient_id'=>$queuePatient,'team_id'=>1,'assigned_to'=>2,'kind'=>'communication_failure','title'=>'Conferir contato fictício','due_date'=>date('Y-m-d'),'note'=>'Confirmar canal com a pessoa.'];
 $taskA=$worklist->create($taskData)['id'];$taskB=$worklist->create($taskData)['id'];
 verify($taskA!==$taskB,'Separate manual tasks have independent identities');
+$taken=$worklist->action($taskA,['version'=>1,'type'=>'take','assigned_to'=>1]);
+verify((int)$worklist->detail($taskA)['assigned_to']===2 && $worklist->detail($taskA)['status']==='in_progress','Take uses authenticated professional and advances status atomically');
+denied(fn()=>(new NursingWorklistService(new CareService($s,$doctor)))->action($taskA,['version'=>$taken['version'],'type'=>'take']),409);
+verify(!(new NursingWorklistService(new CareService($s,$doctor)))->detail($taskA)['can_take'],'Shortcut cannot take over another professional assignment');
+denied(fn()=>$worklist->action($taskA,['version'=>1,'type'=>'take']),409);
 denied(fn()=>$worklist->create(array_replace($taskData,['patient_id'=>2])),404);
 denied(fn()=>$worklist->create(array_replace($taskData,['assigned_to'=>7])),422);
 $before=(int)$s->one('SELECT COUNT(*) n FROM clinical_evolutions')['n'];
