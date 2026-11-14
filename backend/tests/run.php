@@ -39,6 +39,17 @@ check($status === 401, 'Anonymous clinical access denied');
 $routes['/failure'] = ['GET' => ['MissingController', 'show']];
 [$status, $body] = request('GET', '/failure');
 check($status === 500 && $body['error']['message'] === 'Erro interno.', 'Safe internal error');
+foreach ([
+    ['local','true','127.0.0.1',true],
+    ['local','true','::1',true],
+    ['production','true','127.0.0.1',false],
+    ['local','false','127.0.0.1',false],
+    ['local','true','192.168.1.10',false],
+    ['','true','127.0.0.1',false],
+] as [$environment,$enabled,$address,$expected]) {
+    $_ENV['APP_ENV']=$environment; $_ENV['LOCAL_PROFILE_ACCESS']=$enabled; $_SERVER['REMOTE_ADDR']=$address;
+    check(\App\Services\LocalProfileAccess::enabled()===$expected,'Local profile access policy');
+}
 $_ENV = [];
 try {
     Database::connect();

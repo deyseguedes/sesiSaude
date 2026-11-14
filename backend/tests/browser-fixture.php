@@ -15,6 +15,8 @@ $name='viva_elo_test_'.bin2hex(random_bytes(6));$password=bin2hex(random_bytes(1
 $admin->exec("CREATE DATABASE `$name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 $overrides=array_merge(array_intersect_key($_ENV,array_flip(['DB_HOST','DB_PORT','DB_USERNAME','DB_PASSWORD'])),['APP_ENV'=>'local','APP_KEY'=>base64_encode(random_bytes(32)),'DB_DATABASE'=>$name,'DEMO_PASSWORD'=>$password]);
 $env=array_merge(getenv(),$overrides);
+$overrides['LOCAL_PROFILE_ACCESS']=($request['local_profile_access']??false)===true?'true':'false';
+$env['LOCAL_PROFILE_ACCESS']=$overrides['LOCAL_PROFILE_ACCESS'];
 try {
     foreach(['bin/migrate.php','bin/seed.php'] as $command) {
         $process=proc_open([PHP_BINARY,$command],[0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']],$pipes,dirname(__DIR__),$env);

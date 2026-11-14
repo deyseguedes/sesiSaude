@@ -22,7 +22,7 @@ let setup, phpServer, chrome, vite, websocket, profile, logoutBrowser
 const cache = path.join(frontend, 'node_modules/.cache')
 await mkdir(cache, { recursive: true })
 try {
-  setup = fixture({ action: 'create' })
+  setup = fixture({ action: 'create', local_profile_access: process.env.LOCAL_PROFILE_QA === '1' })
   const apiPort = await freePort(), debugPort = await freePort()
   phpServer = spawn(php, ['-S', `127.0.0.1:${apiPort}`, '-t', 'public', 'public/router.php'], { cwd: backend, env: { ...process.env, ...setup.env }, stdio: 'ignore', windowsHide: true })
   await until(async () => { try { return (await fetch(`http://127.0.0.1:${apiPort}/api/v1/health`)).ok } catch { return false } }, 'QA API startup')
@@ -48,7 +48,16 @@ try {
   const click = selector => evaluate(`(() => { const el=document.querySelector(${JSON.stringify(selector)}); if(!el) throw Error('Missing selector'); el.click(); return true })()`)
   const clickText = (selector, text) => evaluate(`(() => { const el=[...document.querySelectorAll(${JSON.stringify(selector)})].find(e=>e.textContent.trim().includes(${JSON.stringify(text)})); if(!el) throw Error('Missing action: '+${JSON.stringify(text)}); el.click(); return true })()`)
   const fill = (selector, value) => evaluate(`(() => { const el=document.querySelector(${JSON.stringify(selector)}); if(!el) throw Error('Missing input'); const proto=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto,'value').set.call(el,${JSON.stringify(value)}); el.dispatchEvent(new Event('input',{bubbles:true})); return true })()`)
-  async function login(role) { await send('Page.navigate', { url: origin + '/login' }); await waitFor(`!!document.querySelector('#email')`); await fill('#email', `${role}@demo.vivaelo.test`); await fill('#password', setup.password); await click('form button[type="submit"], form button'); await waitFor(`!!document.querySelector('.workspace-content h1')`); await waitFor(`!document.querySelector('.loading-state')`); console.log('PASS login: ' + role) }
+  async function login(role) {
+    await send('Page.navigate', { url: origin + '/login' })
+    if (process.env.LOCAL_PROFILE_QA === '1') {
+      await waitFor(`document.querySelectorAll('.demo-profile').length===7`)
+      assert.equal(await evaluate(`!!document.querySelector('input[type="password"]')`), false)
+      const index = ['admin','manager','doctor','nurse','navigator','worker','dependent'].indexOf(role)
+      await evaluate(`document.querySelectorAll('.demo-profile')[${index}].click()`)
+    } else { await waitFor(`!!document.querySelector('#email')`); await fill('#email', `${role}@demo.vivaelo.test`); await fill('#password', setup.password); await click('form button[type="submit"], form button') }
+    await waitFor(`!!document.querySelector('.workspace-content h1')`); await waitFor(`!document.querySelector('.loading-state')`); console.log('PASS login: ' + role)
+  }
   async function screenshot(name) { const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false }); await writeFile(path.join(profile, name + '.png'), Buffer.from(shot.data, 'base64')); console.log('SCREENSHOT ' + path.join(profile, name + '.png')) }
   await send('Page.enable'); await send('Runtime.enable')
   await login('admin')

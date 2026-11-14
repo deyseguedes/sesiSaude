@@ -5,6 +5,7 @@ use App\Controllers\HealthController;
 use App\Controllers\OperationsController as Operations;
 
 return [
+    '/api/v1/auth/local-profile' => ['POST'=>[App\Controllers\AuthController::class,'localProfile']],
     '/api/v1/management/care-assignments' => ['POST'=>[Operations::class,'assignment']],
     '/api/v1/management/contracts/{id}' => ['PUT'=>[Operations::class,'updateContract']],
     '/api/v1/me/appointments/{id}/support' => ['POST'=>[Operations::class,'support']],

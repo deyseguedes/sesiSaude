@@ -1,17 +1,20 @@
 import { defineStore } from 'pinia'
 import { requestJson } from '../services/http.js'
+import { shareDemo } from '../services/share-demo.js'
 export const roles = { admin: 'Administrador SESI', worker: 'Trabalhador', dependent: 'Dependente', navigator: 'Navegador de Cuidado', manager: 'Gestor empresarial', doctor: 'Médico', nurse: 'Enfermeiro' }
 export const managementLevels = { none: 'Assistencial / individual', coordination: 'Coordenação APS', company: 'Gestão empresarial', platform: 'Gestão da plataforma' }
 export const useAuthStore = defineStore('auth', {
-  state: () => ({ user: null, csrf: '', ready: false }),
+  state: () => ({ user: null, csrf: '', ready: false, localProfiles: [] }),
   actions: {
     async demo(role) {
-      const body = await requestJson('/api/v1/auth/demo', { method: 'POST', body: JSON.stringify({ role }) })
+      await this.load()
+      const body = await requestJson(shareDemo ? '/api/v1/auth/demo' : '/api/v1/auth/local-profile', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': this.csrf }, body: JSON.stringify({ role }) })
       this.user = body.data.user; this.csrf = body.data.csrf_token; this.ready = true
     },
     async load() {
       const body = await requestJson('/api/v1/auth/session')
       this.user = body.data.user; this.csrf = body.data.csrf_token; this.ready = true
+      this.localProfiles = body.data.local_profiles || []
     },
     async login(email, password) {
       await this.load()

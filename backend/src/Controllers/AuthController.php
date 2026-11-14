@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Core\{Database,HttpException,Response,Session};
 use App\Repositories\Store;
 use App\Services\Audit;
+use App\Services\LocalProfileAccess;
 final class AuthController
 {
     public function session(): void
@@ -13,6 +14,20 @@ final class AuthController
         if (isset($_SESSION['user_id'])) {
             $user = (new Store(Database::connect()))->one('SELECT id,name,role,company_id,management_level FROM users WHERE id=? AND active=1', [$_SESSION['user_id']]);
         }
+        $profiles = LocalProfileAccess::enabled() ? LocalProfileAccess::profiles(new Store(Database::connect())) : [];
+        Response::send(200, ['user' => $user, 'csrf_token' => $_SESSION['csrf'], 'local_profiles' => $profiles]);
+    }
+    public function localProfile(): void
+    {
+        if (!LocalProfileAccess::enabled()) throw new HttpException(404, 'NOT_FOUND', 'Recurso não encontrado.');
+        Session::start(); Session::csrf();
+        $input = \App\Core\Input::body();
+        if (!is_string($input['role'] ?? null) || !in_array($input['role'], LocalProfileAccess::ROLES, true)) throw new HttpException(422, 'VALIDATION_ERROR', 'Escolha um perfil disponível.');
+        $store = new Store(Database::connect());
+        $user = LocalProfileAccess::account($store, $input['role']);
+        if (!$user) throw new HttpException(404, 'NOT_FOUND', 'Perfil local indisponível.');
+        Audit::record($store, $user, 'local_profile_login', 'user', (int)$user['id']);
+        session_regenerate_id(true); $_SESSION['user_id'] = (int)$user['id']; $_SESSION['csrf'] = bin2hex(random_bytes(32));
         Response::send(200, ['user' => $user, 'csrf_token' => $_SESSION['csrf']]);
     }
     public function login(): void

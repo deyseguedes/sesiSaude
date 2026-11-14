@@ -9,9 +9,19 @@ Todo o conteúdo deste ambiente é público. Alterações e agendamentos não s�
 
 ## Separação do ambiente real
 
-O backend PHP não possui rota de entrada sem senha. O login normal continua
-exigindo credenciais. Apenas a compilação com `VITE_SHARE_DEMO=true` utiliza o
+O backend PHP permite seleção sem senha somente em `APP_ENV=local`, com
+`LOCAL_PROFILE_ACCESS=true` e conexão por loopback. A seleção usa exclusivamente
+as contas ativas `perfil@demo.vivaelo.test`, mantendo seus vínculos e permissões.
+O ambiente local salva alterações normalmente. Cada entrada é auditada e renova
+a sessão e o token CSRF. Desabilitar a opção restaura o formulário de senha.
+Produção não aceita essa entrada. Apenas a compilação com `VITE_SHARE_DEMO=true` utiliza o
 adaptador estático; não conecta à API nem ao banco de uso local.
+
+Para habilitar a seleção na aplicação local, definir `LOCAL_PROFILE_ACCESS=true`
+em `backend/.env`, mantendo `APP_ENV=local`. Não é preciso alterar senhas nem
+executar migrações. A tela mostra apenas perfis cujas contas de demonstração
+estão ativas. Usar “Sair” para voltar à seleção. O `.env.example` mantém a opção
+desabilitada por padrão.
 
 `frontend/scripts/export-share-demo.mjs` cria um banco temporário pelo helper de
 QA, aplica migrações e carga fictícia, consulta os endpoints autenticados para
@@ -50,3 +60,10 @@ não devem ser salvas em arquivos nem no Git.
 normal, bloqueio de gravação e respostas por perfil. Chrome confirmou os sete
 perfis, navegação, persistência ao atualizar, troca de perfil, prontuário médico,
 seletor no celular e ausência de erros de execução no navegador.
+
+O modo local também foi validado nos sete perfis com gravação de agendamento,
+evolução e atualização do resumo, usando banco temporário. `LOCAL_PROFILE_QA=1`
+ativa esse fluxo em `npm run test:ui`. Os 226 testes HTTP incluem seleção local,
+CSRF, renovação e persistência da sessão, bloqueio de contas inativas, permissões
+e auditoria. Os testes de núcleo verificam que a entrada fica desabilitada fora
+do ambiente local, sem a opção explícita ou sem uma conexão por loopback.

@@ -15,6 +15,7 @@ duplicada: 409; limite de login: 429. Detalhes internos não são enviados no 50
 | GET | `/health` | Liveness público, sem informação de banco |
 | GET | `/auth/session` | Usuário atual ou null e `csrf_token` |
 | POST | `/auth/login` | `{email,password}`; CSRF obtido antes pelo session |
+| POST | `/auth/local-profile` | `{role}`; CSRF obrigatório; somente loopback, `APP_ENV=local` e `LOCAL_PROFILE_ACCESS=true`; contas de demonstração ativas |
 | POST | `/auth/logout` | Finaliza sessão; CSRF obrigatório |
 | GET | `/clinical/patients` | Pacientes vinculados, médico/enfermeiro |
 | GET | `/clinical/patients/{id}` | Histórico, equipes e profissionais autorizados |

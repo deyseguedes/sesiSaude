@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import { roles } from '../stores/auth.js'
@@ -7,6 +7,13 @@ import { shareDemo } from '../services/share-demo.js'
 import AppIcon from '../components/AppIcon.vue'
 const auth = useAuthStore(), router = useRouter()
 const email = ref(''), password = ref(''), error = ref(''), busy = ref(false)
+const initializing = ref(!shareDemo)
+const profileAccess = computed(() => shareDemo || auth.localProfiles.length > 0)
+const availableProfiles = computed(() => profiles.filter(p => shareDemo || auth.localProfiles.includes(p.role)))
+onMounted(async () => {
+  if (shareDemo) return
+  try { await auth.load() } catch (e) { error.value = e.message } finally { initializing.value = false }
+})
 const profiles = [
   { role: 'admin', icon: 'building', detail: 'Indústrias, contratos, equipes e níveis de gestão.' },
   { role: 'manager', icon: 'building', detail: 'Visão empresarial, trabalhadores e campanhas.' },
@@ -27,13 +34,15 @@ async function submit() {
 }
 </script>
 <template>
-  <section v-if="shareDemo" class="demo-entry">
+  <p v-if="initializing" role="status">Carregando os níveis de acesso…</p>
+  <section v-else-if="profileAccess" class="demo-entry">
     <p class="eyebrow">CONHEÇA A PLATAFORMA</p><h1>Um cuidado que conecta<br>indústria, pessoas e famílias.</h1>
     <p class="text-secondary fs-5 mt-3">Escolha um perfil e explore seu espaço. Acesso direto, sem senha.</p>
-    <p class="demo-disclosure"><strong>Demonstração com dados fictícios.</strong> Consulta das telas e dos níveis de acesso; alterações e agendamentos não são gravados.</p>
+    <p v-if="shareDemo" class="demo-disclosure"><strong>Demonstração com dados fictícios.</strong> Consulta das telas e dos níveis de acesso; alterações e agendamentos não são gravados.</p>
+    <p v-else class="demo-disclosure"><strong>Ambiente local.</strong> Escolha seu nível de acesso. Cadastros, agendamentos e registros são salvos normalmente.</p>
     <p v-if="error" role="alert" class="alert alert-danger">{{ error }}</p>
-    <div class="demo-profiles"><button v-for="p in profiles" :key="p.role" class="demo-profile" :disabled="busy" @click="enterProfile(p.role)"><span class="action-icon"><AppIcon :name="p.icon" /></span><span><strong>{{ roles[p.role] }}</strong><small>{{ p.detail }}</small></span><AppIcon name="arrow" :size="18" /></button></div>
-    <p class="small text-secondary mt-4">Para experimentar outro nível, use “Trocar perfil” no topo da plataforma.</p>
+    <div class="demo-profiles"><button v-for="p in availableProfiles" :key="p.role" class="demo-profile" :disabled="busy" @click="enterProfile(p.role)"><span class="action-icon"><AppIcon :name="p.icon" /></span><span><strong>{{ roles[p.role] }}</strong><small>{{ p.detail }}</small></span><AppIcon name="arrow" :size="18" /></button></div>
+    <p class="small text-secondary mt-4">Para usar outro nível, {{ shareDemo ? 'use “Trocar perfil”' : 'clique em “Sair”' }} no topo da plataforma.</p>
   </section>
   <div v-else class="row justify-content-center"><div class="col-md-6 col-lg-4">
     <p class="text-success fw-semibold">VIVA+ ELO · APS</p><h1 class="h2">Entre no seu espaço</h1>

@@ -18,6 +18,7 @@ function cli(array $args): void {
     if(proc_close($p)!==0) throw new RuntimeException('CLI fixture failed');
 }
 $cookie=''; $csrf=''; $url='';
+$env['LOCAL_PROFILE_ACCESS']='false';
 function callApi(string $method,string $path,int $expected,?array $body=null,bool $withCsrf=true): mixed {
     global $cookie,$csrf,$url,$checks;
     $curl=curl_init($url.'/api/v1'.$path);
@@ -47,6 +48,7 @@ try {
     $server=proc_open([PHP_BINARY,'-S','127.0.0.1:'.$listen,'-t','public','public/router.php'],[0=>['pipe','r'],1=>['file',$backend.'/storage/logs/http-test.log','a'],2=>['file',$backend.'/storage/logs/http-test.log','a']],$pipes,$backend,$env);
     for($attempt=0;$attempt<30;$attempt++) { $socket=@fsockopen('127.0.0.1',$listen,$errno,$error,0.1); if($socket){fclose($socket);break;} usleep(100000); }
     callApi('GET','/health',200);
+    callApi('POST','/auth/local-profile',404,['role'=>'admin']);
     callApi('GET','/clinical/patients',401);
     callApi('GET','/clinical/patients/1/summary',401);
     $session=callApi('GET','/auth/session',200); $csrf=$session['csrf_token'];
@@ -106,6 +108,7 @@ try {
     $session=callApi('GET','/auth/session',200); $csrf=$session['csrf_token'];
     for($attempt=0;$attempt<10;$attempt++) callApi('POST','/auth/login',401,['email'=>'rate-limit@demo.vivaelo.test','password'=>'wrong']);
     callApi('POST','/auth/login',429,['email'=>'rate-limit@demo.vivaelo.test','password'=>$password]);
+    require __DIR__.'/http-local-profiles.php';
     echo "OK: {$checks} HTTP checks on MySQL\n";
 } finally {
     if(is_resource($server)) { proc_terminate($server); proc_close($server); }
