@@ -35,6 +35,8 @@ final class OperationsController
     public function dependent(): void {Response::send(201,(new EnrollmentService($this->store))->representedDependent($this->industry(),Input::body()));}
     public function ownInvite(int $id): void {Response::send(201,(new EnrollmentService($this->store))->invite(new IndustryService($this->store,$this->user),Input::body(),$id));}
     public function beneficiaries(): void {Response::send(200,(new BeneficiaryService($this->store,$this->user))->list());}
+    public function journey(): void {Response::send(200,(new \App\Services\WorkerJourneyService($this->store,$this->user))->view());}
+    public function syncJourney(): void {Response::send(200,(new \App\Services\WorkerJourneyService($this->store,$this->user))->sync());}
     public function appointments(): void {Response::send(200,(new BeneficiaryService($this->store,$this->user))->appointments());}
     public function confirm(int $id): void {Response::send(200,(new BeneficiaryService($this->store,$this->user))->confirm($id));}
     public function support(int $id): void {Response::send(201,(new BeneficiaryService($this->store,$this->user))->support($id,Input::body()));}

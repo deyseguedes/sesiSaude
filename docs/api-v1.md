@@ -2,6 +2,7 @@
 
 Endpoints adicionais de gestão industrial, cadastro, dependentes, agendas e campanhas:
 [API industrial e de engajamento](industry-api.md).
+Jornada do trabalhador: [conquistas, pontos e regras](worker-journey.md).
 Fila de enfermagem, ficha e ações: [contrato e regras da Etapa 2](nursing-continuity-stage2.md#endpoints).
 
 Contrato uniforme: `{ "data": ..., "error": null }` ou

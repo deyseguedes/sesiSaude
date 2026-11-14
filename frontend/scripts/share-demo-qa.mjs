@@ -34,6 +34,11 @@ try {
     await evaluate(`document.querySelectorAll('.demo-profile')[${index}].click()`)
     await wait(`!!document.querySelector('.workspace-content h1') && !document.querySelector('.loading-state') && !document.querySelector('[role="status"]')`)
     assert.equal(await evaluate(`!!document.querySelector('.alert-danger')`), false, roles[index] + ' home')
+    if (roles[index] === 'worker') {
+      await wait(`document.querySelector('[data-testid="worker-journey"] .journey-score strong')?.textContent==='60'`)
+      assert.equal(await evaluate(`document.querySelectorAll('.journey-mission.earned').length`),3)
+      await writeFile(path.join(root, 'node_modules/.cache/demo-worker-journey.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'))
+    }
     if (roles[index] === 'nurse') {
       await wait(`!!document.querySelector('.worklist-row')`)
       assert.ok(await evaluate(`document.querySelector('.workspace-content h1').textContent.includes('Fila do dia')`))

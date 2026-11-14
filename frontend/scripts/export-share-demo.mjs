@@ -39,6 +39,11 @@ try {
       return result.status === 200 ? result.body.data : null
     }
     for (const endpoint of ['/portal', '/management/companies', '/management/overview', '/management/slots', '/management/campaigns', '/management/contents', '/clinical/dashboard', '/nursing/dashboard', '/continuity/dashboard', '/continuity/cases', '/engagement/pipeline', '/me/beneficiaries', '/me/appointments', '/me/campaigns', '/me/contents', '/professional/appointments', '/availability']) await capture(endpoint)
+    if (role === 'worker') {
+      const synced = await request('/me/journey/sync', { method:'POST', headers:{ 'X-CSRF-Token':login.body.data.csrf_token } })
+      if (synced.status !== 200) throw Error('Fictional worker journey initialization failed')
+    }
+    await capture('/me/journey')
     const patients = await capture('/clinical/patients')
     if (['doctor','nurse'].includes(role)) {
       const synced = await request('/nursing/worklist/sync', { method: 'POST', headers: { 'X-CSRF-Token': login.body.data.csrf_token } })

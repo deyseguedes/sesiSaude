@@ -110,6 +110,7 @@ try {
     callApi('POST','/auth/login',429,['email'=>'rate-limit@demo.vivaelo.test','password'=>$password]);
     require __DIR__.'/http-local-profiles.php';
     require __DIR__.'/http-worklist.php';
+    require __DIR__.'/http-journey.php';
     echo "OK: {$checks} HTTP checks on MySQL\n";
 } finally {
     if(is_resource($server)) { proc_terminate($server); proc_close($server); }

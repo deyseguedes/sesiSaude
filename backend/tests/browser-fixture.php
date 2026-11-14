@@ -42,5 +42,9 @@ try {
     if(($request['nursing_scenario']??false)===true) { ob_start();require dirname(__DIR__).'/bin/seed-nursing.php';ob_end_clean(); }
     $liveAppointment=$store->insert('appointments',['company_id'=>$doctor['company_id'],'patient_id'=>$plan['patient_id'],'professional_id'=>$doctor['id'],'scheduled_at'=>date('Y-m-d H:i:s'),'status'=>'confirmed','modality'=>'telehealth']);
     (new App\Services\SchedulingService($store,$doctor))->setAccess($liveAppointment,['meeting_url'=>'https://example.invalid/fictitious-room']);
+    // Historical, explicitly fictional evidence for the worker's three-step journey.
+    $store->insert('appointments',['company_id'=>$doctor['company_id'],'patient_id'=>$plan['patient_id'],'professional_id'=>$doctor['id'],'scheduled_at'=>date('Y-m-d H:i:s',time()-4*86400),'status'=>'attended']);
+    $fixtureJourneyNurse=$store->one('SELECT id FROM users WHERE email=?',['nurse@demo.vivaelo.test']);
+    $store->insert('clinical_evolutions',['plan_id'=>$plan['id'],'author_id'=>$fixtureJourneyNurse['id'],'kind'=>'nursing','notes'=>App\Services\Crypto::encrypt('Acompanhamento fictício posterior à consulta, exclusivo do cenário demonstrativo.'),'created_at'=>date('Y-m-d H:i:s',time()-2*86400)]);
     echo json_encode(['database'=>$name,'password'=>$password,'env'=>$overrides],JSON_THROW_ON_ERROR);
 } catch(Throwable $error) {$admin->exec("DROP DATABASE `$name`");throw new RuntimeException('QA fixture failed',previous:$error);}

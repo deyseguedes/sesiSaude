@@ -244,3 +244,29 @@ summary { cursor: pointer; }
 .worklist-more summary { list-style: none; }
 .worklist-more-menu { display: flex; flex-direction: column; position: absolute; top: 100%; right: 0; min-width: 230px; padding: 10px; background: white; border: 1px solid var(--elo-line); border-radius: 12px; box-shadow: 0 8px 28px #174c4020; z-index: 5; }
 .form-actions { flex-wrap: wrap; }
+.worker-journey { border-top: 3px solid #bd8a38; }
+.journey-score { display: flex; align-items: center; gap: 10px; color: var(--elo-teal); }
+.journey-score strong { font-size: 2.2rem; line-height: 1; }
+.journey-score span { max-width: 80px; font-size: .78rem; }
+.journey-level { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.journey-track { height: 7px; border-radius: 20px; background: #e8efeb; margin: 14px 0 22px; overflow: hidden; }
+.journey-track > span { display: block; height: 100%; background: #bd8a38; transition: width .25s; }
+.journey-missions { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; }
+.journey-mission { display: flex; gap: 12px; padding: 16px; border: 1px solid var(--elo-line); border-radius: 12px; }
+.journey-mission.earned { border-color: #b9d8c9; background: #f1f8f3; }
+.journey-medal { flex: 0 0 44px; height: 44px; display: grid; place-items: center; color: #75867d; border-radius: 50%; background: #edf1ee; }
+.earned .journey-medal { color: #886017; background: #f4e7c7; }
+.journey-mission strong, .journey-points { display: block; }
+.journey-points { font-size: .74rem; color: #886017; margin: 5px 0 8px; }
+.journey-mobile-state { display: none; }
+@media (max-width:1100px) { .journey-missions { grid-template-columns: 1fr; } }
+@media (max-width:600px) {
+  .journey-missions { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+  .journey-mission { flex-direction: column; align-items: center; text-align: center; padding: 12px 5px; gap: 7px; }
+  .journey-medal { flex-basis: 34px; width: 34px; height: 34px; }
+  .journey-mission strong { font-size: .74rem; line-height: 1.35; min-height: 3em; }
+  .journey-mission p, .journey-points > span { display: none; }
+  .journey-points { font-size: .67rem; margin: 4px 0; }
+  .journey-mobile-state { display: block; font-size: .62rem; color: var(--elo-muted); }
+}
+@media (prefers-reduced-motion:reduce) { .journey-track > span { transition: none; } }

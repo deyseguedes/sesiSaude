@@ -87,3 +87,8 @@ CREATE INDEX idx_pending_queue ON care_pending_items(company_id,status,due_at,pa
 CREATE INDEX idx_pending_patient ON care_pending_items(patient_id,company_id);
 CREATE INDEX idx_pending_events ON care_pending_events(item_id,created_at,id);
 INSERT INTO schema_migrations (name, applied_at) VALUES ('007_nursing_worklist.sql', CURRENT_TIMESTAMP);
+
+-- 008_worker_journey.sql
+CREATE TABLE worker_journey_awards (id INTEGER PRIMARY KEY AUTO_INCREMENT, company_id INTEGER NOT NULL, patient_id INTEGER NOT NULL, milestone VARCHAR(30) NOT NULL, points INTEGER NOT NULL, source_type VARCHAR(30) NOT NULL, source_id INTEGER NOT NULL, evidence_at DATETIME NOT NULL, earned_at DATETIME NOT NULL, status VARCHAR(20) NOT NULL DEFAULT 'active', version INTEGER NOT NULL DEFAULT 1, UNIQUE(company_id,patient_id,milestone), FOREIGN KEY(company_id) REFERENCES companies(id), FOREIGN KEY(patient_id) REFERENCES patients(id));
+CREATE INDEX idx_worker_journey ON worker_journey_awards(company_id,patient_id,status);
+INSERT INTO schema_migrations (name, applied_at) VALUES ('008_worker_journey.sql', CURRENT_TIMESTAMP);
