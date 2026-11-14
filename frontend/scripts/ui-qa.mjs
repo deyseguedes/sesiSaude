@@ -1,0 +1,163 @@
+import { spawn, spawnSync } from 'node:child_process'
+import { mkdir, mkdtemp, writeFile, rm, readdir } from 'node:fs/promises'
+import { createServer as createNetServer } from 'node:net'
+import { once } from 'node:events'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+import assert from 'node:assert/strict'
+import { createServer } from 'vite'
+
+const frontend = fileURLToPath(new URL('..', import.meta.url)), backend = path.resolve(frontend, '../backend')
+const browser = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+const php = process.env.PHP_BINARY || 'php'
+const pause = ms => new Promise(resolve => setTimeout(resolve, ms))
+function fixture(input) {
+  const result = spawnSync(php, ['tests/browser-fixture.php'], { cwd: backend, input: JSON.stringify(input), encoding: 'utf8', windowsHide: true })
+  if (result.status !== 0) throw new Error('Local QA database setup failed. Check the local MySQL configuration.')
+  return JSON.parse(result.stdout)
+}
+async function freePort() { const server = createNetServer(); server.listen(0, '127.0.0.1'); await once(server, 'listening'); const port = server.address().port; await new Promise(resolve => server.close(resolve)); return port }
+async function until(check, description) { for (let i = 0; i < 120; i++) { const result = await check(); if (result) return result; await pause(100) } throw new Error('Timeout: ' + description) }
+let setup, phpServer, chrome, vite, websocket, profile, logoutBrowser
+const cache = path.join(frontend, 'node_modules/.cache')
+await mkdir(cache, { recursive: true })
+try {
+  setup = fixture({ action: 'create' })
+  const apiPort = await freePort(), debugPort = await freePort()
+  phpServer = spawn(php, ['-S', `127.0.0.1:${apiPort}`, '-t', 'public', 'public/router.php'], { cwd: backend, env: { ...process.env, ...setup.env }, stdio: 'ignore', windowsHide: true })
+  await until(async () => { try { return (await fetch(`http://127.0.0.1:${apiPort}/api/v1/health`)).ok } catch { return false } }, 'QA API startup')
+  vite = await createServer({ root: frontend, logLevel: 'silent', server: { host: '127.0.0.1', port: 0, proxy: { '/api': { target: `http://127.0.0.1:${apiPort}`, changeOrigin: true } } } })
+  await vite.listen()
+  const origin = `http://127.0.0.1:${vite.httpServer.address().port}`
+  profile = await mkdtemp(path.join(cache, 'elo-ux-'))
+  chrome = spawn(browser, ['--headless=new', '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--disable-background-networking', '--disable-features=Translate', `--user-data-dir=${profile}`, `--remote-debugging-port=${debugPort}`, '--window-size=1440,1000', 'about:blank'], { stdio: 'ignore', windowsHide: true })
+  const page = await until(async () => { try { return (await (await fetch(`http://127.0.0.1:${debugPort}/json`)).json()).find(p => p.type === 'page') } catch { return null } }, 'Chrome startup')
+  websocket = new WebSocket(page.webSocketDebuggerUrl); await once(websocket, 'open')
+  let nextId = 0; const pending = new Map(), errors = []
+  websocket.addEventListener('message', event => {
+    const message = JSON.parse(event.data)
+    if (message.method === 'Runtime.exceptionThrown') errors.push(message.params.exceptionDetails.exception?.description || message.params.exceptionDetails.text)
+    if (!message.id || !pending.has(message.id)) return
+    const { resolve, reject, timer } = pending.get(message.id); clearTimeout(timer); pending.delete(message.id)
+    if (message.error) reject(new Error(message.error.message)); else resolve(message.result)
+  })
+  function send(method, params = {}) { const id = ++nextId; return new Promise((resolve, reject) => { const timer = setTimeout(() => { pending.delete(id); reject(new Error('CDP timeout: ' + method)) }, 15000); pending.set(id, { resolve, reject, timer }); websocket.send(JSON.stringify({ id, method, params })) }) }
+  async function evaluate(expression) { const result = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }); if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text); return result.result?.value }
+  logoutBrowser = () => evaluate(`(async () => { const response=await fetch('/api/v1/auth/session'); const body=await response.json(); await fetch('/api/v1/auth/logout',{method:'POST',headers:{'X-CSRF-Token':body.data.csrf_token}}); return true })()`)
+  const waitFor = expression => until(() => evaluate(expression), expression)
+  const click = selector => evaluate(`(() => { const el=document.querySelector(${JSON.stringify(selector)}); if(!el) throw Error('Missing selector'); el.click(); return true })()`)
+  const clickText = (selector, text) => evaluate(`(() => { const el=[...document.querySelectorAll(${JSON.stringify(selector)})].find(e=>e.textContent.trim().includes(${JSON.stringify(text)})); if(!el) throw Error('Missing action: '+${JSON.stringify(text)}); el.click(); return true })()`)
+  const fill = (selector, value) => evaluate(`(() => { const el=document.querySelector(${JSON.stringify(selector)}); if(!el) throw Error('Missing input'); const proto=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto,'value').set.call(el,${JSON.stringify(value)}); el.dispatchEvent(new Event('input',{bubbles:true})); return true })()`)
+  async function login(role) { await send('Page.navigate', { url: origin + '/login' }); await waitFor(`!!document.querySelector('#email')`); await fill('#email', `${role}@demo.vivaelo.test`); await fill('#password', setup.password); await click('form button[type="submit"], form button'); await waitFor(`!!document.querySelector('.workspace-content h1')`); await waitFor(`!document.querySelector('.loading-state')`); console.log('PASS login: ' + role) }
+  async function screenshot(name) { const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false }); await writeFile(path.join(profile, name + '.png'), Buffer.from(shot.data, 'base64')); console.log('SCREENSHOT ' + path.join(profile, name + '.png')) }
+  await send('Page.enable'); await send('Runtime.enable')
+  await login('admin')
+  assert.ok(await evaluate(`document.querySelector('.workspace-content').textContent.includes('Pendências de cadastro')`))
+  assert.ok(await evaluate(`[...document.querySelectorAll('.app-sidebar a')].every(e=>e.getAttribute('href')!=='/patients')`))
+  await screenshot('admin-home')
+  await clickText('.workspace-content a', 'Convidar trabalhador')
+  await waitFor(`!!document.querySelector('dialog[open] select')`)
+  assert.equal(await evaluate(`document.querySelector('dialog[open] select').value`), 'worker')
+  assert.equal(await evaluate(`document.querySelectorAll('dialog[open] input[type="number"]').length`), 0)
+  assert.ok(await evaluate(`[...document.querySelectorAll('dialog[open] select')].every(e=>e.value!=='')`))
+  await click('dialog[open] [aria-label="Fechar painel"]')
+  await clickText('.workspace-content button', 'Validar cadastro')
+  await waitFor(`document.querySelectorAll('dialog[open] input[type="checkbox"]').length===2`)
+  assert.equal(await evaluate(`[...document.querySelectorAll('dialog[open] input[type="checkbox"]')].some(e=>e.checked)`), false)
+  await evaluate(`[...document.querySelectorAll('dialog[open] input[type="checkbox"]')].forEach(e=>e.click())`)
+  await clickText('dialog[open] button', 'Validar e liberar')
+  await waitFor(`!document.querySelector('dialog[open]') && document.querySelector('.workspace-content').textContent.includes('Cadastro validado')`)
+  await clickText('.filter-chips button', 'Todos'); await screenshot('management')
+  await evaluate(`(() => { const e=[...document.querySelectorAll('.row-action-select')].find(e=>[...e.options].some(o=>o.value==='family')); if(!e) throw Error('Missing family action'); e.value='family';e.dispatchEvent(new Event('change',{bubbles:true}));return true })()`)
+  await waitFor(`!!document.querySelector('dialog[open] select')`)
+  assert.equal(await evaluate(`document.querySelector('dialog[open] select').value`), 'dependent')
+  assert.ok(await evaluate(`[...document.querySelectorAll('dialog[open] select')].every(e=>e.value!=='')`))
+  await click('dialog[open] [aria-label="Fechar painel"]')
+  console.log('PASS administration: direct invite, single-choice defaults, explicit verification, no manual IDs')
+  await click('.command-trigger'); await waitFor(`!!document.querySelector('dialog[open] #quick-command')`)
+  await fill('#quick-command', 'conteúdo')
+  await clickText('dialog[open] .command-result', 'Preparar conteúdo')
+  await waitFor(`document.querySelector('dialog[open]')?.textContent.includes('Preparar conteúdo educativo') && !!document.querySelector('dialog[open] textarea')`)
+  await click('dialog[open] [aria-label="Fechar painel"]')
+  await click('.app-sidebar a[href="/campaign-management"]')
+  await waitFor(`document.querySelector('.workspace-content h1')?.textContent.includes('Campanhas')`)
+  await waitFor(`[...document.querySelectorAll('.workspace-content button')].some(e=>e.textContent.includes('Novo ciclo') && !e.disabled)`)
+  assert.equal(await evaluate(`!!document.querySelector('dialog[open]')`), false)
+  await clickText('.workspace-content button', 'Novo ciclo')
+  await waitFor(`!!document.querySelector('dialog[open] fieldset')`)
+  await click('dialog[open] [aria-label="Fechar painel"]')
+  console.log('PASS quick actions: content editor and campaign creation open directly without permanent forms')
+  await clickText('.user-summary button', 'Sair'); await login('worker')
+  await clickText('.workspace-content a', 'Encontrar atendimento')
+  await waitFor(`document.querySelectorAll('.slot-card').length>0`)
+  console.log('PASS availability: results without a search-button click')
+  await clickText('.segmented-control button', 'Teleconsulta')
+  await waitFor(`!!document.querySelector('.slot-card') && document.querySelector('.slot-card').textContent.includes('Atendimento por vídeo')`)
+  await clickText('.slot-card button', 'Escolher horário')
+  await waitFor(`!!document.querySelector('dialog[open] input[type="checkbox"]')`)
+  assert.equal(await evaluate(`document.querySelector('dialog[open] input[type="checkbox"]').checked`), false)
+  assert.equal(await evaluate(`document.querySelector('dialog[open] form button').disabled`), true)
+  await click('dialog[open] input[type="checkbox"]'); await clickText('dialog[open] button', 'Confirmar agendamento')
+  await waitFor(`!document.querySelector('dialog[open]') && document.querySelector('.alert-success')?.textContent.includes('Atendimento confirmado')`)
+  await screenshot('worker-booking')
+  await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true })
+  await evaluate('window.scrollTo(0,0)'); await pause(150)
+  assert.ok(await evaluate(`getComputedStyle(document.querySelector('.mobile-bottom-nav')).display!=='none'`))
+  assert.ok(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'))
+  await screenshot('mobile-booking')
+  await send('Emulation.clearDeviceMetricsOverride'); await clickText('.user-summary button', 'Sair')
+  await login('doctor')
+  await waitFor(`!!document.querySelector('#clinical-patient-search')`); await fill('#clinical-patient-search', 'Ana')
+  await waitFor(`!!document.querySelector('a[href*="section=records"]')`); await click('a[href*="section=records"]')
+  await waitFor(`!!document.querySelector('.workspace-content textarea') && document.querySelector('.workspace-content').textContent.includes('Evolução profissional')`)
+  assert.ok(await evaluate(`!!document.querySelector('.care-plan-option.btn-success')`))
+  await screenshot('clinical-record')
+  console.log('PASS clinical shortcut: search to evolution with active plan already selected')
+  await clickText('.user-summary button', 'Sair'); await login('nurse')
+  await click('.app-sidebar a[href="/management"]')
+  await waitFor(`document.querySelector('.workspace-content h1')?.textContent.includes('Pessoas e operação')`)
+  await waitFor(`!!document.querySelector('.section-tabs')`)
+  assert.ok(await evaluate(`![...document.querySelectorAll('.section-tabs button')].some(e=>e.textContent==='Acessos')`))
+  await clickText('.section-tabs button', 'Agenda'); await clickText('.workspace-content button', 'Disponibilizar horário')
+  await waitFor(`document.querySelector('dialog[open]')?.textContent.includes('Disponibilizar horário') && !!document.querySelector('dialog[open] form')`)
+  await click('dialog[open] [aria-label="Fechar painel"]')
+  console.log('PASS nursing coordination: own workflow with scheduling but no account administration')
+  await clickText('.user-summary button', 'Sair'); await login('navigator')
+  await clickText('.workspace-content a', 'Acolher')
+  await waitFor(`!!document.querySelector('dialog[open] #action-type')`)
+  await evaluate(`(() => { const e=document.querySelector('#action-type'); e.value='assign_navigator';e.dispatchEvent(new Event('change',{bubbles:true}));return true })()`)
+  await waitFor(`document.querySelectorAll('dialog[open] select').length===2`)
+  assert.ok(await evaluate(`document.querySelectorAll('dialog[open] select')[1].selectedOptions[0].textContent.includes('Navegador')`))
+  await click('dialog[open] [aria-label="Fechar painel"]')
+  await clickText('.table button', 'Confirmar retorno')
+  await waitFor(`document.querySelector('.alert-success')?.textContent.includes('Retorno confirmado')`)
+  assert.equal(await evaluate(`!!document.querySelector('dialog[open]')`), false)
+  console.log('PASS navigator: case opens directly, names replace IDs, return confirmation needs one action')
+  await clickText('.user-summary button', 'Sair'); await login('manager')
+  await click('.app-sidebar a[href="/management"]')
+  await waitFor(`document.querySelector('.workspace-content h1')?.textContent.includes('Pessoas e operação')`)
+  await waitFor(`!!document.querySelector('.section-tabs')`)
+  assert.ok(await evaluate(`![...document.querySelectorAll('.section-tabs button')].some(e=>['Agenda','Acessos'].includes(e.textContent))`))
+  console.log('PASS employer management: administrative interface without clinical agenda/account controls')
+  await clickText('.user-summary button', 'Sair'); await login('dependent')
+  assert.ok(await evaluate(`![...document.querySelectorAll('.app-sidebar a')].some(e=>['/management','/patients'].includes(e.getAttribute('href')))`))
+  await clickText('.workspace-content a', 'Encontrar atendimento')
+  await waitFor(`document.querySelectorAll('.slot-card').length>0`)
+  assert.equal(await evaluate(`!!document.querySelector('#beneficiary')`), false)
+  console.log('PASS dependent: individual care space and automatic authorized availability')
+  assert.equal(errors.length, 0, errors.join('\n'))
+  console.log('PASS no browser runtime exceptions; screenshots use isolated fictional data only')
+} finally {
+  if (logoutBrowser) await logoutBrowser().catch(() => {})
+  websocket?.close(); if (chrome && chrome.exitCode === null) { chrome.kill(); await Promise.race([once(chrome, 'exit'), pause(2000)]) }
+  if (vite) await vite.close()
+  if (phpServer && phpServer.exitCode === null) { phpServer.kill(); await Promise.race([once(phpServer, 'exit'), pause(2000)]) }
+  if (setup) fixture({ action: 'drop', database: setup.database })
+  // Keep only fictional screenshots, discard cookies and the temporary browser profile.
+  if (profile && path.resolve(profile).startsWith(path.resolve(cache) + path.sep)) {
+    for (const entry of await readdir(profile)) {
+      const target = path.resolve(profile, entry)
+      if (target.startsWith(path.resolve(profile) + path.sep) && !entry.endsWith('.png')) await rm(target, { recursive: true, force: true }).catch(() => {})
+    }
+  }
+}

@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "node --test",
+    "test:ui": "node scripts/ui-qa.mjs",
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1"

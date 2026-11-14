@@ -13,7 +13,8 @@ export async function requestJson(url, options = {}) {
   try {
     response = await fetch(url, { credentials: 'same-origin', ...options })
     text = await response.text()
-  } catch {
+  } catch (error) {
+    if (error.name === 'AbortError') throw error
     throw new Error(unavailable)
   }
 

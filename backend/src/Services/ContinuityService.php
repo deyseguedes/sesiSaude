@@ -37,6 +37,7 @@ final class ContinuityService
         if (!$row) throw new HttpException(404,'NOT_FOUND','Caso não encontrado.');
         $this->care->access->patient((int)$row['patient_id'],false);
         $row['actions']=$this->care->store->all('SELECT * FROM continuity_actions WHERE case_id=? ORDER BY created_at,id',[$id]);
+        $row['navigators']=$this->care->store->all('SELECT DISTINCT u.id,u.name FROM users u JOIN team_members m ON m.user_id=u.id JOIN teams t ON t.id=m.team_id AND t.company_id=u.company_id JOIN care_team_assignments a ON a.team_id=m.team_id AND a.company_id=u.company_id WHERE u.company_id=? AND u.role=? AND u.active=1 AND a.patient_id=? AND a.active=1 ORDER BY u.name',[$this->care->user['company_id'],'navigator',$row['patient_id']]);
         foreach($row['actions'] as &$a) { $a['administrative_note']=Crypto::decrypt($a['administrative_note']); $a['payload']=json_decode($a['payload'],true); }
         Audit::record($this->care->store,$this->care->user,'read','continuity_case',$id); return $row;
     }

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LoginView from '../views/LoginView.vue'
-import DashboardView from '../views/DashboardView.vue'
+import WorkspaceHome from '../views/WorkspaceHome.vue'
 import PatientsView from '../views/PatientsView.vue'
 import PatientView from '../views/PatientView.vue'
 import ContinuityView from '../views/ContinuityView.vue'
@@ -18,6 +18,7 @@ import { useAuthStore } from '../stores/auth.js'
 
 const router = createRouter({
   history: createWebHistory(),
+  scrollBehavior(to, from, saved) { return saved || (to.path === from.path ? false : { top: 0 }) },
   routes: [
     { path: '/login', component: LoginView },
     { path: '/register', component: RegisterView },
@@ -28,7 +29,7 @@ const router = createRouter({
     { path: '/my-care', component: LearningView, meta: { auth: true, roles: ['worker', 'dependent'] } },
     { path: '/engagement', component: EngagementView, meta: { auth: true, roles: ['doctor', 'nurse', 'navigator'] } },
     { path: '/my-agenda', component: ProfessionalAgendaView, meta: { auth: true, roles: ['doctor', 'nurse'] } },
-    { path: '/', component: DashboardView, meta: { auth: true } },
+    { path: '/', component: WorkspaceHome, meta: { auth: true } },
     { path: '/patients', component: PatientsView, meta: { auth: true, roles: ['doctor', 'nurse'] } },
     { path: '/patients/:id', component: PatientView, meta: { auth: true, roles: ['doctor', 'nurse'] } },
     { path: '/continuity', component: ContinuityView, meta: { auth: true, roles: ['doctor', 'nurse', 'navigator'] } },

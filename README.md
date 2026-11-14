@@ -151,6 +151,7 @@ npm run build
 
 Resultados: [verificação V3](docs/verification-v3.md).
 Expansão atual: [verificação industrial](docs/verification-industry.md).
+Revisão de interface: [fluxos simplificados e validação](docs/usability-review.md).
 
 ## Estrutura e publicação
 

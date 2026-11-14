@@ -1,0 +1,33 @@
+<?php
+declare(strict_types=1);
+// Only used by the local browser QA runner. Credentials travel over stdin/stdout pipes.
+require dirname(__DIR__).'/environment.php';
+$request=json_decode(stream_get_contents(STDIN),true,32,JSON_THROW_ON_ERROR);
+if(($_ENV['APP_ENV']??'local')!=='local') throw new RuntimeException('Browser QA requires local environment');
+$host=$_ENV['DB_HOST'];$port=$_ENV['DB_PORT'];
+$admin=new PDO("mysql:host=$host;port=$port;charset=utf8mb4",$_ENV['DB_USERNAME'],$_ENV['DB_PASSWORD'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
+if(($request['action']??'')==='drop') {
+    $name=$request['database']??'';
+    if(!preg_match('/^viva_elo_test_[a-f0-9]{12}$/D',$name)) throw new RuntimeException('Invalid QA database');
+    $admin->exec("DROP DATABASE `$name`");echo json_encode(['dropped'=>true]);exit;
+}
+$name='viva_elo_test_'.bin2hex(random_bytes(6));$password=bin2hex(random_bytes(16));
+$admin->exec("CREATE DATABASE `$name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+$overrides=array_merge(array_intersect_key($_ENV,array_flip(['DB_HOST','DB_PORT','DB_USERNAME','DB_PASSWORD'])),['APP_ENV'=>'local','APP_KEY'=>base64_encode(random_bytes(32)),'DB_DATABASE'=>$name,'DEMO_PASSWORD'=>$password]);
+$env=array_merge(getenv(),$overrides);
+try {
+    foreach(['bin/migrate.php','bin/seed.php'] as $command) {
+        $process=proc_open([PHP_BINARY,$command],[0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']],$pipes,dirname(__DIR__),$env);
+        fclose($pipes[0]);stream_get_contents($pipes[1]);stream_get_contents($pipes[2]);fclose($pipes[1]);fclose($pipes[2]);
+        if(proc_close($process)!==0) throw new RuntimeException('QA fixture initialization failed');
+    }
+    $_ENV=array_replace($_ENV,$overrides);
+    $store=new App\Repositories\Store(App\Core\Database::connect());
+    $user=$store->one('SELECT * FROM users WHERE email=?',['admin@demo.vivaelo.test']);
+    $industry=new App\Services\IndustryService($store,$user);
+    $contract=$store->one('SELECT id FROM service_contracts LIMIT 1');$unit=$store->one('SELECT id FROM industry_units LIMIT 1');
+    $enrollment=new App\Services\EnrollmentService($store);
+    $invite=$enrollment->invite($industry,['contract_id'=>(int)$contract['id'],'industry_unit_id'=>(int)$unit['id'],'kind'=>'worker','email'=>'pending@demo.vivaelo.test']);
+    $enrollment->register(['invitation_token'=>$invite['invitation_token'],'name'=>'Elisa Cadastro Fictício','email'=>'pending@demo.vivaelo.test','password'=>$password,'birth_date'=>'2000-01-01','contact'=>'Contato fictício','postal_code'=>'40000-000','preferred_period'=>'flexible','accept_notice'=>true]);
+    echo json_encode(['database'=>$name,'password'=>$password,'env'=>$overrides],JSON_THROW_ON_ERROR);
+} catch(Throwable $error) {$admin->exec("DROP DATABASE `$name`");throw new RuntimeException('QA fixture failed',previous:$error);}
