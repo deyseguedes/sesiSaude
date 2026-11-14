@@ -10,6 +10,14 @@ na Fase A não continha entidades, consultas, importadores ou módulos legados. 
 tabelas de identidade e consultas foram criadas uma única vez; não houve migração
 de dados anteriores nem implementação presumida de importadores ausentes.
 
+## Diretriz recebida em 14/11/2026
+
+Consulte [Painéis da solução](paineis-solucao-2026-11-14.md) para a evolução
+SOC/WhatsApp, canal do trabalhador, lista autorizada do líder, indicadores e
+arquitetura de segurança. Esse documento registra o alvo e a análise de lacunas;
+a infraestrutura implementada continua sendo a descrita abaixo até migração
+validada. A [regra de prêmio coletivo](premio-equipe-saude.md) é uma proposta em discussão.
+
 ## Entrega por fase
 
 | Fase | Arquivos e alterações centrais | Impacto |

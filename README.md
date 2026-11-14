@@ -9,10 +9,19 @@ O diretório inicial tinha apenas `backend/` e `frontend/` vazios. Não havia c�
 legado, esquema SQL ou importadores para migrar. As funcionalidades de versões
 anteriores não fornecidas não fazem parte desta implementação.
 
+## Diretrizes dos painéis — 14/11/2026
+
+A [especificação dos painéis e integrações](docs/paineis-solucao-2026-11-14.md)
+consolida o canal do trabalhador, a lista autorizada do líder, SOC/WhatsApp,
+métricas e requisitos de segurança. Ela distingue recursos existentes de
+requisitos futuros e decisões de propostas em discussão. A
+[proposta original de prêmio da equipe](docs/premio-equipe-saude.md) está
+preservada para revisão; não representa pagamento implementado.
+
 ## Atualizar uma base V3
 
 Preserve a chave `APP_KEY` e faça backup do banco. Na pasta `backend`, execute
-`composer migrate`: somente as migrações novas 005 e 006 serão aplicadas.
+`composer migrate`: somente as migrações ainda não registradas serão aplicadas.
 O [SQL de atualização](backend/database/upgrade_industry.sql) é uma alternativa
 para importar uma única vez sobre V3 com 001–004 aplicadas. O
 [SQL completo](backend/database/viva_elo.sql) é somente para banco vazio.
