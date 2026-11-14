@@ -7,6 +7,9 @@ estava vazio. Para integrar qualquer base legada, primeiro mapear trabalhadores,
 profissionais, equipes e consultas; não executar estas migrações sem esse mapeamento.
 
 `../viva_elo.sql`: instalação completa em banco vazio.
-`../upgrade_industry.sql`: somente 005–006 para V3 existente; importar uma vez.
+007 acrescenta a fila de enfermagem e seu histórico auditável, preservando as
+tabelas e registros anteriores.
+
+`../upgrade_industry.sql`: 005–007 para V3 existente; importar uma vez.
 Ambos podem ser regenerados com `composer schema:build` e registram as migrações
 aplicadas, para não duplicá-las na próxima execução do migrador.

@@ -28,6 +28,23 @@ export async function demoRequest(url, options = {}) {
   if (!result) throw Error('Este detalhe não está disponível na demonstração compartilhada.')
   if (result.status !== 200 || result.body.error) throw Error(result.body.error?.message || 'Acesso indisponível para este perfil.')
   const payload = structuredClone(result.body)
+  if (endpoint === '/nursing/worklist') {
+    const status = parsed.searchParams.get('status') || 'active'
+    const deadline = parsed.searchParams.get('deadline')
+    const day = payload.data.generated_at.slice(0, 10)
+    const horizon = new Date(day + 'T12:00:00-03:00'); horizon.setUTCDate(horizon.getUTCDate() + 7)
+    const lastDay = horizon.toISOString().slice(0, 10)
+    payload.data.items = payload.data.items.filter(item => {
+      if (status === 'active' && item.status === 'resolved') return false
+      if (!['active', 'all'].includes(status) && item.status !== status) return false
+      for (const field of ['team_id', 'professional_id', 'service_unit_id', 'assigned_to']) if (parsed.searchParams.get(field) && Number(item[field]) !== Number(parsed.searchParams.get(field))) return false
+      if (deadline === 'overdue' && !item.overdue) return false
+      if (deadline === 'today' && item.due_at.slice(0, 10) !== day) return false
+      if (deadline === 'next7' && (item.due_at < payload.data.generated_at || item.due_at.slice(0, 10) > lastDay)) return false
+      return true
+    })
+    payload.data.metrics = { total: payload.data.items.length, overdue: payload.data.items.filter(i => i.overdue).length, help: payload.data.items.filter(i => i.status !== 'resolved' && Number(i.help_requested)).length }
+  }
   if (endpoint === '/availability' && Array.isArray(payload.data)) {
     const modality = parsed.searchParams.get('modality')
     if (modality) payload.data = payload.data.filter(slot => slot.modality === modality)

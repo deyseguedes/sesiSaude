@@ -153,6 +153,7 @@ Resultados: [verificação V3](docs/verification-v3.md).
 Expansão atual: [verificação industrial](docs/verification-industry.md).
 Revisão de interface: [fluxos simplificados e validação](docs/usability-review.md).
 Prontuário: [resumo por paciente e regras de acesso](docs/patient-summary.md).
+Enfermagem: [Central de Continuidade — entrega da Etapa 2](docs/nursing-continuity-stage2.md).
 Demonstração compartilhável: [link público e seleção de perfis](docs/share-demo.md).
 
 ## Estrutura e publicação

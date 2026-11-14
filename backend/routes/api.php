@@ -5,6 +5,11 @@ use App\Controllers\HealthController;
 use App\Controllers\OperationsController as Operations;
 
 return [
+    '/api/v1/nursing/worklist' => ['GET'=>[App\Controllers\ClinicalController::class,'worklist']],
+    '/api/v1/nursing/worklist/sync' => ['POST'=>[App\Controllers\ClinicalController::class,'syncWorklist']],
+    '/api/v1/nursing/worklist/tasks' => ['POST'=>[App\Controllers\ClinicalController::class,'worklistTask']],
+    '/api/v1/nursing/worklist/{id}' => ['GET'=>[App\Controllers\ClinicalController::class,'worklistDetail']],
+    '/api/v1/nursing/worklist/{id}/actions' => ['POST'=>[App\Controllers\ClinicalController::class,'worklistAction']],
     '/api/v1/auth/local-profile' => ['POST'=>[App\Controllers\AuthController::class,'localProfile']],
     '/api/v1/management/care-assignments' => ['POST'=>[Operations::class,'assignment']],
     '/api/v1/management/contracts/{id}' => ['PUT'=>[Operations::class,'updateContract']],

@@ -14,7 +14,7 @@ function fixture(input) {
 }
 let setup, server
 try {
-  setup = fixture({ action: 'create' })
+  setup = fixture({ action: 'create', nursing_scenario: true })
   const listener = createServer().listen(0, '127.0.0.1'); await once(listener, 'listening')
   const port = listener.address().port; await new Promise(resolve => listener.close(resolve))
   const origin = `http://127.0.0.1:${port}`
@@ -40,6 +40,13 @@ try {
     }
     for (const endpoint of ['/portal', '/management/companies', '/management/overview', '/management/slots', '/management/campaigns', '/management/contents', '/clinical/dashboard', '/nursing/dashboard', '/continuity/dashboard', '/continuity/cases', '/engagement/pipeline', '/me/beneficiaries', '/me/appointments', '/me/campaigns', '/me/contents', '/professional/appointments', '/availability']) await capture(endpoint)
     const patients = await capture('/clinical/patients')
+    if (['doctor','nurse'].includes(role)) {
+      const synced = await request('/nursing/worklist/sync', { method: 'POST', headers: { 'X-CSRF-Token': login.body.data.csrf_token } })
+      if (synced.status !== 200) throw Error('Falha ao preparar fila fictícia.')
+      const queue = await request('/nursing/worklist?status=all')
+      profile.routes['/nursing/worklist'] = queue
+      for (const item of queue.body.data.items) await capture(`/nursing/worklist/${item.id}`)
+    }
     const beneficiaries = profile.routes['/me/beneficiaries']?.body.data
     for (const beneficiary of Array.isArray(beneficiaries) ? beneficiaries : []) {
       for (const mode of ['in_person', 'telehealth']) {

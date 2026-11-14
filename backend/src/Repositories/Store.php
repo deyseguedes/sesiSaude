@@ -26,6 +26,13 @@ final class Store
     }
     public function transaction(callable $operation): mixed
     {
+        if ($this->db->inTransaction()) {
+            static $sequence=0;
+            $savepoint='elo_nested_'.(++$sequence);
+            $this->db->exec('SAVEPOINT '.$savepoint);
+            try { $result=$operation(); $this->db->exec('RELEASE SAVEPOINT '.$savepoint); return $result; }
+            catch (\Throwable $error) { $this->db->exec('ROLLBACK TO SAVEPOINT '.$savepoint); $this->db->exec('RELEASE SAVEPOINT '.$savepoint); throw $error; }
+        }
         $this->db->beginTransaction();
         try { $result = $operation(); $this->db->commit(); return $result; }
         catch (\Throwable $error) { $this->db->rollBack(); throw $error; }

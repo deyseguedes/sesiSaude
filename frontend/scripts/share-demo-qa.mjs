@@ -34,6 +34,14 @@ try {
     await evaluate(`document.querySelectorAll('.demo-profile')[${index}].click()`)
     await wait(`!!document.querySelector('.workspace-content h1') && !document.querySelector('.loading-state') && !document.querySelector('[role="status"]')`)
     assert.equal(await evaluate(`!!document.querySelector('.alert-danger')`), false, roles[index] + ' home')
+    if (roles[index] === 'nurse') {
+      await wait(`!!document.querySelector('.worklist-row')`)
+      assert.ok(await evaluate(`document.querySelector('.workspace-content h1').textContent.includes('Fila do dia')`))
+      assert.ok(await evaluate(`document.querySelector('.workspace-content').textContent.includes('Maria')`))
+      await click('.worklist-row button'); await wait(`!!document.querySelector('dialog[open] .summary-facts')`)
+      await writeFile(path.join(root, 'node_modules/.cache/demo-nursing-followup.png'), Buffer.from((await send('Page.captureScreenshot', { format: 'png' })).data, 'base64'))
+      await click('dialog[open] [aria-label="Fechar painel"]')
+    }
     const links = await evaluate(`[...document.querySelectorAll('.app-sidebar a')].map(a=>a.getAttribute('href')).filter((v,i,a)=>a.indexOf(v)===i)`)
     for (const link of links) {
       await click(`.app-sidebar a[href="${link}"]`)

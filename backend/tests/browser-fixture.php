@@ -39,5 +39,6 @@ try {
     $indicator=$indicators->create(['patient_id'=>(int)$plan['patient_id'],'name'=>'Indicador fictício de teste','type'=>'numeric','unit'=>'unidades','measurement_method'=>'Registro demonstrativo','frequency'=>'Pactuada'])['id'];
     $indicators->measure($indicator,['value'=>0,'source'=>'professional','collected_at'=>date('Y-m-d H:i:s'),'method'=>'Coleta profissional fictícia']);
     $indicators->measure($indicator,['value'=>1,'source'=>'self_reported','collected_at'=>date('Y-m-d H:i:s'),'method'=>'Autorrelato fictício recebido']);
+    if(($request['nursing_scenario']??false)===true) { ob_start();require dirname(__DIR__).'/bin/seed-nursing.php';ob_end_clean(); }
     echo json_encode(['database'=>$name,'password'=>$password,'env'=>$overrides],JSON_THROW_ON_ERROR);
 } catch(Throwable $error) {$admin->exec("DROP DATABASE `$name`");throw new RuntimeException('QA fixture failed',previous:$error);}

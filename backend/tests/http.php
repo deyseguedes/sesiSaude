@@ -109,6 +109,7 @@ try {
     for($attempt=0;$attempt<10;$attempt++) callApi('POST','/auth/login',401,['email'=>'rate-limit@demo.vivaelo.test','password'=>'wrong']);
     callApi('POST','/auth/login',429,['email'=>'rate-limit@demo.vivaelo.test','password'=>$password]);
     require __DIR__.'/http-local-profiles.php';
+    require __DIR__.'/http-worklist.php';
     echo "OK: {$checks} HTTP checks on MySQL\n";
 } finally {
     if(is_resource($server)) { proc_terminate($server); proc_close($server); }

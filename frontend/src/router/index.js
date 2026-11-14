@@ -14,12 +14,16 @@ import EducationEditorView from '../views/EducationEditorView.vue'
 import CampaignManagementView from '../views/CampaignManagementView.vue'
 import EngagementView from '../views/EngagementView.vue'
 import ProfessionalAgendaView from '../views/ProfessionalAgendaView.vue'
+import NursingWorklistView from '../views/NursingWorklistView.vue'
+import DashboardView from '../views/DashboardView.vue'
 import { useAuthStore } from '../stores/auth.js'
 
 const router = createRouter({
   history: createWebHistory(),
   scrollBehavior(to, from, saved) { return saved || (to.path === from.path ? false : { top: 0 }) },
   routes: [
+    { path: '/nursing-worklist', component: NursingWorklistView, meta: { auth: true, roles: ['doctor', 'nurse'] } },
+    { path: '/care-dashboard', component: DashboardView, meta: { auth: true, roles: ['doctor','nurse'] } },
     { path: '/login', component: LoginView },
     { path: '/register', component: RegisterView },
     { path: '/management', component: ManagementView, meta: { auth: true, management: true } },

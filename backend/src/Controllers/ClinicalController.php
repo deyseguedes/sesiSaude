@@ -19,6 +19,11 @@ final class ClinicalController
         $this->care=new CareService($s,$u);
     }
     public function patients(): void { $this->care->access->roles(['doctor','nurse']); Response::send(200,$this->care->access->patients()); }
+    public function worklist(): void { Response::send(200,(new \App\Services\NursingWorklistService($this->care))->queue($_GET)); }
+    public function syncWorklist(): void { Response::send(200,(new \App\Services\NursingWorklistService($this->care))->sync()); }
+    public function worklistDetail(int $id): void { Response::send(200,(new \App\Services\NursingWorklistService($this->care))->detail($id)); }
+    public function worklistAction(int $id): void { Response::send(201,(new \App\Services\NursingWorklistService($this->care))->action($id,Input::body())); }
+    public function worklistTask(): void { Response::send(201,(new \App\Services\NursingWorklistService($this->care))->create(Input::body())); }
     public function summary(int $id): void { Response::send(200,(new \App\Services\PatientSummaryService($this->care))->summarize($id)); }
     public function patient(int $id): void
     {
