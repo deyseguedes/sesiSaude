@@ -25,18 +25,24 @@ final class IndustryService
     public function gamification(): array
     {
         if(!$this->isPlatform() && !($this->user['role']==='manager' && ($this->user['management_level']??'none')==='company')) throw new HttpException(403,'FORBIDDEN','A adoção da gamificação é definida pela gestão empresarial ou administrador SESI autorizado.');
-        $row=$this->store->one('SELECT id,gamification_enabled,gamification_version FROM companies WHERE id=?',[$this->company]);
+        $row=$this->store->one('SELECT id,gamification_enabled,gamification_version,reactivation_enabled,reactivation_days,reactivation_points,reactivation_policy_at FROM companies WHERE id=?',[$this->company]);
         if(!$row) throw new HttpException(404,'NOT_FOUND','Empresa não encontrada.');
-        return ['company_id'=>(int)$row['id'],'enabled'=>(bool)$row['gamification_enabled'],'version'=>(int)$row['gamification_version']];
+        return ['company_id'=>(int)$row['id'],'enabled'=>(bool)$row['gamification_enabled'],'version'=>(int)$row['gamification_version'],'reactivation_enabled'=>(bool)$row['reactivation_enabled'],'reactivation_days'=>(int)$row['reactivation_days'],'reactivation_points'=>(int)$row['reactivation_points'],'reactivation_effective_at'=>$row['reactivation_policy_at']];
     }
     public function setGamification(array $d): array
     {
-        $this->gamification();$enabled=self::flag($d,'enabled');$version=Input::id($d,'version');
-        return $this->store->transaction(function()use($enabled,$version){
-            $statement=$this->store->db->prepare('UPDATE companies SET gamification_enabled=?,gamification_version=gamification_version+1 WHERE id=? AND gamification_version=?');
-            $statement->execute([$enabled,$this->company,$version]);
+        $old=$this->gamification();$enabled=self::flag($d,'enabled');$version=Input::id($d,'version');
+        $reactivation=array_key_exists('reactivation_enabled',$d)?self::flag($d,'reactivation_enabled'):(int)$old['reactivation_enabled'];
+        $days=$d['reactivation_days']??$old['reactivation_days'];$points=$d['reactivation_points']??$old['reactivation_points'];
+        if(!is_int($days) || $days<1 || $days>3650 || !is_int($points) || $points<1 || $points>1000) Input::fail('período de 1 a 3650 dias e bônus de 1 a 1000 pontos');
+        $effective=$old['reactivation_effective_at'];
+        if($enabled && $reactivation && (!$old['enabled'] || !$old['reactivation_enabled'] || $old['reactivation_days']!==$days || $old['reactivation_points']!==$points || !$effective)) $effective=date('Y-m-d H:i:s');
+        return $this->store->transaction(function()use($enabled,$version,$reactivation,$days,$points,$effective){
+            $statement=$this->store->db->prepare('UPDATE companies SET gamification_enabled=?,reactivation_enabled=?,reactivation_days=?,reactivation_points=?,reactivation_policy_at=?,gamification_version=gamification_version+1 WHERE id=? AND gamification_version=?');
+            $statement->execute([$enabled,$reactivation,$days,$points,$effective,$this->company,$version]);
             if($statement->rowCount()!==1) throw new HttpException(409,'CONFLICT','Configuração alterada. Atualize antes de tentar novamente.');
             $this->audit($enabled?'gamification_enabled':'gamification_disabled','company',$this->company);
+            $this->audit('reactivation_policy_saved','company',$this->company);
             return $this->gamification();
         });
     }

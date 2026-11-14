@@ -59,6 +59,9 @@ try {
       }
     }
     if (roles[index] === 'doctor') {
+      await click('.app-sidebar a[href="/"]')
+      await wait(`document.querySelector('[data-testid="doctor-reactivation"] .journey-score strong')?.textContent==='30'`)
+      assert.ok(await evaluate(`document.querySelector('[data-testid="doctor-reactivation"]').textContent.includes('180 dias')`))
       await click('.app-sidebar a[href="/patients"]'); await wait(`!!document.querySelector('a[href^="/patients/"]')`)
       await click('a[href^="/patients/"]'); await wait(`!!document.querySelector('.summary-facts')`)
       await evaluate(`[...document.querySelectorAll('[data-testid="patient-summary"] button')].find(e=>e.textContent==='Ver resumo completo').click();true`)

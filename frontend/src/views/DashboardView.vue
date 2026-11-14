@@ -4,6 +4,7 @@ import { apiGet } from '../services/api.js'
 import { useAuthStore, roles } from '../stores/auth.js'
 import { label, today } from '../utils.js'
 import TrendChart from '../components/TrendChart.vue'
+import DoctorReactivation from '../components/DoctorReactivation.vue'
 import AppIcon from '../components/AppIcon.vue'
 import { normalizeSearch } from '../utils/workflow.js'
 const patientSearch = ref('')
@@ -25,6 +26,7 @@ async function load() {
 onMounted(load)
 </script>
 <template>
+  <DoctorReactivation v-if="auth.user.role === 'doctor'" />
   <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4"><div><p class="eyebrow">VISÃO DO CUIDADO</p><h1>{{ auth.user?.role === 'nurse' ? 'Acompanhamento de enfermagem' : auth.user?.role === 'doctor' ? 'Gestão clínica' : 'Meu espaço' }}</h1><p class="text-secondary">{{ roles[auth.user?.role] }} · {{ auth.user?.name }}</p></div><RouterLink v-if="clinical" to="/patients" class="btn btn-success">Acompanhar pacientes →</RouterLink></div>
   <p v-if="auth.user?.role === 'navigator'">Acesse o <RouterLink to="/continuity">ELO Reconecta</RouterLink> para acolhimentos e retornos.</p>
   <section v-if="['worker', 'dependent'].includes(auth.user?.role)" class="row g-4 mb-4"><div class="col-lg-7"><div class="card card-body h-100"><p class="eyebrow">SEU PRÓXIMO PASSO</p><h2 class="h3">Cuidar de você também cabe na rotina</h2><p>Escolha atendimento perto de casa, da indústria ou por teleconsulta. Você pode pedir apoio para organizar seus retornos.</p><RouterLink to="/find-care" class="btn btn-success align-self-start">Encontrar atendimento →</RouterLink></div></div><div class="col-lg-5"><div class="card card-body h-100"><h2 class="h4">Meu cuidado</h2><p>Conteúdos rápidos, orientações de uso e campanhas por ciclos, no seu ritmo.</p><RouterLink to="/my-care" class="btn btn-outline-success align-self-start">Conhecer conteúdos e campanhas →</RouterLink></div></div></section>

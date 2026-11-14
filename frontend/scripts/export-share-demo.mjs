@@ -44,6 +44,11 @@ try {
       if (synced.status !== 200) throw Error('Fictional worker journey initialization failed')
     }
     await capture('/me/journey')
+    if (role === 'doctor') {
+      const synced = await request('/professional/reactivation/sync', { method:'POST', headers:{ 'X-CSRF-Token':login.body.data.csrf_token } })
+      if (synced.status !== 200) throw Error('Fictional doctor recognition initialization failed')
+      await capture('/professional/reactivation')
+    }
     const patients = await capture('/clinical/patients')
     if (['doctor','nurse'].includes(role)) {
       const synced = await request('/nursing/worklist/sync', { method: 'POST', headers: { 'X-CSRF-Token': login.body.data.csrf_token } })

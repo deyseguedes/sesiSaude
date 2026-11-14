@@ -29,6 +29,8 @@ foreach(['fresh','upgrade'] as $mode) {
         $db->query('SELECT source_revision FROM care_pending_items LIMIT 1');$checks++;
         $db->query('SELECT milestone,points FROM worker_journey_awards LIMIT 1');$checks++;
         $db->query('SELECT gamification_enabled,gamification_version FROM companies LIMIT 1');$checks++;
+        $db->query('SELECT reactivation_days,reactivation_points,reactivation_policy_at FROM companies LIMIT 1');$checks++;
+        $db->query('SELECT baseline_id,professional_id,threshold_days,points FROM doctor_reactivation_awards LIMIT 1');$checks++;
         $db->query('SELECT management_level FROM users LIMIT 1');$checks++;
         $db->query('SELECT content_version FROM content_progress LIMIT 1');$checks++;
         $db->query('SELECT version FROM service_contracts LIMIT 1');$checks++;
