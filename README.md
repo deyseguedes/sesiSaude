@@ -86,6 +86,9 @@ npm run dev
 
 Abra `http://127.0.0.1:5173`. O Vite encaminha `/api` ao backend em
 `http://127.0.0.1:8000`. Não use origens/hostnames diferentes para login e API.
+Mantenha os dois processos em execução. Se a interface abrir, mas indicar serviço
+indisponível, execute `composer serve` no terminal de `backend` e atualize a página.
+A API pode ser conferida em `http://127.0.0.1:8000/api/v1/health`.
 A rota `/system` preserva a tela de verificação da Fase A; o health check não
 verifica disponibilidade do banco.
 
@@ -142,6 +145,7 @@ php tests/sql-bundles.php
 
 ```powershell
 cd frontend
+npm test
 npm run build
 ```
 
