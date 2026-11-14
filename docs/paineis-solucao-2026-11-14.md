@@ -15,10 +15,10 @@ Fontes: resumo fornecido pelo usuário nesta conversa e anexo “Prêmio da equi
 | RH | Boletim agregado; mínimo proposto de 10 pessoas | Agregado atual suprime abaixo de 5; novo limiar pendente |
 | Médico | Resumo/carteira; entrada principal: risco confirmado e retorno | Resumo e carteira existem; risco e protocolo precisam de modelo próprio |
 | Trabalhador: benefício | Elegibilidade semestral; empresa escolhe benefício | Decisão recebida; diferente dos atuais pontos simbólicos 10/20/30 |
-| Equipe de saúde | Reconhecimento coletivo baseado em retorno no prazo | Proposta em discussão; não autoriza pagamento ou substituição automática dos pontos individuais |
+| Equipe de saúde | Reconhecimento coletivo baseado em retorno no prazo | Substituição dos pontos individuais confirmada; pagamento segue em discussão |
 | Segurança | Arquitetura pós-quântica e gestão pseudonimizada | Decisão de arquitetura recebida, implementação e evidências pendentes |
 
-A gamificação opcional por empresa e os 30 pontos do médico após 180 dias continuam descritos em seus documentos atuais. A relação entre esses pontos e o prêmio coletivo depende da decisão sobre substituição ou coexistência. Nenhuma das propostas monetárias equivale a uma obrigação de pagamento gerada pelo software.
+Decisão confirmada em 14/11/2026: o reconhecimento coletivo substitui os 30 pontos individuais do médico. A [implementação da simulação coletiva](team-recognition.md) desativa o bônus antigo, preserva o histórico e não autoriza pagamento. A gamificação simbólica do trabalhador continua independente.
 
 ## Fluxo alvo e atualização
 

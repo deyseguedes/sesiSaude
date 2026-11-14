@@ -27,24 +27,13 @@ try {
     $store=new App\Repositories\Store(App\Core\Database::connect());
     $user=$store->one('SELECT * FROM users WHERE email=?',['admin@demo.vivaelo.test']);
     $industry=new App\Services\IndustryService($store,$user);
-    $industry->setGamification(['enabled'=>true,'version'=>$industry->gamification()['version'],'reactivation_enabled'=>true,'reactivation_days'=>180,'reactivation_points'=>30]);
-    $store->execute('UPDATE companies SET reactivation_policy_at=? WHERE id=?',[date('Y-m-d H:i:s',time()-7200),$user['company_id']]);
+    $industry->setGamification(['enabled'=>true,'version'=>$industry->gamification()['version']]);
     $contract=$store->one('SELECT id FROM service_contracts LIMIT 1');$unit=$store->one('SELECT id FROM industry_units LIMIT 1');
     $enrollment=new App\Services\EnrollmentService($store);
     $invite=$enrollment->invite($industry,['contract_id'=>(int)$contract['id'],'industry_unit_id'=>(int)$unit['id'],'kind'=>'worker','email'=>'pending@demo.vivaelo.test']);
     $enrollment->register(['invitation_token'=>$invite['invitation_token'],'name'=>'Elisa Cadastro Fictício','email'=>'pending@demo.vivaelo.test','password'=>$password,'birth_date'=>'2000-01-01','contact'=>'Contato fictício','postal_code'=>'40000-000','preferred_period'=>'flexible','accept_notice'=>true]);
     $doctor=$store->one('SELECT * FROM users WHERE email=?',['doctor@demo.vivaelo.test']);
     $care=new App\Services\CareService($store,$doctor);
-    // Fictional workers for the doctor bonus. Never inserted in the application database.
-    $fixtureTeam=$store->one('SELECT team_id FROM team_members WHERE user_id=?',[$doctor['id']]);
-    foreach(['dormant'=>'Retomada Pendente Fictícia','returned'=>'Retomada Concluída Fictícia'] as $scenario=>$fixtureName) {
-        $fixtureUser=$store->insert('users',['company_id'=>$doctor['company_id'],'name'=>$fixtureName,'email'=>$scenario.'@reactivation.demo.invalid','password_hash'=>'unused','role'=>'worker']);
-        $fixturePatient=$store->insert('patients',['company_id'=>$doctor['company_id'],'user_id'=>$fixtureUser,'name'=>$fixtureName]);
-        $store->insert('care_team_assignments',['company_id'=>$doctor['company_id'],'patient_id'=>$fixturePatient,'team_id'=>$fixtureTeam['team_id']]);
-        $store->insert('appointments',['company_id'=>$doctor['company_id'],'patient_id'=>$fixturePatient,'professional_id'=>$doctor['id'],'scheduled_at'=>date('Y-m-d H:i:s',time()-200*86400),'status'=>'attended']);
-        $care->create(['patient_id'=>$fixturePatient,'professional_id'=>$doctor['id'],'team_id'=>$fixtureTeam['team_id'],'start_date'=>date('Y-m-d',time()-200*86400),'reassessment_date'=>date('Y-m-d',time()+86400),'objectives'=>'Acompanhamento fictício','interventions'=>'Retomar o cuidado pactuado','status'=>'active']);
-        if($scenario==='returned') $store->insert('appointments',['company_id'=>$doctor['company_id'],'patient_id'=>$fixturePatient,'professional_id'=>$doctor['id'],'scheduled_at'=>date('Y-m-d H:i:s',time()-3600),'status'=>'attended']);
-    }
     $plan=$store->one('SELECT id,patient_id FROM care_plans ORDER BY id LIMIT 1');
     $care->evolution((int)$plan['id'],['kind'=>'clinical','notes'=>'Registro fictício para conferir o resumo e sua autoria. '.str_repeat('Texto demonstrativo sem dados reais. ',12).'Fim do registro fictício.']);
     $indicators=new App\Services\IndicatorService($care);

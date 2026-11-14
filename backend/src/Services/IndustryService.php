@@ -27,11 +27,13 @@ final class IndustryService
         if(!$this->isPlatform() && !($this->user['role']==='manager' && ($this->user['management_level']??'none')==='company')) throw new HttpException(403,'FORBIDDEN','A adoção da gamificação é definida pela gestão empresarial ou administrador SESI autorizado.');
         $row=$this->store->one('SELECT id,gamification_enabled,gamification_version,reactivation_enabled,reactivation_days,reactivation_points,reactivation_policy_at FROM companies WHERE id=?',[$this->company]);
         if(!$row) throw new HttpException(404,'NOT_FOUND','Empresa não encontrada.');
-        return ['company_id'=>(int)$row['id'],'enabled'=>(bool)$row['gamification_enabled'],'version'=>(int)$row['gamification_version'],'reactivation_enabled'=>(bool)$row['reactivation_enabled'],'reactivation_days'=>(int)$row['reactivation_days'],'reactivation_points'=>(int)$row['reactivation_points'],'reactivation_effective_at'=>$row['reactivation_policy_at']];
+        return ['company_id'=>(int)$row['id'],'enabled'=>(bool)$row['gamification_enabled'],'version'=>(int)$row['gamification_version'],'recognition_mode'=>'team_simulation','reactivation_enabled'=>false,'reactivation_days'=>(int)$row['reactivation_days'],'reactivation_points'=>(int)$row['reactivation_points'],'reactivation_effective_at'=>$row['reactivation_policy_at']];
     }
     public function setGamification(array $d): array
     {
         $old=$this->gamification();$enabled=self::flag($d,'enabled');$version=Input::id($d,'version');
+        if(array_key_exists('reactivation_enabled',$d) && self::flag($d,'reactivation_enabled')) throw new HttpException(422,'INDIVIDUAL_RECOGNITION_RETIRED','O bônus individual foi substituído pelo reconhecimento coletivo da equipe.');
+        $d['reactivation_enabled']=false;
         $reactivation=array_key_exists('reactivation_enabled',$d)?self::flag($d,'reactivation_enabled'):(int)$old['reactivation_enabled'];
         $days=$d['reactivation_days']??$old['reactivation_days'];$points=$d['reactivation_points']??$old['reactivation_points'];
         if(!is_int($days) || $days<1 || $days>3650 || !is_int($points) || $points<1 || $points>1000) Input::fail('período de 1 a 3650 dias e bônus de 1 a 1000 pontos');

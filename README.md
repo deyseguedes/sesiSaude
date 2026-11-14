@@ -16,7 +16,9 @@ consolida o canal do trabalhador, a lista autorizada do líder, SOC/WhatsApp,
 métricas e requisitos de segurança. Ela distingue recursos existentes de
 requisitos futuros e decisões de propostas em discussão. A
 [proposta original de prêmio da equipe](docs/premio-equipe-saude.md) está
-preservada para revisão; não representa pagamento implementado.
+preservada para revisão; não representa pagamento implementado. O
+[reconhecimento coletivo](docs/team-recognition.md) substitui o bônus individual
+do médico e oferece simulação por equipe, com travas e acesso por perfil.
 
 ## Atualizar uma base V3
 

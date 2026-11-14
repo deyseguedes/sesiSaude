@@ -19,6 +19,9 @@ final class OperationsController
     }
     private function scheduling(): SchedulingService {return new SchedulingService($this->store,$this->user);}
     private function engagement(): EngagementService {return new EngagementService($this->store,$this->user);}
+    private function recognition(): \App\Services\TeamRecognitionService { return new \App\Services\TeamRecognitionService($this->store,$this->user,$this->industry()->company); }
+    public function recognitionTeams(): void { Response::send(200,$this->recognition()->teams()); }
+    public function simulateRecognition(): void { Response::send(200,$this->recognition()->simulate(Input::body())); }
     public function companies(): void {Response::send(200,$this->industry()->companies());}
     public function gamification(): void {Response::send(200,$this->industry()->gamification());}
     public function setGamification(): void {Response::send(200,$this->industry()->setGamification(Input::body()));}
