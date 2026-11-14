@@ -1,0 +1,12 @@
+# Migrações
+
+As migrações 001–004 criam a base clínica V3; 005–006 acrescentam gestão industrial,
+elegibilidade, agendas, educação e campanhas. Execute `composer migrate`
+em uma única instância; `schema_migrations` evita reaplicação. O diretório inicial
+estava vazio. Para integrar qualquer base legada, primeiro mapear trabalhadores,
+profissionais, equipes e consultas; não executar estas migrações sem esse mapeamento.
+
+`../viva_elo.sql`: instalação completa em banco vazio.
+`../upgrade_industry.sql`: somente 005–006 para V3 existente; importar uma vez.
+Ambos podem ser regenerados com `composer schema:build` e registram as migrações
+aplicadas, para não duplicá-las na próxima execução do migrador.

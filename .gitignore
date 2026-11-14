@@ -1,0 +1,11 @@
+/backend/vendor/
+/backend/.env
+/backend/storage/logs/*
+!/backend/storage/logs/.gitkeep
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env.local
+*.log
+/backend/storage/sessions/
+/backend/storage/*.sqlite
+/backend/storage/mysql-test/
