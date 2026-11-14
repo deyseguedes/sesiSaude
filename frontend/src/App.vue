@@ -6,6 +6,7 @@ import { useWorkspaceStore } from './stores/workspace.js'
 import { navigationFor, normalizeSearch } from './utils/workflow.js'
 import AppIcon from './components/AppIcon.vue'
 import SidePanel from './components/SidePanel.vue'
+import { shareDemo } from './services/share-demo.js'
 const auth = useAuthStore(), workspace = useWorkspaceStore(), router = useRouter(), route = useRoute()
 const error = ref(''), menuOpen = ref(false), commandsOpen = ref(false), search = ref('')
 const navigation = computed(() => navigationFor(auth.user))
@@ -32,7 +33,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', keyboard))
     </aside>
     <div class="app-workspace">
       <header class="workspace-header"><div class="d-flex align-items-center gap-3"><button class="icon-button mobile-menu-button" aria-label="Abrir navegação" @click="menuOpen = true"><AppIcon name="menu" /></button><span class="workspace-title">{{ currentTitle }}</span></div><button class="command-trigger" @click="commandsOpen = true"><AppIcon name="search" /><span>O que você precisa fazer?</span><kbd>Ctrl K</kbd></button><div class="user-summary"><span class="avatar avatar-small">{{ initials }}</span><div><strong>{{ auth.user.name.split(' — ')[0] }}</strong><small>{{ roles[auth.user.role] }}</small></div><button class="btn btn-sm btn-link text-secondary" @click="logout">Sair</button></div></header>
-      <main id="main-content" class="workspace-content" tabindex="-1"><p v-if="error" class="alert alert-danger" role="alert">{{ error }}</p><RouterView :key="auth.user.id" /></main>
+      <main id="main-content" class="workspace-content" tabindex="-1"><div v-if="shareDemo" class="demo-disclosure mb-4 d-flex flex-wrap align-items-center justify-content-between gap-2"><span><strong>Demonstração · {{ roles[auth.user.role] }}</strong><br>Dados fictícios · somente consulta · sem gravação de alterações.</span><button class="btn btn-sm btn-outline-success" @click="logout">Trocar perfil</button></div><p v-if="error" class="alert alert-danger" role="alert">{{ error }}</p><RouterView :key="auth.user.id" /></main>
       <footer class="workspace-footer">VIVA+ ELO · Demonstração com dados fictícios. Decisões clínicas cabem à equipe habilitada.</footer>
     </div>
     <nav class="mobile-bottom-nav" aria-label="Acesso rápido"><RouterLink v-for="item in navigation.primary.slice(0, 4)" :key="item.to" :to="item.to"><AppIcon :name="item.icon" /><span>{{ item.label }}</span></RouterLink><button @click="menuOpen = true"><AppIcon name="menu" /><span>Mais</span></button></nav>

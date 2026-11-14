@@ -217,3 +217,14 @@ summary { cursor: pointer; }
 .summary-history { font-size: .81rem; padding: 16px 2px 0; }
 @media (max-width: 1100px) { .summary-facts { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 767px) { .summary-clinical-grid { grid-template-columns: 1fr; } .summary-facts { gap: 9px; } .summary-facts > div { padding: 11px; } .summary-facts strong { font-size: .77rem; } .summary-goal { flex-direction: column; gap: 9px; } .summary-goal-state { flex-basis: auto; align-items: flex-start; } .summary-readings { min-width: 600px; } }
+.demo-entry { max-width: 1040px; margin: 0 auto; }
+.demo-entry h1 { font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.15; }
+.demo-disclosure { background: #e8f3ed; color: #174c40; border: 1px solid #c9ddd1; border-radius: 12px; padding: 16px 20px; }
+.demo-profiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 28px; }
+.demo-profile { display: flex; align-items: center; gap: 16px; text-align: left; padding: 24px; background: white; border: 1px solid #d4e1da; border-radius: 16px; color: #17444b; transition: border-color .15s, box-shadow .15s; }
+.demo-profile:hover, .demo-profile:focus-visible { border-color: #087660; box-shadow: 0 5px 20px #174c4012; }
+.demo-profile > span:nth-child(2) { flex: 1; }
+.demo-profile strong, .demo-profile small { display: block; }
+.demo-profile strong { font-size: 1.1rem; margin-bottom: 6px; }
+.demo-profile small { color: #617579; line-height: 1.5; }
+@media (max-width: 600px) { .demo-profiles { grid-template-columns: 1fr; } .demo-profile { padding: 20px; } }

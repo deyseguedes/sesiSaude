@@ -9,6 +9,10 @@ function fallbackMessage(status) {
 }
 
 export async function requestJson(url, options = {}) {
+  if (import.meta.env?.VITE_SHARE_DEMO === 'true') {
+    const { demoRequest } = await import('./share-demo.js')
+    return demoRequest(url, options)
+  }
   let response, text
   try {
     response = await fetch(url, { credentials: 'same-origin', ...options })

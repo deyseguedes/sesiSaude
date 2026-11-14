@@ -5,6 +5,10 @@ export const managementLevels = { none: 'Assistencial / individual', coordinatio
 export const useAuthStore = defineStore('auth', {
   state: () => ({ user: null, csrf: '', ready: false }),
   actions: {
+    async demo(role) {
+      const body = await requestJson('/api/v1/auth/demo', { method: 'POST', body: JSON.stringify({ role }) })
+      this.user = body.data.user; this.csrf = body.data.csrf_token; this.ready = true
+    },
     async load() {
       const body = await requestJson('/api/v1/auth/session')
       this.user = body.data.user; this.csrf = body.data.csrf_token; this.ready = true
