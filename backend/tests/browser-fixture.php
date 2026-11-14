@@ -29,5 +29,13 @@ try {
     $enrollment=new App\Services\EnrollmentService($store);
     $invite=$enrollment->invite($industry,['contract_id'=>(int)$contract['id'],'industry_unit_id'=>(int)$unit['id'],'kind'=>'worker','email'=>'pending@demo.vivaelo.test']);
     $enrollment->register(['invitation_token'=>$invite['invitation_token'],'name'=>'Elisa Cadastro Fictício','email'=>'pending@demo.vivaelo.test','password'=>$password,'birth_date'=>'2000-01-01','contact'=>'Contato fictício','postal_code'=>'40000-000','preferred_period'=>'flexible','accept_notice'=>true]);
+    $doctor=$store->one('SELECT * FROM users WHERE email=?',['doctor@demo.vivaelo.test']);
+    $care=new App\Services\CareService($store,$doctor);
+    $plan=$store->one('SELECT id,patient_id FROM care_plans ORDER BY id LIMIT 1');
+    $care->evolution((int)$plan['id'],['kind'=>'clinical','notes'=>'Registro fictício para conferir o resumo e sua autoria. '.str_repeat('Texto demonstrativo sem dados reais. ',12).'Fim do registro fictício.']);
+    $indicators=new App\Services\IndicatorService($care);
+    $indicator=$indicators->create(['patient_id'=>(int)$plan['patient_id'],'name'=>'Indicador fictício de teste','type'=>'numeric','unit'=>'unidades','measurement_method'=>'Registro demonstrativo','frequency'=>'Pactuada'])['id'];
+    $indicators->measure($indicator,['value'=>0,'source'=>'professional','collected_at'=>date('Y-m-d H:i:s'),'method'=>'Coleta profissional fictícia']);
+    $indicators->measure($indicator,['value'=>1,'source'=>'self_reported','collected_at'=>date('Y-m-d H:i:s'),'method'=>'Autorrelato fictício recebido']);
     echo json_encode(['database'=>$name,'password'=>$password,'env'=>$overrides],JSON_THROW_ON_ERROR);
 } catch(Throwable $error) {$admin->exec("DROP DATABASE `$name`");throw new RuntimeException('QA fixture failed',previous:$error);}

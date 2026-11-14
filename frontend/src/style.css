@@ -189,3 +189,31 @@ summary { cursor: pointer; }
 @media (max-width: 767px) { .clinical-quick-actions .btn { flex: 1 1 45%; } }
 .sidebar-link.is-active { color: #096b5b; background: #e9f3ee; font-weight: 700; }
 .row-action-select { display: inline-block; width: 185px; min-height: 34px; font-size: .76rem; }
+.patient-summary { border-top: 3px solid #3c8165; }
+.summary-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.summary-heading h2 { font-size: 1.05rem; font-weight: 700; }
+.summary-heading > div > p { font-size: .7rem; margin-top: 7px; }
+.summary-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
+.summary-facts > div { padding: 15px; background: #f4f8f2; border: 1px solid #e2ebe0; border-radius: 9px; }
+.summary-facts span { display: block; color: #61786b; font-size: .7rem; margin-bottom: 8px; }
+.summary-facts strong { display: block; font-size: .88rem; line-height: 1.5; }
+.summary-facts small { display: block; font-size: .67rem; line-height: 1.5; margin-top: 5px; color: #6c7d70; }
+.summary-details { margin-top: 18px; }
+.summary-clinical-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.summary-block { padding: 18px; border: 1px solid #e2e9df; border-radius: 9px; min-width: 0; }
+.summary-authorship { font-size: .72rem; color: #647c6a; line-height: 1.6; margin-bottom: 14px; }
+.summary-label { font-size: .72rem; font-weight: 700; color: #506e5b; margin-bottom: 7px; }
+.record-text { font-size: .82rem; line-height: 1.6; overflow-wrap: anywhere; }
+.record-text p { white-space: pre-wrap; }
+.record-excerpt-label { display: block; color: #6c7e6d; font-size: .65rem; font-style: italic; margin-bottom: 4px; }
+.summary-adherence { margin-top: 20px; padding-top: 16px; border-top: 1px solid #e6ece3; }
+.summary-adherence small { color: #6b7b6a; font-size: .68rem; }
+.summary-readings { font-size: .77rem; }
+.summary-readings small { color: #647b69; font-size: .66rem; line-height: 1.7; }
+.summary-goal { display: flex; justify-content: space-between; gap: 18px; padding: 14px 0; border-top: 1px solid #e8ede4; }
+.summary-goal strong { font-size: .82rem; }
+.summary-goal small { color: #607665; font-size: .67rem; }
+.summary-goal-state { flex: 0 0 185px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.summary-history { font-size: .81rem; padding: 16px 2px 0; }
+@media (max-width: 1100px) { .summary-facts { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 767px) { .summary-clinical-grid { grid-template-columns: 1fr; } .summary-facts { gap: 9px; } .summary-facts > div { padding: 11px; } .summary-facts strong { font-size: .77rem; } .summary-goal { flex-direction: column; gap: 9px; } .summary-goal-state { flex-basis: auto; align-items: flex-start; } .summary-readings { min-width: 600px; } }

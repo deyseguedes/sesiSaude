@@ -7,12 +7,20 @@ import { label, options, today, timestamp } from '../utils.js'
 import FormPanel from '../components/FormPanel.vue'
 import TrendChart from '../components/TrendChart.vue'
 import AppIcon from '../components/AppIcon.vue'
+import PatientSummary from '../components/PatientSummary.vue'
 import { defaultPlan, formatDate, formatDateTime } from '../utils/workflow.js'
 const route = useRoute(), auth = useAuthStore()
 const patient = ref(null), plans = ref([]), plan = ref(null), indicators = ref([]), measurements = ref([])
 const selectedPlan = ref(''), selectedIndicator = ref(''), goalIndicator = ref(''), editingGoal = ref(null)
 const error = ref(''), notice = ref(''), busy = ref(false), section = ref('overview'), creating = ref(false)
 const planInitial = ref({}), goalInitial = ref({})
+const summaryVersion = ref(0)
+async function openSummarySource(target) {
+  if (busy.value) return
+  if (target.planId && Number(selectedPlan.value) !== Number(target.planId)) await selectPlan(Number(target.planId))
+  if (target.indicatorId) selectedIndicator.value = Number(target.indicatorId)
+  section.value = target.section
+}
 const field = (name, label, extra = {}) => ({ name, label, ...extra })
 const professionals = computed(() => patient.value?.professionals.map(u => ({ value: Number(u.id), label: `${u.name} · equipe #${u.team_id}` })) || [])
 const teamOptions = computed(() => patient.value?.teams.map(t => ({ value: Number(t.id), label: t.name })) || [])
@@ -70,7 +78,7 @@ async function selectPlan(id) { selectedPlan.value = id; creating.value = false;
 function newPlan() { selectedPlan.value = ''; plan.value = null; creating.value = true; section.value = 'plan'; planInitial.value = { professional_id: Number(auth.user.id), team_id: Number(patient.value.teams[0]?.id || 0), start_date: today(), status: 'active' } }
 async function mutate(path, method, data, after) {
   busy.value = true; error.value = ''; notice.value = ''
-  try { const result = await apiRequest(path, method, data); after?.(result); await load(); notice.value = 'Registro salvo com autoria e histórico.' }
+  try { const result = await apiRequest(path, method, data); after?.(result); await load(); summaryVersion.value++; notice.value = 'Registro salvo com autoria e histórico.' }
   catch (e) { error.value = e.message } finally { busy.value = false }
 }
 function savePlan(data) {
@@ -97,6 +105,7 @@ watch(() => route.params.id, async () => {
   <p v-if="error" class="alert alert-danger mt-3" role="alert">{{ error }}</p><p v-if="notice" class="alert alert-success mt-3" role="status">{{ notice }}</p><p v-if="busy" role="status">Processando…</p>
   <template v-if="patient">
     <div class="d-flex justify-content-between flex-wrap gap-3 my-4"><div><p class="eyebrow">ACOMPANHAMENTO INDIVIDUAL</p><h1>{{ patient.name }}</h1><p class="text-secondary">Equipe APS · acesso assistencial restrito</p></div><button class="btn btn-success align-self-start" :disabled="busy" @click="newPlan">Criar plano de cuidado</button></div>
+    <PatientSummary :patient-id="Number(patient.id)" :refresh-key="summaryVersion" :compact="section !== 'overview'" :busy="busy" @navigate="openSummarySource" />
     <div class="clinical-quick-actions mb-4"><button class="btn btn-success" :disabled="busy" @click="section = 'records'"><AppIcon name="plus" :size="17" /> Registrar evolução</button><button class="btn btn-outline-success" :disabled="busy" @click="section = 'indicators'">Registrar medição</button><button class="btn btn-outline-success" :disabled="busy" @click="section = 'goals'">Acompanhar metas</button><button class="btn btn-outline-secondary" :disabled="busy" @click="section = 'overview'">Programar retorno</button></div><div class="row g-4"><aside class="col-lg-3"><div class="card card-body"><h2 class="h6">Planos de cuidado</h2><p v-if="!plans.length" class="small text-secondary">Nenhum plano registrado.</p><button v-for="p in plans" :key="p.id" class="btn text-start my-1 care-plan-option" :class="Number(selectedPlan) === Number(p.id) ? 'btn-success' : 'btn-outline-secondary'" :disabled="busy" @click="selectPlan(p.id)">Plano de cuidado<small>{{ label(p.status) }} · {{ formatDate(p.reassessment_date) }}</small></button></div></aside>
       <div class="col-lg-9"><nav class="nav nav-pills gap-1 mb-4" aria-label="Seções do paciente"><button v-for="tab in [{ id: 'overview', title: 'Histórico' }, { id: 'plan', title: 'Plano' }, { id: 'goals', title: 'Metas' }, { id: 'indicators', title: 'Indicadores' }, { id: 'records', title: 'Registros e revisão' }, { id: 'referral', title: 'Encaminhar' }]" :key="tab.id" class="nav-link" :class="{ active: section === tab.id }" :disabled="busy" @click="section = tab.id">{{ tab.title }}</button></nav>
         <section v-if="section === 'overview'" class="card card-body"><h2 class="h4">Histórico de consultas e retornos</h2><p v-if="!patient.appointments.length">Nenhum atendimento registrado.</p><p v-for="a in patient.appointments" :key="a.id">{{ formatDateTime(a.scheduled_at) }} · {{ label(a.status) }} · profissional #{{ a.professional_id }}</p><RouterLink to="/continuity">Acompanhar continuidade no ELO Reconecta →</RouterLink><h3 class="h5 mt-4">Programar retorno</h3><FormPanel :fields="appointmentFields" :busy="busy" @submit="d => mutate(`/clinical/patients/${patient.id}/appointments`, 'POST', { ...d, team_id: Number(d.team_id), professional_id: Number(d.professional_id) })" /></section>

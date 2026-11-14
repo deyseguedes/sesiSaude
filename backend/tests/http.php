@@ -48,6 +48,7 @@ try {
     for($attempt=0;$attempt<30;$attempt++) { $socket=@fsockopen('127.0.0.1',$listen,$errno,$error,0.1); if($socket){fclose($socket);break;} usleep(100000); }
     callApi('GET','/health',200);
     callApi('GET','/clinical/patients',401);
+    callApi('GET','/clinical/patients/1/summary',401);
     $session=callApi('GET','/auth/session',200); $csrf=$session['csrf_token'];
     callApi('POST','/auth/login',403,['email'=>'doctor@demo.vivaelo.test','password'=>$password],false);
     callApi('POST','/auth/login',401,['email'=>'doctor@demo.vivaelo.test','password'=>'wrong']);
@@ -55,7 +56,10 @@ try {
     $patients=callApi('GET','/clinical/patients',200);
     if(count($patients)!==3) throw new RuntimeException('Patient filtering failed');
     callApi('GET','/clinical/patients/'.$otherPatient,404); callApi('GET','/clinical/patients/'.$unlinked,404);
+    callApi('GET','/clinical/patients/'.$otherPatient.'/summary',404); callApi('GET','/clinical/patients/'.$unlinked.'/summary',404);
     callApi('GET','/clinical/patients/1',200);
+    $initialSummary=callApi('GET','/clinical/patients/1/summary',200);
+    if($initialSummary['patient']['id']!==1 || $initialSummary['last_attended']!==null) throw new RuntimeException('Invalid initial patient summary');
     $data=['patient_id'=>1,'professional_id'=>(int)$doctor['id'],'team_id'=>1,'start_date'=>date('Y-m-d'),'reassessment_date'=>date('Y-m-d',time()+86400),'objectives'=>'Objetivo fictício','interventions'=>'Ação pactuada','clinical_notes'=>'Observação restrita','status'=>'active'];
     callApi('POST','/care-plans',403,$data,false);
     callApi('POST','/care-plans',422,array_replace($data,['reassessment_date'=>'2026-02-30']));
@@ -77,22 +81,26 @@ try {
     callApi('PUT','/care-plans/'.$plan,200,$data+['version'=>1]);
     callApi('PUT','/care-plans/'.$plan,409,$data+['version'=>1]);
     callApi('POST','/care-plans/'.$plan.'/reviews',201,['version'=>2,'notes'=>'Revisão registrada','outcome'=>'active','reassessment_date'=>date('Y-m-d',time()+172800)]);
+    $reviewSummary=callApi('GET','/clinical/patients/1/summary',200);
+    if($reviewSummary['latest_review']['notes']!=='Revisão registrada') throw new RuntimeException('Patient summary missing current review');
     callApi('GET','/clinical/dashboard',200); callApi('GET','/nursing/dashboard',403);
     $nurse=login('nurse');
     callApi('GET','/nursing/dashboard',200); callApi('GET','/clinical/dashboard',403);
     callApi('POST','/care-plans/'.$plan.'/evolutions',201,['kind'=>'education','notes'=>'Ação educativa fictícia']);
+    $nursingSummary=callApi('GET','/clinical/patients/1/summary',200);
+    if($nursingSummary['latest_evolution']['notes']!=='Ação educativa fictícia' || $nursingSummary['latest_evolution']['author_role']!=='nurse') throw new RuntimeException('Patient summary missing evolution attribution');
     callApi('POST','/care-plans/'.$plan.'/evolutions',422,['kind'=>'clinical','notes'=>'Fora do tipo de registro']);
     callApi('POST','/care-plans/'.$plan.'/adherence',201,['action_description'=>'Ação fictícia','completed'=>true,'source'=>'self_reported','occurred_at'=>date('Y-m-d H:i:s')]);
     callApi('POST','/clinical/referrals',201,['patient_id'=>1,'team_id'=>1,'to_professional_id'=>(int)$doctor['id'],'reason'=>'Motivo clínico restrito']);
     callApi('POST','/clinical/patients/1/appointments',201,['team_id'=>1,'professional_id'=>(int)$nurse['id'],'date'=>date('Y-m-d',time()+86400),'time'=>'11:00']);
-    login('navigator'); callApi('GET','/clinical/patients',403); callApi('GET','/care-plans/'.$plan,403); callApi('GET','/indicators/'.$indicator.'/measurements',403);
+    login('navigator'); callApi('GET','/clinical/patients',403); callApi('GET','/clinical/patients/1/summary',403); callApi('GET','/care-plans/'.$plan,403); callApi('GET','/indicators/'.$indicator.'/measurements',403);
     $cases=callApi('GET','/continuity/cases',200); $case=$cases[0];
     callApi('POST','/continuity/cases/'.$case['id'].'/actions',201,['type'=>'barrier','barrier'=>'transport','version'=>1]);
     callApi('POST','/continuity/cases/'.$case['id'].'/actions',409,['type'=>'confirm','version'=>1]);
     callApi('POST','/continuity/cases/'.$case['id'].'/actions',201,['type'=>'clinical_review','version'=>2]);
     callApi('GET','/continuity/cases/'.$case['id'],200); callApi('GET','/continuity/dashboard',200);
     callApi('POST','/continuity/sync',200);
-    foreach(['admin','manager','worker'] as $role) { login($role); callApi('GET','/portal',200); callApi('GET','/clinical/patients',403); callApi('GET','/continuity/cases',403); }
+    foreach(['admin','manager','worker'] as $role) { login($role); callApi('GET','/portal',200); callApi('GET','/clinical/patients',403); callApi('GET','/clinical/patients/1/summary',403); callApi('GET','/continuity/cases',403); }
     callApi('POST','/auth/logout',200); callApi('GET','/portal',401);
     require __DIR__.'/http-industry.php';
     $session=callApi('GET','/auth/session',200); $csrf=$session['csrf_token'];

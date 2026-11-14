@@ -18,6 +18,7 @@ duplicada: 409; limite de login: 429. Detalhes internos não são enviados no 50
 | POST | `/auth/logout` | Finaliza sessão; CSRF obrigatório |
 | GET | `/clinical/patients` | Pacientes vinculados, médico/enfermeiro |
 | GET | `/clinical/patients/{id}` | Histórico, equipes e profissionais autorizados |
+| GET | `/clinical/patients/{id}/summary` | Resumo factual do prontuário; médico/enfermeiro vinculado ([regras](patient-summary.md)) |
 | POST | `/clinical/patients/{id}/appointments` | `{team_id,professional_id,date,time}`; cria retorno e caso |
 | GET, POST | `/care-plans` | Lista e criação de planos |
 | GET, PUT | `/care-plans/{id}` | Detalhe e atualização com `version` |

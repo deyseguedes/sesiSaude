@@ -19,6 +19,7 @@ final class ClinicalController
         $this->care=new CareService($s,$u);
     }
     public function patients(): void { $this->care->access->roles(['doctor','nurse']); Response::send(200,$this->care->access->patients()); }
+    public function summary(int $id): void { Response::send(200,(new \App\Services\PatientSummaryService($this->care))->summarize($id)); }
     public function patient(int $id): void
     {
         $p=$this->care->access->patient($id); $s=$this->care->store;

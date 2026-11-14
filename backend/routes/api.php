@@ -56,6 +56,7 @@ return [
     '/api/v1/continuity/cases/{id}/actions' => ['POST'=>[App\Controllers\ClinicalController::class,'action']],
     '/api/v1/clinical/referrals' => ['POST'=>[App\Controllers\ClinicalController::class,'referral']],
     '/api/v1/clinical/patients' => ['GET' => [App\Controllers\ClinicalController::class,'patients']],
+    '/api/v1/clinical/patients/{id}/summary' => ['GET' => [App\Controllers\ClinicalController::class,'summary']],
     '/api/v1/clinical/patients/{id}' => ['GET' => [App\Controllers\ClinicalController::class,'patient']],
     '/api/v1/care-plans' => ['GET' => [App\Controllers\ClinicalController::class,'plans'],'POST' => [App\Controllers\ClinicalController::class,'create']],
     '/api/v1/care-plans/{id}' => ['GET' => [App\Controllers\ClinicalController::class,'detail'],'PUT' => [App\Controllers\ClinicalController::class,'update']],
