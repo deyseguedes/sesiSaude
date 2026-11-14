@@ -4,10 +4,11 @@ import { apiGet, apiRequest } from '../services/api.js'
 import { shareDemo } from '../services/share-demo.js'
 import AppIcon from './AppIcon.vue'
 const journey=ref(null),error=ref(''),loading=ref(false)
+const emit=defineEmits(['availability'])
 async function load() {
   if(loading.value) return
   loading.value=true;error.value=''
-  try { journey.value=shareDemo?await apiGet('/me/journey'):await apiRequest('/me/journey/sync','POST') }
+  try { journey.value=shareDemo?await apiGet('/me/journey'):await apiRequest('/me/journey/sync','POST');emit('availability',journey.value.enabled===true) }
   catch(e) { error.value=e.message } finally { loading.value=false }
 }
 onMounted(() => { load(); window.addEventListener('focus',load) })
@@ -15,7 +16,7 @@ onBeforeUnmount(() => window.removeEventListener('focus',load))
 const icons={ scheduled:'calendar',attended:'check',followup:'heart' }
 </script>
 <template>
-  <section class="worker-journey card card-body mb-4" aria-labelledby="journey-title" :aria-busy="loading" data-testid="worker-journey">
+  <section v-if="journey?.enabled || error" class="worker-journey card card-body mb-4" aria-labelledby="journey-title" :aria-busy="loading" data-testid="worker-journey">
     <div class="section-heading flex-wrap gap-3"><div><p class="eyebrow mb-2">CADA PASSO CONTA</p><h2 id="journey-title" class="h4 mb-1">Minha jornada de cuidado</h2><p class="text-secondary small mb-0">Conquistas pessoais por organizar e continuar seu acompanhamento.</p></div><div v-if="journey?.available" class="journey-score"><AppIcon name="heart" :size="24" /><strong>{{ journey.points }}</strong><span>pontos da jornada</span></div></div>
     <p v-if="error" class="alert alert-danger mt-3 mb-0" role="alert">Não foi possível atualizar suas conquistas. <button class="btn btn-sm btn-link" :disabled="loading" @click="load">Tentar novamente</button></p>
     <p v-else-if="loading && !journey" class="small text-secondary mt-3 mb-0" role="status">Consultando sua jornada…</p>

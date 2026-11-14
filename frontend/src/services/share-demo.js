@@ -28,6 +28,7 @@ export async function demoRequest(url, options = {}) {
   if (!result) throw Error('Este detalhe não está disponível na demonstração compartilhada.')
   if (result.status !== 200 || result.body.error) throw Error(result.body.error?.message || 'Acesso indisponível para este perfil.')
   const payload = structuredClone(result.body)
+  if (endpoint === '/management/gamification' && parsed.searchParams.get('company_id') && Number(parsed.searchParams.get('company_id')) !== Number(payload.data.company_id)) throw Error('Esta empresa não está disponível no cenário de demonstração.')
   if (endpoint === '/nursing/worklist') {
     const status = parsed.searchParams.get('status') || 'active'
     const deadline = parsed.searchParams.get('deadline')

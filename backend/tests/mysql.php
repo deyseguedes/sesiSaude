@@ -8,7 +8,7 @@ if(!preg_match('/^viva_elo_test_[a-f0-9]{12}$/D',$name)) throw new RuntimeExcept
 $admin->exec("CREATE DATABASE `$name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 try {
     putenv("TEST_MYSQL_DSN=mysql:host=$host;port=$port;dbname=$name;charset=utf8mb4");
-    $process=proc_open([PHP_BINARY,__DIR__.'/worker-journey.php'],[0=>STDIN,1=>STDOUT,2=>STDERR],$pipes);
+    $process=proc_open([PHP_BINARY,__DIR__.'/company-gamification.php'],[0=>STDIN,1=>STDOUT,2=>STDERR],$pipes);
     $code=proc_close($process);
 } finally { $admin->exec("DROP DATABASE `$name`"); }
 exit($code);

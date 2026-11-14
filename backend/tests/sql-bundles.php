@@ -28,6 +28,7 @@ foreach(['fresh','upgrade'] as $mode) {
         if((int)$db->query('SELECT COUNT(*) FROM schema_migrations')->fetchColumn()!==count(glob(dirname(__DIR__).'/database/migrations/*.sql'))) throw new RuntimeException('Incomplete migration ledger');$checks++;
         $db->query('SELECT source_revision FROM care_pending_items LIMIT 1');$checks++;
         $db->query('SELECT milestone,points FROM worker_journey_awards LIMIT 1');$checks++;
+        $db->query('SELECT gamification_enabled,gamification_version FROM companies LIMIT 1');$checks++;
         $db->query('SELECT management_level FROM users LIMIT 1');$checks++;
         $db->query('SELECT content_version FROM content_progress LIMIT 1');$checks++;
         $db->query('SELECT version FROM service_contracts LIMIT 1');$checks++;

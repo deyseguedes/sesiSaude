@@ -8,6 +8,7 @@ import FormPanel from '../components/FormPanel.vue'
 import SidePanel from '../components/SidePanel.vue'
 import AppIcon from '../components/AppIcon.vue'
 import { useWorkspaceStore } from '../stores/workspace.js'
+import CompanyGamification from '../components/CompanyGamification.vue'
 import { formatDate, formatDateTime, normalizeSearch } from '../utils/workflow.js'
 const auth = useAuthStore(), workspace = useWorkspaceStore(), route = useRoute(), router = useRouter()
 const companies = computed(() => workspace.companies), company = computed({ get: () => workspace.companyId, set: value => { workspace.companyId = Number(value) } })
@@ -100,7 +101,7 @@ onMounted(async () => { busy.value = true; try { await workspace.ensure(auth.use
   <div class="page-heading"><div><p class="eyebrow">GESTÃO PARA A INDÚSTRIA</p><h1>Pessoas e operação</h1><p class="text-secondary mb-0">Resolva pendências, convide pessoas e organize o atendimento.</p></div><button class="btn btn-success" :disabled="busy || !data" @click="open('invite')"><AppIcon name="plus" :size="18" /> Convidar pessoa</button></div>
   <div v-if="companies.length > 1" class="context-bar"><AppIcon name="building" /><label for="industry" class="visually-hidden">Indústria contratante</label><select id="industry" v-model="company" class="form-select" :disabled="busy" @change="changeCompany"><option v-for="c in companies" :key="c.id" :value="c.id">{{ c.name }}</option></select></div>
   <p v-else-if="companies.length" class="context-caption"><AppIcon name="building" :size="16" /> {{ companies[0].name }}</p>
-  <p v-if="error && !section" class="alert alert-danger" role="alert">{{ error }}</p><p v-if="notice && !section" class="alert alert-success" role="status">{{ notice }}</p>
+  <CompanyGamification v-if="company && ((auth.user.role === 'admin' && auth.user.management_level === 'platform') || (auth.user.role === 'manager' && auth.user.management_level === 'company'))" :company-id="company" :company-name="companies.find(c => Number(c.id) === Number(company))?.name" /><p v-if="error && !section" class="alert alert-danger" role="alert">{{ error }}</p><p v-if="notice && !section" class="alert alert-success" role="status">{{ notice }}</p>
   <div v-if="!data && busy" class="loading-state" role="status"><span class="spinner-border spinner-border-sm" /> Preparando sua gestão…</div>
   <template v-if="data">
     <div class="task-strip"><button @click="activeTab = 'people'; statusFilter = 'pending'"><strong>{{ pendingCount }}</strong><span>cadastros para validar</span><AppIcon name="arrow" :size="16" /></button><button @click="activeTab = 'people'; statusFilter = ''"><strong>{{ data.beneficiaries.length }}</strong><span>trabalhadores e dependentes</span></button><button @click="activeTab = 'contracts'"><strong>{{ data.contracts.filter(c => c.status === 'active').length }}</strong><span>contratos ativos</span></button><button v-if="careManagement" @click="activeTab = 'agenda'"><strong>{{ slots.filter(s => s.status === 'available').length }}</strong><span>horários disponíveis</span></button></div>

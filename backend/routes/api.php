@@ -5,6 +5,7 @@ use App\Controllers\HealthController;
 use App\Controllers\OperationsController as Operations;
 
 return [
+    '/api/v1/management/gamification' => ['GET'=>[Operations::class,'gamification'],'PUT'=>[Operations::class,'setGamification']],
     '/api/v1/me/journey' => ['GET'=>[Operations::class,'journey']],
     '/api/v1/me/journey/sync' => ['POST'=>[Operations::class,'syncJourney']],
     '/api/v1/nursing/worklist' => ['GET'=>[App\Controllers\ClinicalController::class,'worklist']],

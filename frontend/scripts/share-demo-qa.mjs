@@ -53,6 +53,10 @@ try {
       await pause(400)
       await wait(`!document.querySelector('.loading-state') && !document.querySelector('[role="status"]')`)
       assert.equal(await evaluate(`!!document.querySelector('.alert-danger')`), false, roles[index] + ' ' + link)
+      if (link === '/management' && ['admin','manager'].includes(roles[index])) {
+        await wait(`!!document.querySelector('[data-testid="company-gamification"] button')`)
+        assert.ok(await evaluate(`document.querySelector('[data-testid="company-gamification"] button').disabled`))
+      }
     }
     if (roles[index] === 'doctor') {
       await click('.app-sidebar a[href="/patients"]'); await wait(`!!document.querySelector('a[href^="/patients/"]')`)

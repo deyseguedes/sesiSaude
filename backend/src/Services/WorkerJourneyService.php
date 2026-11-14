@@ -36,13 +36,18 @@ final class WorkerJourneyService
     }
     public function sync(): array
     {
-        $patient=$this->patient(); if(!$patient) return $this->view();
+        $patient=$this->patient();
         return $this->store->transaction(function()use($patient){
+            // Shared policy lock permits different workers concurrently, while adoption edits wait.
+            $policySql='SELECT gamification_enabled FROM companies WHERE id=?';
+            if($this->store->db->getAttribute(\PDO::ATTR_DRIVER_NAME)==='mysql') $policySql.=' LOCK IN SHARE MODE';
+            $company=$this->store->one($policySql,[$this->user['company_id']]);
+            if(!$company || !(int)$company['gamification_enabled'] || !$patient) return $this->view();
             // Serialize this person's recognition; repeating refreshes cannot multiply points.
             $this->store->oneLocked('SELECT id FROM patients WHERE id=? AND company_id=?',[$patient['id'],$this->user['company_id']]);
             $evidence=$this->evidence((int)$patient['id']);
             foreach(self::RULES as $code=>$rule) {
-                $old=$this->store->oneLocked('SELECT * FROM worker_journey_awards WHERE patient_id=? AND company_id=? AND milestone=?',[$patient['id'],$this->user['company_id'],$code]);
+                $old=$this->store->one('SELECT * FROM worker_journey_awards WHERE patient_id=? AND company_id=? AND milestone=?',[$patient['id'],$this->user['company_id'],$code]);
                 $source=$evidence[$code];
                 if(!$source) {
                     if($old && $old['status']==='active') {
@@ -63,7 +68,10 @@ final class WorkerJourneyService
     }
     public function view(): array
     {
-        $patient=$this->patient();$evidence=$patient?$this->evidence((int)$patient['id']):[];
+        $patient=$this->patient();
+        $company=$this->store->one('SELECT gamification_enabled FROM companies WHERE id=?',[$this->user['company_id']]);
+        if(!$company || !(int)$company['gamification_enabled']) return ['enabled'=>false,'available'=>false];
+        $evidence=$patient?$this->evidence((int)$patient['id']):[];
         $awards=$patient?$this->store->all('SELECT milestone,status,earned_at FROM worker_journey_awards WHERE company_id=? AND patient_id=?',[$this->user['company_id'],$patient['id']]):[];
         $byCode=array_column($awards,null,'milestone');$missions=[];$points=0;$completed=0;
         foreach(self::RULES as $code=>$rule) {
@@ -76,6 +84,6 @@ final class WorkerJourneyService
         $level=$levels[0];$next=null;
         foreach($levels as $candidate) { if($points>=$candidate['minimum']) $level=$candidate; else { $next=$candidate;break; } }
         Audit::record($this->store,$this->user,'journey_read','patient',(int)($patient['id']??0));
-        return ['available'=>(bool)$patient,'points'=>$points,'maximum_points'=>60,'completed'=>$completed,'total'=>3,'level'=>$level,'next_level'=>$next,'missions'=>$missions,'updated_at'=>date('Y-m-d H:i:s')];
+        return ['enabled'=>true,'available'=>(bool)$patient,'points'=>$points,'maximum_points'=>60,'completed'=>$completed,'total'=>3,'level'=>$level,'next_level'=>$next,'missions'=>$missions,'updated_at'=>date('Y-m-d H:i:s')];
     }
 }

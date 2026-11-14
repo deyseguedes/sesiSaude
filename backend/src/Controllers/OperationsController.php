@@ -20,6 +20,8 @@ final class OperationsController
     private function scheduling(): SchedulingService {return new SchedulingService($this->store,$this->user);}
     private function engagement(): EngagementService {return new EngagementService($this->store,$this->user);}
     public function companies(): void {Response::send(200,$this->industry()->companies());}
+    public function gamification(): void {Response::send(200,$this->industry()->gamification());}
+    public function setGamification(): void {Response::send(200,$this->industry()->setGamification(Input::body()));}
     public function createCompany(): void {Response::send(201,$this->industry()->createCompany(Input::body()));}
     public function overview(): void {Response::send(200,$this->industry()->overview());}
     public function unit(): void {Response::send(201,$this->industry()->unit(Input::body()));}

@@ -38,7 +38,7 @@ try {
       const result = await request(endpoint); profile.routes[endpoint] = result
       return result.status === 200 ? result.body.data : null
     }
-    for (const endpoint of ['/portal', '/management/companies', '/management/overview', '/management/slots', '/management/campaigns', '/management/contents', '/clinical/dashboard', '/nursing/dashboard', '/continuity/dashboard', '/continuity/cases', '/engagement/pipeline', '/me/beneficiaries', '/me/appointments', '/me/campaigns', '/me/contents', '/professional/appointments', '/availability']) await capture(endpoint)
+    for (const endpoint of ['/portal', '/management/companies', '/management/gamification', '/management/overview', '/management/slots', '/management/campaigns', '/management/contents', '/clinical/dashboard', '/nursing/dashboard', '/continuity/dashboard', '/continuity/cases', '/engagement/pipeline', '/me/beneficiaries', '/me/appointments', '/me/campaigns', '/me/contents', '/professional/appointments', '/availability']) await capture(endpoint)
     if (role === 'worker') {
       const synced = await request('/me/journey/sync', { method:'POST', headers:{ 'X-CSRF-Token':login.body.data.csrf_token } })
       if (synced.status !== 200) throw Error('Fictional worker journey initialization failed')

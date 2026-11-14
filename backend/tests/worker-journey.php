@@ -2,6 +2,8 @@
 declare(strict_types=1);
 require __DIR__.'/nursing-worklist.php';
 use App\Services\{WorkerJourneyService,CareService,Crypto};
+$adoption=new \App\Services\IndustryService($s,$manager);
+$adoption->setGamification(['enabled'=>true,'version'=>$adoption->gamification()['version']]);
 $journeyUserId=$s->insert('users',['company_id'=>1,'role'=>'worker','name'=>'Trabalhadora da jornada fictícia','email'=>'journey@test.invalid','password_hash'=>'unused']);
 $journeyUser=$s->one('SELECT * FROM users WHERE id=?',[$journeyUserId]);
 $journeyPatient=$s->insert('patients',['company_id'=>1,'user_id'=>$journeyUserId,'name'=>'Trabalhadora fictícia']);
@@ -29,7 +31,7 @@ $journeyPlan=$journeyCare->create(['patient_id'=>$journeyPatient,'professional_i
 $s->execute('UPDATE care_plans SET created_at=? WHERE id=?',[date('Y-m-d H:i:s',time()-7*86400),$journeyPlan]);
 $journeyCare->adherence($journeyPlan,['action_description'=>'Relato fictício','source'=>'self_reported','completed'=>true,'occurred_at'=>date('Y-m-d H:i:s')]);
 verify($journey->sync()['points']===30,'Self-report and merely having a plan do not prove follow-up');
-$s->insert('clinical_evolutions',['plan_id'=>$journeyPlan,'author_id'=>1,'kind'=>'clinical','notes'=>Crypto::encrypt('Nota da própria consulta.'),'created_at'=>date('Y-m-d H:i:s',strtotime($attendedAt)+3600)]);
+$s->insert('clinical_evolutions',['plan_id'=>$journeyPlan,'author_id'=>1,'kind'=>'clinical','notes'=>Crypto::encrypt('Nota da própria consulta.'),'created_at'=>substr($attendedAt,0,10).' 23:59:59']);
 verify($journey->sync()['points']===30,'The consultation note on the same day is not a separate follow-up');
 $followup=$s->insert('clinical_evolutions',['plan_id'=>$journeyPlan,'author_id'=>2,'kind'=>'nursing','notes'=>Crypto::encrypt('Acompanhamento confidencial fictício'),'created_at'=>date('Y-m-d H:i:s',time()-86400)]);
 $full=$journey->sync();verify($full['points']===60 && $full['completed']===3 && $full['next_level']===null,'Documented later follow-up completes the three-step journey');
@@ -44,6 +46,7 @@ $s->execute('UPDATE appointments SET status=? WHERE id=?',['attended',$second]);
 verify($journey->sync()['points']===60,'Restored evidence restores existing awards');
 verify((int)$s->one('SELECT COUNT(*) n FROM worker_journey_awards WHERE patient_id=?',[$journeyPatient])['n']===3,'Corrections never create duplicate awards');
 $otherWorkerId=$s->insert('users',['company_id'=>2,'role'=>'worker','name'=>'Outro trabalhador','email'=>'otherjourney@test.invalid','password_hash'=>'unused']);
+$s->execute('UPDATE companies SET gamification_enabled=1 WHERE id=2');
 $s->insert('patients',['company_id'=>2,'user_id'=>$otherWorkerId,'name'=>'Outra pessoa fictícia']);
 verify((new WorkerJourneyService($s,$s->one('SELECT * FROM users WHERE id=?',[$otherWorkerId])))->sync()['points']===0,'Other companies cannot borrow achievements');
 $withoutPatient=$s->insert('users',['company_id'=>1,'role'=>'worker','name'=>'Sem cadastro','email'=>'emptyjourney@test.invalid','password_hash'=>'unused']);

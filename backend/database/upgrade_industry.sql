@@ -49,3 +49,8 @@ INSERT INTO schema_migrations (name, applied_at) VALUES ('007_nursing_worklist.s
 CREATE TABLE worker_journey_awards (id INTEGER PRIMARY KEY AUTO_INCREMENT, company_id INTEGER NOT NULL, patient_id INTEGER NOT NULL, milestone VARCHAR(30) NOT NULL, points INTEGER NOT NULL, source_type VARCHAR(30) NOT NULL, source_id INTEGER NOT NULL, evidence_at DATETIME NOT NULL, earned_at DATETIME NOT NULL, status VARCHAR(20) NOT NULL DEFAULT 'active', version INTEGER NOT NULL DEFAULT 1, UNIQUE(company_id,patient_id,milestone), FOREIGN KEY(company_id) REFERENCES companies(id), FOREIGN KEY(patient_id) REFERENCES patients(id));
 CREATE INDEX idx_worker_journey ON worker_journey_awards(company_id,patient_id,status);
 INSERT INTO schema_migrations (name, applied_at) VALUES ('008_worker_journey.sql', CURRENT_TIMESTAMP);
+
+-- 009_company_gamification.sql
+ALTER TABLE companies ADD COLUMN gamification_enabled INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE companies ADD COLUMN gamification_version INTEGER NOT NULL DEFAULT 1;
+INSERT INTO schema_migrations (name, applied_at) VALUES ('009_company_gamification.sql', CURRENT_TIMESTAMP);

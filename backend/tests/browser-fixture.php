@@ -27,6 +27,7 @@ try {
     $store=new App\Repositories\Store(App\Core\Database::connect());
     $user=$store->one('SELECT * FROM users WHERE email=?',['admin@demo.vivaelo.test']);
     $industry=new App\Services\IndustryService($store,$user);
+    $industry->setGamification(['enabled'=>true,'version'=>$industry->gamification()['version']]);
     $contract=$store->one('SELECT id FROM service_contracts LIMIT 1');$unit=$store->one('SELECT id FROM industry_units LIMIT 1');
     $enrollment=new App\Services\EnrollmentService($store);
     $invite=$enrollment->invite($industry,['contract_id'=>(int)$contract['id'],'industry_unit_id'=>(int)$unit['id'],'kind'=>'worker','email'=>'pending@demo.vivaelo.test']);

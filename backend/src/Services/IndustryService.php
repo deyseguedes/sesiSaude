@@ -22,6 +22,24 @@ final class IndustryService
         throw new HttpException(403,'FORBIDDEN','Nível de gestão insuficiente para este recurso.');
     }
     public function audit(string $event,string $resource,int $id): void { Audit::record($this->store,array_replace($this->user,['company_id'=>$this->company]),$event,$resource,$id); }
+    public function gamification(): array
+    {
+        if(!$this->isPlatform() && !($this->user['role']==='manager' && ($this->user['management_level']??'none')==='company')) throw new HttpException(403,'FORBIDDEN','A adoção da gamificação é definida pela gestão empresarial ou administrador SESI autorizado.');
+        $row=$this->store->one('SELECT id,gamification_enabled,gamification_version FROM companies WHERE id=?',[$this->company]);
+        if(!$row) throw new HttpException(404,'NOT_FOUND','Empresa não encontrada.');
+        return ['company_id'=>(int)$row['id'],'enabled'=>(bool)$row['gamification_enabled'],'version'=>(int)$row['gamification_version']];
+    }
+    public function setGamification(array $d): array
+    {
+        $this->gamification();$enabled=self::flag($d,'enabled');$version=Input::id($d,'version');
+        return $this->store->transaction(function()use($enabled,$version){
+            $statement=$this->store->db->prepare('UPDATE companies SET gamification_enabled=?,gamification_version=gamification_version+1 WHERE id=? AND gamification_version=?');
+            $statement->execute([$enabled,$this->company,$version]);
+            if($statement->rowCount()!==1) throw new HttpException(409,'CONFLICT','Configuração alterada. Atualize antes de tentar novamente.');
+            $this->audit($enabled?'gamification_enabled':'gamification_disabled','company',$this->company);
+            return $this->gamification();
+        });
+    }
     public static function coordinates(array $d): array
     {
         if(($d['latitude']??null)===null && ($d['longitude']??null)===null) return [null,null];

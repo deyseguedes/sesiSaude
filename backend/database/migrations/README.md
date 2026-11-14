@@ -12,6 +12,8 @@ tabelas e registros anteriores.
 
 008 acrescenta as conquistas individuais da jornada do trabalhador.
 
-`../upgrade_industry.sql`: 005–008 para V3 existente; importar uma vez.
+009 acrescenta a decisão de adoção da gamificação por empresa, desativada por padrão.
+
+`../upgrade_industry.sql`: 005–009 para V3 existente; importar uma vez.
 Ambos podem ser regenerados com `composer schema:build` e registram as migrações
 aplicadas, para não duplicá-las na próxima execução do migrador.
