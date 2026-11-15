@@ -64,6 +64,8 @@ try {
       assert.equal(await evaluate(`!!document.querySelector('[data-testid="doctor-reactivation"]')`),false)
       await click('.app-sidebar a[href="/patients"]'); await wait(`!!document.querySelector('a[href^="/patients/"]')`)
       await click('a[href^="/patients/"]'); await wait(`!!document.querySelector('.summary-facts')`)
+      await wait(`document.querySelector('#return-risk')?.value==='3'`)
+      assert.ok(await evaluate(`[...document.querySelectorAll('[data-testid="clinical-return"] input,[data-testid="clinical-return"] select,[data-testid="clinical-return"] textarea,[data-testid="clinical-return"] button.btn-success')].every(e=>e.disabled)`))
       await evaluate(`[...document.querySelectorAll('[data-testid="patient-summary"] button')].find(e=>e.textContent==='Ver resumo completo').click();true`)
       assert.ok(await evaluate(`document.querySelector('[data-testid="patient-summary"]').textContent.includes('Última evolução')`))
       await evaluate(`document.querySelector('.clinical-quick-actions button').click();true`)

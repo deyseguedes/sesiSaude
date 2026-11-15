@@ -28,6 +28,6 @@ O mesmo percentual proposto é aplicado aos integrantes elegíveis, proporcional
 
 ## Próxima apuração oficial
 
-A proposta original em [premio-equipe-saude.md](premio-equipe-saude.md) continua em discussão quanto a pagamento e calibração. Para apuração automática faltam: risco confirmado versionado, retorno devido por pessoa, congelamento da carteira, exclusões com fonte, linha de base fixa e revisão anual, evidências de satisfação/queixas, auditoria de rebaixamentos e exclusões, autorização de contato, membros/dias na equipe e fechamento validado.
+A proposta original em [premio-equipe-saude.md](premio-equipe-saude.md) continua em discussão quanto a pagamento e calibração. Risco confirmado versionado e retorno devido por pessoa já existem no [fluxo clínico](clinical-returns.md). Para apuração automática faltam: congelamento da carteira, exclusões com fonte, linha de base fixa e revisão anual, evidências de satisfação/queixas, auditoria de rebaixamentos e exclusões, autorização de contato, membros/dias na equipe e fechamento validado.
 
 Não usar consultas ou planos existentes como substituto desses dados. A simulação não publica indicadores observados nem preenche lacunas com zero. Os limiares de 15 dias, 80% e demais pontos propostos precisam de confirmação institucional antes de virar regra de pagamento.

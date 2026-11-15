@@ -86,6 +86,7 @@ final class PatientSummaryService
         return [
             'patient' => ['id' => (int)$patient['id'], 'name' => $patient['name']],
             'generated_at' => $now,
+            'clinical_return' => (new ClinicalReturnService($this->care))->view($patientId,false),
             'plans' => ['total' => count($plans), 'active' => count($active), 'focus' => $focusPlan],
             'goals' => ['total' => $goalCount, 'items' => $goals],
             'indicators' => ['total' => count($indicators), 'items' => array_slice($indicators, 0, 6)],

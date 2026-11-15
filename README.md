@@ -20,6 +20,10 @@ preservada para revisão; não representa pagamento implementado. O
 [reconhecimento coletivo](docs/team-recognition.md) substitui o bônus individual
 do médico e oferece simulação por equipe, com travas e acesso por perfil.
 
+O [fluxo de risco e retorno](docs/clinical-returns.md) permite confirmação pelo
+médico e organiza automaticamente os retornos na fila da enfermagem, com
+contato, agendamento e registro de comparecimento na própria ficha.
+
 ## Atualizar uma base V3
 
 Preserve a chave `APP_KEY` e faça backup do banco. Na pasta `backend`, execute

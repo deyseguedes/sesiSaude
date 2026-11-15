@@ -32,6 +32,8 @@ foreach(['fresh','upgrade'] as $mode) {
         $db->query('SELECT reactivation_days,reactivation_points,reactivation_policy_at FROM companies LIMIT 1');$checks++;
         $db->query('SELECT baseline_id,professional_id,threshold_days,points FROM doctor_reactivation_awards LIMIT 1');$checks++;
         $db->query('SELECT management_level FROM users LIMIT 1');$checks++;
+        $db->query('SELECT risk_cipher,due_date,version FROM clinical_return_plans LIMIT 1');$checks++;
+        $db->query('SELECT payload,author_id FROM clinical_return_events LIMIT 1');$checks++;
         $db->query('SELECT content_version FROM content_progress LIMIT 1');$checks++;
         $db->query('SELECT version FROM service_contracts LIMIT 1');$checks++;
         if($mode==='upgrade') {if($db->query('SELECT name FROM companies WHERE id=1')->fetchColumn()!=='Preservar este registro') throw new RuntimeException('Upgrade lost existing data');$checks++;}

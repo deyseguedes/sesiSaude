@@ -26,6 +26,8 @@ final class ClinicalController
     public function worklistDetail(int $id): void { Response::send(200,(new \App\Services\NursingWorklistService($this->care))->detail($id)); }
     public function worklistAction(int $id): void { Response::send(201,(new \App\Services\NursingWorklistService($this->care))->action($id,Input::body())); }
     public function worklistTask(): void { Response::send(201,(new \App\Services\NursingWorklistService($this->care))->create(Input::body())); }
+    public function clinicalReturn(int $id): void { Response::send(200,(new \App\Services\ClinicalReturnService($this->care))->view($id)); }
+    public function saveClinicalReturn(int $id): void { Response::send(200,(new \App\Services\ClinicalReturnService($this->care))->save($id,Input::body())); }
     public function summary(int $id): void { Response::send(200,(new \App\Services\PatientSummaryService($this->care))->summarize($id)); }
     public function patient(int $id): void
     {

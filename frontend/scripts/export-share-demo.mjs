@@ -63,7 +63,7 @@ try {
       }
     }
     for (const p of patients || []) {
-      await capture(`/clinical/patients/${p.id}`); await capture(`/clinical/patients/${p.id}/summary`)
+      await capture(`/clinical/patients/${p.id}`); await capture(`/clinical/patients/${p.id}/summary`); await capture(`/clinical/patients/${p.id}/return`)
       const indicators = await capture(`/clinical/patients/${p.id}/indicators`)
       for (const i of indicators || []) await capture(`/indicators/${i.id}/measurements`)
     }

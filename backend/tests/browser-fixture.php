@@ -35,6 +35,8 @@ try {
     $doctor=$store->one('SELECT * FROM users WHERE email=?',['doctor@demo.vivaelo.test']);
     $care=new App\Services\CareService($store,$doctor);
     $plan=$store->one('SELECT id,patient_id FROM care_plans ORDER BY id LIMIT 1');
+    $fixtureTeam=$store->one('SELECT team_id FROM care_plans WHERE id=?',[$plan['id']]);
+    (new App\Services\ClinicalReturnService($care))->save((int)$plan['patient_id'],['risk'=>3,'due_date'=>date('Y-m-d',time()+3*86400),'assessment_date'=>date('Y-m-d',time()-86400),'team_id'=>(int)$fixtureTeam['team_id'],'version'=>0]);
     $care->evolution((int)$plan['id'],['kind'=>'clinical','notes'=>'Registro fictício para conferir o resumo e sua autoria. '.str_repeat('Texto demonstrativo sem dados reais. ',12).'Fim do registro fictício.']);
     $indicators=new App\Services\IndicatorService($care);
     $indicator=$indicators->create(['patient_id'=>(int)$plan['patient_id'],'name'=>'Indicador fictício de teste','type'=>'numeric','unit'=>'unidades','measurement_method'=>'Registro demonstrativo','frequency'=>'Pactuada'])['id'];

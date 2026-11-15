@@ -68,6 +68,10 @@ final class NursingWorklistService
                 $reason=$help?'Há um pedido voluntário de apoio aguardando acompanhamento.':($barrier?'Há uma dificuldade informada sem resolução registrada.':($late?'A data do retorno passou e não há comparecimento registrado.':'O retorno ocorrerá nos próximos sete dias e ainda não está confirmado.'));
                 $append('case',$case,'return_followup',$help?'Pedido de apoio':($barrier?'Dificuldade relatada':($late?'Verificar comparecimento':'Confirmar próximo retorno')),$reason,$help||$barrier?'Registrar contato humano e pactuar o próximo passo.':($late?'Verificar o comparecimento com a pessoa ou equipe.':'Confirmar a programação com a pessoa.'),$case['scheduled_at'],(int)$case['professional_id'],$team,$case['service_unit_id']===null?null:(int)$case['service_unit_id'],$help,(string)($trigger['n']??0));
             }
+            $clinicalReturn=(new ClinicalReturnService($this->care))->view($patientId,false);
+            if($clinicalReturn['available'] && !$clinicalReturn['attendance'] && $clinicalReturn['due_date']<=substr($horizon,0,10)) {
+                $append('clinical_return',$clinicalReturn,'medical_return','Retorno definido pelo médico','Existe retorno médico confirmado com prazo até os próximos sete dias.','Contatar a pessoa, conferir agenda e registrar o próximo passo.',$clinicalReturn['due_date'].' 23:59:59',$clinicalReturn['doctor_id'],$clinicalReturn['team_id'],null,false,(string)$clinicalReturn['version']);
+            }
             foreach($s->all('SELECT * FROM care_plans WHERE company_id=? AND patient_id=? AND status IN (?,?) AND reassessment_date<=?',[...$scope,'active','reviewed',substr($horizon,0,10)]) as $plan) {
                 $append('plan',$plan,'plan_review','Reavaliar plano','O plano possui reavaliação prevista até os próximos sete dias.','Conferir a programação e encaminhar à equipe responsável.',$plan['reassessment_date'].' 23:59:59',(int)$plan['professional_id'],(int)$plan['team_id'],null,false,$plan['reassessment_date']);
             }
@@ -89,7 +93,7 @@ final class NursingWorklistService
                 if($old) {
                     $changes=[];
                     foreach($data as $key=>$value) if($old[$key]!=$value) $changes[$key]=$value;
-                    if($old['status']==='resolved' && $old['source_revision']!==$data['source_revision']) $changes['status']='open';
+                    if($old['status']==='resolved' && ($old['source_revision']!==$data['source_revision'] || $data['source_type']==='clinical_return')) $changes['status']='open';
                     if($changes) {
                         $sql=implode(',',array_map(fn($key)=>$key.'=?',array_keys($changes)));
                         $s->execute('UPDATE care_pending_items SET '.$sql.',version=version+1,updated_at=? WHERE id=?',[...array_values($changes),date('Y-m-d H:i:s'),$id]);
@@ -116,6 +120,7 @@ final class NursingWorklistService
         $status=$filter['status']??'active'; if(!in_array($status,['active','open','in_progress','resolved','all'],true)) Input::fail('status');
         $deadline=$filter['deadline']??''; if(!in_array($deadline,['','overdue','today','next7'],true)) Input::fail('deadline');
         if(!in_array($filter['help_requested']??'',['','1'],true)) Input::fail('help_requested');
+        if(!in_array($filter['contact_state']??'',['','lost'],true)) Input::fail('contact_state');
         foreach(['team_id','professional_id','service_unit_id','assigned_to'] as $key) if(isset($filter[$key]) && $filter[$key]!=='' && (!ctype_digit((string)$filter[$key]) || (int)$filter[$key]<1)) Input::fail($key);
         $rows=[];
         if($ids) {
@@ -130,6 +135,11 @@ final class NursingWorklistService
             if($status==='active' && $row['status']==='resolved') return false;
             if(!in_array($status,['active','all'],true) && $row['status']!==$status) return false;
             if(($filter['help_requested']??'')==='1' && !(int)$row['help_requested']) return false;
+            if(($filter['contact_state']??'')==='lost') {
+                $contact=$this->care->store->one('SELECT payload FROM care_pending_events WHERE item_id=? AND event_type=? ORDER BY id DESC LIMIT 1',[$row['id'],'contact']);
+                $outcome=$contact?(json_decode(Crypto::decrypt($contact['payload']),true)['outcome']??null):null;
+                if(!in_array($outcome,['no_answer','invalid_contact'],true)) return false;
+            }
             foreach(['team_id','professional_id','service_unit_id','assigned_to'] as $key) if(!empty($filter[$key]) && (int)$row[$key] !== (int)$filter[$key]) return false;
             return match($deadline){'overdue'=>$row['due_at']<$now,'today'=>substr($row['due_at'],0,10)===$today,'next7'=>$row['due_at']>=$now && $row['due_at']<=date('Y-m-d',time()+7*86400).' 23:59:59',default=>true};
         }));
@@ -156,7 +166,7 @@ final class NursingWorklistService
         $item['history']=$s->all('SELECT e.*,u.name AS author_name FROM care_pending_events e JOIN users u ON u.id=e.author_id WHERE e.item_id=? ORDER BY e.created_at DESC,e.id DESC',[$id]);
         foreach($item['history'] as &$event) { $event['note']=Crypto::decrypt($event['note']);$event['payload']=json_decode(Crypto::decrypt($event['payload']),true); } unset($event);
         $item['summary']=(new PatientSummaryService($this->care))->summarize($patient);
-        $item['appointments']=$s->all('SELECT a.id,a.scheduled_at,a.status,u.name AS professional_name FROM appointments a JOIN users u ON u.id=a.professional_id WHERE a.patient_id=? AND a.company_id=? ORDER BY a.scheduled_at DESC,a.id DESC',[$patient,$this->care->user['company_id']]);
+        $item['appointments']=$s->all('SELECT a.id,a.scheduled_at,a.status,u.name AS professional_name,u.role AS professional_role FROM appointments a JOIN users u ON u.id=a.professional_id WHERE a.patient_id=? AND a.company_id=? ORDER BY a.scheduled_at DESC,a.id DESC',[$patient,$this->care->user['company_id']]);
         $item['cases']=[];
         foreach((new ContinuityService($this->care))->cases() as $case) if((int)$case['patient_id']===$patient) {
             $case['contacts']=(new ContinuityService($this->care))->detail((int)$case['id'])['actions'];$item['cases'][]=$case;
@@ -178,7 +188,7 @@ final class NursingWorklistService
     public function action(int $id,array $d): array
     {
         $this->authorize();$version=Input::id($d,'version');
-        $type=Input::choice($d,'type',['contact','assign','take','start','resolve','reopen','attendance','confirm','reschedule','difficulty','refer_doctor','nursing_record']);
+        $type=Input::choice($d,'type',['contact','assign','take','start','resolve','reopen','attendance','confirm','reschedule','difficulty','refer_doctor','nursing_record','schedule_return','record_return']);
         $note=Input::text($d,'note',1000,!in_array($type,['resolve','reopen','contact','refer_doctor','nursing_record'],true));
         return $this->care->store->transaction(function()use($id,$d,$version,$type,$note){
             $item=$this->item($id,true);$s=$this->care->store;
@@ -193,7 +203,32 @@ final class NursingWorklistService
                 if($type==='take') $status='in_progress';
             }
             if($type==='start') $status='in_progress';
-            if($type==='resolve') $status='resolved';
+            if($type==='resolve') {
+                if($item['source_type']==='clinical_return') throw new HttpException(422,'ATTENDANCE_REQUIRED','O retorno médico permanece devido até um comparecimento posterior registrado.');
+                $status='resolved';
+            }
+            if($type==='record_return') {
+                if($item['source_type']!=='clinical_return') Input::fail('retorno médico');
+                $r=$s->oneLocked('SELECT * FROM clinical_return_plans WHERE id=? AND company_id=? AND patient_id=?',[$item['source_id'],$this->care->user['company_id'],$item['patient_id']]);
+                if(!$r || (string)$r['version']!==$item['source_revision']) throw new HttpException(409,'CONFLICT','Retorno médico alterado. Atualize a fila.');
+                $appointment=Input::id($d,'appointment_id');
+                $a=$s->oneLocked('SELECT a.* FROM appointments a JOIN users u ON u.id=a.professional_id AND u.company_id=a.company_id WHERE a.id=? AND a.company_id=? AND a.patient_id=? AND u.role=?',[$appointment,$this->care->user['company_id'],$item['patient_id'],'doctor']);
+                if(!$a || !in_array($a['status'],['expected','confirmed'],true) || $a['scheduled_at']>date('Y-m-d H:i:s') || $a['scheduled_at']<=$r['assessment_date'].' 23:59:59') Input::fail('consulta médica posterior já ocorrida');
+                $this->care->access->team((int)$item['patient_id'],(int)$r['team_id'],(int)$a['professional_id']);
+                $case=$s->one('SELECT id,version FROM continuity_cases WHERE appointment_id=? AND company_id=? AND patient_id=?',[$appointment,$this->care->user['company_id'],$item['patient_id']]);
+                if(!$case) { $caseId=$s->insert('continuity_cases',['company_id'=>$this->care->user['company_id'],'patient_id'=>$item['patient_id'],'appointment_id'=>$appointment,'created_at'=>date('Y-m-d H:i:s'),'updated_at'=>date('Y-m-d H:i:s')]);$case=['id'=>$caseId,'version'=>1]; }
+                $payload['attendance']=(new ContinuityService($this->care))->action((int)$case['id'],['type'=>'attendance','version'=>(int)$case['version'],'administrative_note'=>$note]);$status='resolved';
+            }
+            if($type==='schedule_return') {
+                if($item['source_type']!=='clinical_return') Input::fail('retorno médico');
+                $currentReturn=$s->oneLocked('SELECT version FROM clinical_return_plans WHERE id=? AND company_id=? AND patient_id=?',[$item['source_id'],$this->care->user['company_id'],$item['patient_id']]);
+                if(!$currentReturn || (string)$currentReturn['version']!==$item['source_revision']) throw new HttpException(409,'CONFLICT','Retorno médico alterado. Atualize a fila.');
+                $team=Input::id($d,'team_id');$professional=Input::id($d,'professional_id');
+                $eligible=$s->one('SELECT id FROM users WHERE id=? AND company_id=? AND role=? AND active=1',[$professional,$this->care->user['company_id'],'doctor']);
+                if(!$eligible || (int)$item['team_id']!==$team) Input::fail('médico da equipe de referência');
+                $payload['appointment']=(new ContinuityService($this->care))->schedule((int)$item['patient_id'],$d);
+                $status='in_progress';
+            }
             if($type==='reopen') $status='open';
             if($type==='contact') { $payload['channel']=Input::choice($d,'channel',['phone','in_person','other']);$payload['outcome']=Input::choice($d,'outcome',['reached','no_answer','invalid_contact']);$status='in_progress'; }
             if(in_array($type,['attendance','confirm','reschedule','difficulty'],true)) {

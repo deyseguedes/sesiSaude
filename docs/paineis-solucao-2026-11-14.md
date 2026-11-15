@@ -13,7 +13,7 @@ Fontes: resumo fornecido pelo usuário nesta conversa e anexo “Prêmio da equi
 | Trabalhador | Canal próprio, check-ins, consentimentos e resgate voluntário | Espaço individual existe; estes novos fluxos não existem |
 | Líder | Lista estritamente autorizada e participação agregada | Perfil e autorização específica ainda não existem |
 | RH | Boletim agregado; mínimo proposto de 10 pessoas | Agregado atual suprime abaixo de 5; novo limiar pendente |
-| Médico | Resumo/carteira; entrada principal: risco confirmado e retorno | Resumo e carteira existem; risco e protocolo precisam de modelo próprio |
+| Médico | Resumo/carteira; entrada principal: risco confirmado e retorno | Resumo, carteira, risco confirmado e retorno versionado implementados; protocolo institucional ainda exige validação |
 | Trabalhador: benefício | Elegibilidade semestral; empresa escolhe benefício | Decisão recebida; diferente dos atuais pontos simbólicos 10/20/30 |
 | Equipe de saúde | Reconhecimento coletivo baseado em retorno no prazo | Substituição dos pontos individuais confirmada; pagamento segue em discussão |
 | Segurança | Arquitetura pós-quântica e gestão pseudonimizada | Decisão de arquitetura recebida, implementação e evidências pendentes |

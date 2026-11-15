@@ -1,4 +1,4 @@
-const defaults = { team_id: '', professional_id: '', service_unit_id: '', deadline: '', status: 'active', assigned_to: '', help_requested: '' }
+const defaults = { team_id: '', professional_id: '', service_unit_id: '', deadline: '', status: 'active', assigned_to: '', help_requested: '', contact_state: '' }
 export function filterKey(user) { return `elo-worklist-v1:${user.company_id}:${user.id}` }
 export function restoreFilters(raw) {
   let saved
@@ -8,6 +8,7 @@ export function restoreFilters(raw) {
   for(const key of ['team_id','professional_id','service_unit_id','assigned_to']) if(/^[1-9]\d*$/.test(String(saved[key] ?? ''))) result[key]=String(saved[key])
   if(['active','open','in_progress','resolved','all'].includes(saved.status)) result.status=saved.status
   if(['','overdue','today','next7'].includes(saved.deadline)) result.deadline=saved.deadline
+  if(saved.contact_state==='lost') result.contact_state='lost'
   if(saved.help_requested==='1') result.help_requested='1'
   return result
 }

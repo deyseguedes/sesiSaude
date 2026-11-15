@@ -8,6 +8,7 @@ import FormPanel from '../components/FormPanel.vue'
 import TrendChart from '../components/TrendChart.vue'
 import AppIcon from '../components/AppIcon.vue'
 import PatientSummary from '../components/PatientSummary.vue'
+import ClinicalReturn from '../components/ClinicalReturn.vue'
 import { defaultPlan, formatDate, formatDateTime } from '../utils/workflow.js'
 const route = useRoute(), auth = useAuthStore()
 const patient = ref(null), plans = ref([]), plan = ref(null), indicators = ref([]), measurements = ref([])
@@ -107,6 +108,7 @@ watch(() => route.params.id, async () => {
   <p v-if="error" class="alert alert-danger mt-3" role="alert">{{ error }}</p><p v-if="notice" class="alert alert-success mt-3" role="status">{{ notice }}</p><p v-if="busy" role="status">Processando…</p>
   <template v-if="patient">
     <div class="d-flex justify-content-between flex-wrap gap-3 my-4"><div><p class="eyebrow">ACOMPANHAMENTO INDIVIDUAL</p><h1>{{ patient.name }}</h1><p class="text-secondary">Equipe APS · acesso assistencial restrito</p></div><button class="btn btn-success align-self-start" :disabled="busy" @click="newPlan">Criar plano de cuidado</button></div>
+    <ClinicalReturn :patient-id="Number(patient.id)" :teams="patient.teams" @saved="summaryVersion++" />
     <PatientSummary :patient-id="Number(patient.id)" :refresh-key="summaryVersion" :compact="true" :busy="busy" @navigate="openSummarySource" />
     <div class="clinical-quick-actions mb-4"><button class="btn btn-success" :disabled="busy" @click="section = 'records'"><AppIcon name="plus" :size="17" /> Registrar evolução</button><button class="btn btn-outline-success" :disabled="busy" @click="section = 'indicators'">Registrar medição</button><button v-if="plan && plan.status !== 'closed'" class="btn btn-outline-success" :disabled="busy" @click="openReview">Reavaliar plano</button><button class="btn btn-outline-success" :disabled="busy" @click="section = 'goals'">Acompanhar metas</button><button class="btn btn-outline-secondary" :disabled="busy" @click="section = 'overview'">Programar retorno</button></div><div class="row g-4"><aside class="col-lg-3"><div class="card card-body"><h2 class="h6">Planos de cuidado</h2><p v-if="!plans.length" class="small text-secondary">Nenhum plano registrado.</p><button v-for="p in plans" :key="p.id" class="btn text-start my-1 care-plan-option" :class="Number(selectedPlan) === Number(p.id) ? 'btn-success' : 'btn-outline-secondary'" :disabled="busy" @click="selectPlan(p.id)">Plano de cuidado<small>{{ label(p.status) }} · {{ formatDate(p.reassessment_date) }}</small></button></div></aside>
       <div class="col-lg-9"><nav class="nav nav-pills gap-1 mb-4" aria-label="Seções do paciente"><button v-for="tab in [{ id: 'overview', title: 'Histórico' }, { id: 'plan', title: 'Plano' }, { id: 'goals', title: 'Metas' }, { id: 'indicators', title: 'Indicadores' }, { id: 'records', title: 'Registros e revisão' }, { id: 'referral', title: 'Encaminhar' }]" :key="tab.id" class="nav-link" :class="{ active: section === tab.id }" :disabled="busy" @click="section = tab.id">{{ tab.title }}</button></nav>

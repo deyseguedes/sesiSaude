@@ -113,6 +113,7 @@ try {
     require __DIR__.'/http-journey.php';
     require __DIR__.'/http-company-gamification.php';
     require __DIR__.'/http-reactivation.php';
+    require __DIR__.'/http-clinical-returns.php';
     echo "OK: {$checks} HTTP checks on MySQL\n";
 } finally {
     if(is_resource($server)) { proc_terminate($server); proc_close($server); }
