@@ -20,3 +20,7 @@ aplicadas, para não duplicá-las na próxima execução do migrador.
 
 014 acrescenta o arquivo cifrado das origens APS, com identificação única por
 empresa/visita/conteúdo. Não importa planilhas nem altera registros existentes.
+
+015 acrescenta os apontamentos técnicos da importação, com notas cifradas e
+versão de conferência, e amplia a capacidade dos relatórios para LONGTEXT.
+As cargas anteriores são preservadas; nenhuma planilha é reprocessada.

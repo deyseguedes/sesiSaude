@@ -1,4 +1,5 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {parseCsv,mapHeaders,populatedRows} from '../src/utils/import-aps.js'
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {parseCsv,mapHeaders,populatedRows,canonical} from '../src/utils/import-aps.js'
+test('Server and UI use the same column alias catalogue',()=>{assert.deepEqual(JSON.parse(readFileSync(new URL('../../backend/config/aps-columns.json',import.meta.url),'utf8')),canonical)})
 test('All 32 original SOC labels have unique destinations without changing source headers',()=>{
  const profile=JSON.parse(readFileSync(new URL('../../docs/diagnostico-aps-sesi/qualidade-agregada.json',import.meta.url),'utf8'))
  const headers=profile.columns.map(c=>c.header),original=[...headers],mapping=Object.values(mapHeaders(headers))

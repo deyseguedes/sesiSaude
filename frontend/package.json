@@ -10,6 +10,7 @@
     "test": "node --test",
     "guide:build": "node scripts/build-user-guide.mjs --pdf",
     "test:ui": "node scripts/ui-qa.mjs",
+    "test:import-ui": "node scripts/ui-qa.mjs --import-only",
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "build:server": "node scripts/build-server-release.mjs",

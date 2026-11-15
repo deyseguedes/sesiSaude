@@ -10,7 +10,11 @@ $db = $mysqlDsn ? new PDO($mysqlDsn,getenv('MYSQL_TEST_USER')?:'root',getenv('MY
 if(!$mysqlDsn) $db->exec('PRAGMA foreign_keys=ON');
 foreach (glob(dirname(__DIR__).'/database/migrations/*.sql') as $file) {
     $sql = file_get_contents($file);
-    if(!$mysqlDsn) $sql=str_replace('INTEGER PRIMARY KEY AUTO_INCREMENT', 'INTEGER PRIMARY KEY AUTOINCREMENT',$sql);
+    if(!$mysqlDsn) {
+        $sql=str_replace('INTEGER PRIMARY KEY AUTO_INCREMENT', 'INTEGER PRIMARY KEY AUTOINCREMENT',$sql);
+        // SQLite TEXT is already unbounded; MySQL needs the explicit capacity upgrade.
+        $sql=str_replace('ALTER TABLE aps_imports MODIFY COLUMN report LONGTEXT NOT NULL;','',$sql);
+    }
     foreach(explode(';',$sql) as $statement) if(trim($statement)) $db->exec($statement);
 }
 $s = new Store($db); $count = 0;

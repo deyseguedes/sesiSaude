@@ -15,7 +15,6 @@ verify(ApsImportService::date(0,'1904')==='1904-01-01','Workbook 1904 date syste
 verify(App\Services\ApsSource::cpfValid('52998224725')&&!App\Services\ApsSource::cpfValid('00000000000'),'CPF check digits');
 $sourceInput=['headers'=>['MATRÍCULA','NOME COMPLETO','EMPRESA','STATUS','SEXO','CPF','CLASSIFICAÇÃO DE RISCO ATUAL','Data extra'],'mapping'=>['registration','name','company','status','sex','cpf','risk_current',''],'rows'=>[['SOURCE-1','Pessoa teste','Empresa teste','ATIVO','FEMININO','00000000000','RISCO 2','  original  '],['','','','','','','','Observação isolada']],'source_lines'=>[2,392],'preview'=>true];
 $sourcePreview=$service->import($sourceInput);
-$sourceInput['original_base64']=base64_encode("matricula;nome\nSOURCE-1;Pessoa teste");
 verify($sourcePreview['valid']===1&&count($sourcePreview['review'])===1&&$sourcePreview['review'][0]['line']===392,'Orphan stays in review with original line');
 verify($sourcePreview['preview'][0]['sex']==='F'&&$sourcePreview['preview'][0]['risk_current']==='2','Source labels normalized explicitly');
 verify(!isset($sourcePreview['preview'][0]['_source'])&&count($sourcePreview['warnings'])===2,'Raw provenance hidden and invalid CPF warned');
@@ -28,7 +27,6 @@ verify($repeat['unchanged']===1&&($repeat['reused']??false)&&(int)$s->one('SELEC
 verify(!isset($service->last()['report']['_source_archive']),'Archive not exposed by last-load endpoint');
 $rawReport=json_decode(App\Services\Crypto::decrypt($s->one('SELECT archive FROM aps_source_archives ORDER BY id DESC LIMIT 1')['archive']),true);
 verify($rawReport['rows'][0][7]==='  original  '&&$rawReport['rows'][1][7]==='Observação isolada','Unmapped values and orphan preserved in encrypted archive');
-verify(base64_decode($rawReport['original_base64'])==="matricula;nome\nSOURCE-1;Pessoa teste"&&$rawReport['original_sha256']===hash('sha256',base64_decode($rawReport['original_base64'])),'Original bytes and SHA-256 preserved');
 $sourceInput['rows'][0][6]='';$service->import(array_replace($sourceInput,['preview'=>false]));
 $after=json_decode(App\Services\Crypto::decrypt($s->one('SELECT payload FROM aps_people WHERE registration=?',['SOURCE-1'])['payload']),true);
 verify($after['risk_current']==='2','Blank source does not erase previously recorded risk');
@@ -52,4 +50,5 @@ verify(App\Services\OutreachRules::classify(array_replace($base,['state'=>'confi
 verify(App\Services\OutreachRules::classify(array_replace($base,['message_sent_at'=>'2026-11-14']),'2026-11-15',$config)['category']==='waiting','Recent message stays in separate section');
 verify(App\Services\OutreachRules::compare(['registration'=>'A','days_due'=>-1,'reply'=>null,'unanswered_count'=>1,'risk_current'=>1],['registration'=>'B','days_due'=>2,'reply'=>'cannot','unanswered_count'=>5,'risk_current'=>4])<0,'Overdue wins before risk');
 
+require __DIR__.'/aps-source-reader.php';
 ob_end_flush();echo "OK: {$count} combined APS checks\n";

@@ -1,0 +1,158 @@
+{
+  "registration": [
+    "matricula",
+    "registro",
+    "codigo"
+  ],
+  "name": [
+    "nome",
+    "nome completo",
+    "paciente"
+  ],
+  "birth_date": [
+    "data de nascimento",
+    "nascimento"
+  ],
+  "cpf": [
+    "cpf"
+  ],
+  "sex": [
+    "sexo"
+  ],
+  "entry_date": [
+    "data de entrada na aps",
+    "entrada aps",
+    "DATA DE ENTRADA APS"
+  ],
+  "phone": [
+    "telefone",
+    "celular",
+    "whatsapp"
+  ],
+  "company": [
+    "empresa",
+    "industria"
+  ],
+  "doctor": [
+    "medico de referencia",
+    "medico"
+  ],
+  "status": [
+    "status",
+    "situacao"
+  ],
+  "last_consultation": [
+    "data da ultima consulta",
+    "ultima consulta",
+    "DATA ÚLTIMA CONSULTA MÉDICA"
+  ],
+  "return_date": [
+    "previsao de retorno",
+    "retorno",
+    "data retorno",
+    "PREVISÃO DE RETORNO CONFORME SOLICITAÇÃO MÉDICA"
+  ],
+  "demands": [
+    "demandas",
+    "DEMANDAS GERADAS NA ÚLTIMA CONSULTA MÉDICA"
+  ],
+  "risk_initial": [
+    "risco inicial",
+    "CLASSIFICAÇÃO DE RISCO INICIAL"
+  ],
+  "risk_current": [
+    "risco atual",
+    "risco",
+    "CLASSIFICAÇÃO DE RISCO ATUAL"
+  ],
+  "multiprofessional": [
+    "equipe multiprofissional",
+    "multiprofissional",
+    "ATENDIMENTO COM EQUIPE MULTI?"
+  ],
+  "plan_sent_at": [
+    "data de envio do plano",
+    "envio do plano",
+    "DATA ENVIO DO PLANO"
+  ],
+  "plan_status": [
+    "status do plano de cuidado",
+    "status plano",
+    "STATUS PLANO DE CUIDADO"
+  ],
+  "coordination_dates": [
+    "datas da coordenacao do cuidado"
+  ],
+  "shift": [
+    "turno"
+  ],
+  "care_line": [
+    "linha de cuidado"
+  ],
+  "contact_jul": [
+    "contatos julho 2026",
+    "julho",
+    "jul/2026",
+    "CONTATO DE JULHO / 2026",
+    "CONTATO DE JULHO/ 2026"
+  ],
+  "contact_ago": [
+    "contatos agosto 2026",
+    "agosto",
+    "ago/2026",
+    "CONTATO DE AGOSTO / 2026",
+    "CONTATO DE AGOSTO/ 2026"
+  ],
+  "contact_set": [
+    "contatos setembro 2026",
+    "setembro",
+    "set/2026",
+    "CONTATO DE SETEMBRO / 2026",
+    "CONTATO DE SETEMBRO/ 2026"
+  ],
+  "contact_out": [
+    "contatos outubro 2026",
+    "outubro",
+    "out/2026",
+    "CONTATO DE OUTUBRO / 2026",
+    "CONTATO DE OUTUBRO/ 2026"
+  ],
+  "contact_nov": [
+    "contatos novembro 2026",
+    "novembro",
+    "nov/2026",
+    "CONTATO DE NOVEMBRO / 2026",
+    "CONTATO DE NOVEMBRO/ 2026"
+  ],
+  "contact_dez": [
+    "contatos dezembro 2026",
+    "dezembro",
+    "dez/2026",
+    "CONTATO DE DEZEMBRO / 2026",
+    "CONTATO DE DEZEMBRO/ 2026"
+  ],
+  "age_source": [
+    "IDADE"
+  ],
+  "last_nutrition": [
+    "DATA ÚLTIMA CONSULTA NUTRICIONISTA"
+  ],
+  "last_psychology": [
+    "DATA ÚLTIMA CONSULTA PSICOLOGIA"
+  ],
+  "contact_history": [
+    "HISTÓRICO CONTATO DE CONSTADOS DE 2026"
+  ],
+  "risk_review_source": [
+    "RETORNO DO ATENDIMENTO MÉDICO PARA VERIFICAR CLASSIFICAÇÃO DE RISCO"
+  ],
+  "goals_review_source": [
+    "VERIFICAR ADESÃO DAS METAS"
+  ],
+  "coordination_at": [
+    "DATA DA COORD CUIDADO"
+  ],
+  "next_coordination_at": [
+    "DATA DA PRÓXIMA COORD CUIDADO2"
+  ]
+}
