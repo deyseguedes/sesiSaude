@@ -11,6 +11,8 @@
     "test:ui": "node scripts/ui-qa.mjs",
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
+    "build:server": "node scripts/build-server-release.mjs",
+    "publish:laragon": "node scripts/build-server-release.mjs --install-laragon",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

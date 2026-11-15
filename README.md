@@ -89,6 +89,23 @@ Todas usam a senha definida no ambiente durante a carga.
 Na demonstração, o administrador tem gestão de plataforma, o gestor tem gestão
 empresarial e a enfermeira tem coordenação APS. Os níveis não liberam prontuários.
 
+## Publicar no próprio Laragon
+
+Para servir a aplicação completa pelo Apache, com gravação no banco existente:
+
+```powershell
+cd frontend
+npm run publish:laragon
+```
+
+A instalação compilada usa a pasta `public/` e o backend existente. Neste
+computador, o virtual host já está configurado em **http://vivaelo.test**;
+na rede Wi-Fi atual, **http://192.168.106.96**. Mantenha Apache e MySQL ligados.
+O IP pode mudar quando o computador trocar de rede. As permissões existentes
+continuam em vigor; seleção local por perfil só está disponível no próprio computador.
+
+[Configuração e atualização da publicação](docs/server-deployment.md).
+
 ## Executar o frontend
 
 Em outro terminal:

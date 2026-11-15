@@ -1,0 +1,11 @@
+Require all granted
+Options -Indexes
+DirectoryIndex index.html
+RewriteEngine On
+RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,END]
+RewriteRule ^(?:backend|frontend|deploy|docs|server-release|share-demo)(?:/|$) - [F,END]
+RewriteRule ^api(?:/|$) api.php [QSA,END]
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [END]
+RewriteRule ^ index.html [END]
