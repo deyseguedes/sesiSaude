@@ -1,5 +1,8 @@
 # Diagnóstico da planilha APS SESI — fase 1
 
+Evolução posterior: [importação e preservação da origem](../etl-aps-sesi.md).
+Os achados abaixo retratam o importador antes desse incremento.
+
 **Referência:** 15/11/2026. **Estado:** diagnóstico do arquivo concluído; validações semânticas indicadas para a próxima fase.
 
 ## 1. Identificação e método

@@ -17,3 +17,6 @@ tabelas e registros anteriores.
 `../upgrade_industry.sql`: 005–009 para V3 existente; importar uma vez.
 Ambos podem ser regenerados com `composer schema:build` e registram as migrações
 aplicadas, para não duplicá-las na próxima execução do migrador.
+
+014 acrescenta o arquivo cifrado das origens APS, com identificação única por
+empresa/visita/conteúdo. Não importa planilhas nem altera registros existentes.

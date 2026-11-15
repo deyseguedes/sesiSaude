@@ -82,3 +82,15 @@ CREATE INDEX idx_outreach_patient ON outreach_events(company_id,visit_key,patien
 CREATE TABLE campaign_experiments (id INTEGER PRIMARY KEY AUTO_INCREMENT, company_id INTEGER NOT NULL, visit_key VARCHAR(64) NOT NULL DEFAULT 'template', parent_id INTEGER, version INTEGER NOT NULL DEFAULT 1, name VARCHAR(190) NOT NULL, kind VARCHAR(40) NOT NULL, status VARCHAR(30) NOT NULL, payload TEXT NOT NULL, created_at DATETIME NOT NULL);
 CREATE TABLE campaign_decisions (id INTEGER PRIMARY KEY AUTO_INCREMENT, campaign_id INTEGER NOT NULL, visit_key VARCHAR(64) NOT NULL, author_id INTEGER NOT NULL, decision VARCHAR(40) NOT NULL, justification TEXT NOT NULL, created_at DATETIME NOT NULL);
 INSERT INTO schema_migrations (name, applied_at) VALUES ('013_hackathon.sql', CURRENT_TIMESTAMP);
+
+-- 014_aps_source_archive.sql
+CREATE TABLE aps_source_archives (
+ id INTEGER PRIMARY KEY AUTO_INCREMENT,
+ company_id INTEGER NOT NULL,
+ visit_key VARCHAR(64) NOT NULL,
+ fingerprint VARCHAR(64) NOT NULL,
+ archive LONGTEXT NOT NULL,
+ created_at DATETIME NOT NULL,
+ UNIQUE (company_id, visit_key, fingerprint)
+);
+INSERT INTO schema_migrations (name, applied_at) VALUES ('014_aps_source_archive.sql', CURRENT_TIMESTAMP);
