@@ -1,8 +1,9 @@
 <script setup>
+import {formatarNumero} from '../utils/format.js'
 import {onMounted,ref} from 'vue'
 import {apiGet} from '../services/api.js'
 const data=ref(null),error=ref('')
-const number=v=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}).format(v)
+const number=v=>formatarNumero(v,1)
 onMounted(async()=>{try{data.value=await apiGet('/demo/management')}catch(e){error.value=e.message}})
 </script>
 <template><section class="mb-4" data-testid="management-insights"><p class="eyebrow">CRITÉRIO DE SUCESSO · CENÁRIO FICTÍCIO</p><h2 class="h3">O cuidado está chegando e continuando?</h2><p v-if="error" class="alert alert-danger">{{error}}</p><template v-if="data">

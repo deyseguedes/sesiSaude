@@ -1,0 +1,6 @@
+export const LOCALE='pt-BR',TIME_ZONE='America/Bahia'
+const missing=v=>v===null||v===undefined||v===''||!Number.isFinite(Number(v))
+export function formatarNumero(value,decimals=0){return missing(value)?'—':new Intl.NumberFormat(LOCALE,{minimumFractionDigits:decimals,maximumFractionDigits:decimals}).format(Number(value))}
+export const formatarPercentual=(value,decimals=1)=>missing(value)?'—':formatarNumero(value,decimals)+'%'
+export function formatarData(value){if(!value)return '—';const raw=String(value).slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(raw))return '—';const d=new Date(raw+'T12:00:00-03:00');return Number.isNaN(d.getTime())||d.toISOString().slice(0,10)!==raw?'—':new Intl.DateTimeFormat(LOCALE,{timeZone:TIME_ZONE,day:'2-digit',month:'2-digit',year:'numeric'}).format(d)}
+export function formatarDataHora(value){if(!value)return '—';const raw=String(value).replace(' ','T');const d=new Date(raw+(/(Z|[+-]\d{2}:?\d{2})$/.test(raw)?'':'-03:00'));if(Number.isNaN(d.getTime()))return '—';const p=new Intl.DateTimeFormat(LOCALE,{timeZone:TIME_ZONE,day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(d);const get=t=>p.find(x=>x.type===t)?.value;return get('day')+'/'+get('month')+'/'+get('year')+' '+get('hour')+':'+get('minute')}

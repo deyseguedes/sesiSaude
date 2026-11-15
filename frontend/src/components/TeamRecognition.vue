@@ -1,4 +1,5 @@
 <script setup>
+import {formatarNumero} from '../utils/format.js'
 import { computed, ref, watch } from 'vue'
 import { apiGet, apiRequest } from '../services/api.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -31,7 +32,7 @@ async function simulate(values) {
  try {const value=await apiRequest('/recognition/teams/simulate'+(props.companyId?'?company_id='+props.companyId:''),'POST',values);if(current===generation)result.value=value}
  catch(e){if(current===generation)error.value=e.message}finally{busy.value=false}
 }
-const number=value=>value===null?'Não apurável':new Intl.NumberFormat('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}).format(value)
+const number=value=>value===null?'Não apurável':formatarNumero(value,1)
 </script>
 <template>
 <section class="card card-body mb-4" data-testid="team-recognition">

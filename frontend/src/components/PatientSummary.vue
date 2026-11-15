@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { apiGet } from '../services/api.js'
 import { useLatestQuery } from '../composables/useLatestQuery.js'
-import { formatDate } from '../utils/workflow.js'
+import { formatDateTime, formatDate } from '../utils/workflow.js'
 import { label } from '../utils.js'
 import AppIcon from './AppIcon.vue'
 import RecordText from './RecordText.vue'
@@ -12,11 +12,7 @@ const query = useLatestQuery((options, id) => apiGet(`/clinical/patients/${id}/s
 const { data: summary, loading, error } = query
 const expanded = ref(!props.compact)
 const plan = computed(() => summary.value?.plans.focus)
-const stamp = value => {
-  if (!value) return 'Sem registro'
-  const date = new Date(String(value).replace(' ', 'T') + '-03:00')
-  return Number.isNaN(date.getTime()) ? 'Data não informada' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Bahia', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date)
-}
+const stamp = formatDateTime
 const value = reading => reading.value_num ?? reading.value_category
 function open(section, planId, indicatorId) { emit('navigate', { section, planId, indicatorId }) }
 watch(() => [props.patientId, props.refreshKey], () => { query.cancel(true); query.run(props.patientId) }, { immediate: true })

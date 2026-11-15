@@ -18,18 +18,7 @@ export function defaultPlan(plans, requested) {
     || plans[0] || null
 }
 
-export function formatDate(value) {
-  if (!value) return '—'
-  const date = new Date(`${String(value).slice(0, 10)}T12:00:00-03:00`)
-  return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Bahia', day: '2-digit', month: '2-digit', year: 'numeric' }).format(date)
-}
-
-export function formatDateTime(value) {
-  if (!value) return '—'
-  const raw = String(value).replace(' ', 'T')
-  const date = new Date(raw + (/(Z|[+-]\d{2}:?\d{2})$/.test(raw) ? '' : '-03:00'))
-  return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Bahia', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date)
-}
+export {formatarData as formatDate,formatarDataHora as formatDateTime} from './format.js'
 
 export function navigationFor(user) {
   if (!user) return { primary: [], secondary: [], actions: [] }
