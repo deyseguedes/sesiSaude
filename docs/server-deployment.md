@@ -26,6 +26,16 @@ Requisitos: Apache 2.4 com mod_rewrite e AllowOverride All, PHP 8.2+ com PDO MyS
 
 O frontend acessa /api/v1 na própria origem. O Apache encaminha /api/... para public/api.php, que carrega a aplicação PHP fora da raiz pública. Demais rotas Vue retornam index.html; os arquivos assets são servidos diretamente. Não publique a raiz inteira do repositório.
 
+## Compartilhar pela internet com túnel
+
+O gateway local do túnel está configurado em http://127.0.0.1:8099, separado do acesso local comum. Ele usa o mesmo frontend compilado e a mesma API, mas define VIVA_PUBLIC_ACCESS=1 e HTTPS=on no Apache. O serviço do túnel deve encaminhar exclusivamente para essa porta.
+
+Nesse gateway, a seleção sem senha fica desabilitada, o endpoint de seleção local retorna 404 e dados clínicos exigem sessão autenticada. Cookies de sessão são Secure. O endereço vivaelo.test continua com a seleção local já autorizada. Cabeçalhos de proxy também desabilitam identidades locais, mesmo se um túnel for apontado por engano ao host comum.
+
+O ngrok está instalado e sua configuração foi validada sem exibir credenciais. A ativação externa está pendente da escolha explícita sobre usar o banco atual com autenticação ou uma base fictícia separada: a revisão automática bloqueou a primeira tentativa por envolver possível exposição de dados clínicos ao serviço externo. Nenhum link público foi criado nessa tentativa.
+
+A transmissão pelo túnel não substitui as permissões da aplicação. A pessoa acessa com usuário e senha cadastrados. Computador, Apache, MySQL e agente do túnel precisam permanecer ligados para o endereço funcionar.
+
 ## Verificação
 
 - GET https://SEU-DOMINIO/api/v1/health retorna JSON.

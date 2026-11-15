@@ -50,6 +50,11 @@ foreach ([
     $_ENV['APP_ENV']=$environment; $_ENV['LOCAL_PROFILE_ACCESS']=$enabled; $_SERVER['REMOTE_ADDR']=$address;
     check(\App\Services\LocalProfileAccess::enabled()===$expected,'Local profile access policy');
 }
+$_ENV['APP_ENV']='local';$_ENV['LOCAL_PROFILE_ACCESS']='true';$_SERVER['REMOTE_ADDR']='127.0.0.1';
+foreach(['VIVA_PUBLIC_ACCESS','REDIRECT_VIVA_PUBLIC_ACCESS','HTTP_X_FORWARDED_FOR','HTTP_FORWARDED'] as $flag) {
+    $_SERVER[$flag]='1';check(!\App\Services\LocalProfileAccess::enabled(),'Public gateway and proxy cannot use local identities');unset($_SERVER[$flag]);
+}
+check(\App\Services\LocalProfileAccess::enabled(),'Direct local profiles remain available');
 $_ENV = [];
 try {
     Database::connect();

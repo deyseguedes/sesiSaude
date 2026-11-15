@@ -12,6 +12,10 @@ final class LocalProfileAccess
     {
         return ($_ENV['APP_ENV'] ?? '') === 'local'
             && ($_ENV['LOCAL_PROFILE_ACCESS'] ?? '') === 'true'
+            && ($_SERVER['VIVA_PUBLIC_ACCESS'] ?? '') !== '1'
+            && ($_SERVER['REDIRECT_VIVA_PUBLIC_ACCESS'] ?? '') !== '1'
+            && !isset($_SERVER['HTTP_X_FORWARDED_FOR'])
+            && !isset($_SERVER['HTTP_FORWARDED'])
             && in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1','::1'], true);
     }
 
