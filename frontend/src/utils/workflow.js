@@ -50,6 +50,7 @@ export function navigationFor(user) {
     (clinical ? secondary : primary).push({ to: '/education-editor', label: 'Conteúdos', icon: 'book' })
     actions.push({ to: '/education-editor?new=content', label: 'Preparar conteúdo educativo', detail: 'Vídeo, roteiro e revisão', icon: 'book' })
   }
+  if(user.role==='nurse')secondary.push({to:'/campaign-management',label:'Campanhas e avalia??o',icon:'cycle'})
   if(['admin','nurse'].includes(user.role))secondary.push({to:'/import',label:'Importar exporta??o',icon:'building'})
   secondary.push({to:'/security',label:'Segurança e privacidade',icon:'book'})
   return { primary, secondary, actions }

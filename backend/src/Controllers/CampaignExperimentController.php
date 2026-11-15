@@ -10,5 +10,8 @@ final class CampaignExperimentController {
  public function listing():void{Response::send(200,$this->service->listing());}
  public function detail(int $id):void{Response::send(200,$this->service->detail($id));}
  public function create():void{Response::send(201,$this->service->create(Input::body()));}
+ public function decision(int $id):void{Response::send(200,$this->service->recordDecision($id,Input::body()));}
+ public function version(int $id):void{Response::send(201,$this->service->create(Input::body(),$id));}
+ public function export():void{Response::send(200,$this->service->export());}
  public function start(int $id):void{Response::send(200,$this->service->start($id));}
 }

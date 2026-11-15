@@ -31,9 +31,19 @@ final class CampaignExperimentService {
   $this->outreach->guard(['admin','nurse','manager']);$rows=$this->outreach->s->all('SELECT id FROM campaign_experiments WHERE company_id=? AND visit_key IN (?,?) ORDER BY id',[$this->outreach->user['company_id'],DemoWorkspace::key(),'template']);$result=[];foreach($rows as $r)$result[]=$this->detail((int)$r['id']);return $result;
  }
  public function detail(int $id):array{
-  $this->outreach->guard(['admin','nurse','manager']);$r=$this->row($id);$d=$r['data'];$n=count($d['frozen']??[]);
+  $this->outreach->guard(['admin','nurse','manager']);$r=$this->row($id);$d=$r['data'];$n=isset($d['history'])?(int)$d['history']['n1']+(int)$d['history']['n2']:count($d['frozen']??[]);
   if($this->outreach->user['role']==='manager')return ['id'=>(int)$r['id'],'name'=>$r['name'],'suppressed'=>$n<10,'participation'=>$n>=10?['invited'=>$n]:null,'simulated'=>true];
-  $stats=$this->statistics($r);$diagnosis=$this->diagnosis($r,$stats);unset($d['frozen']);return ['id'=>(int)$r['id'],'name'=>$r['name'],'kind'=>$r['kind'],'version'=>(int)$r['version'],'parent_id'=>$r['parent_id'],'status'=>$r['status'],'population'=>$n,'data'=>$d,'statistics'=>$stats,'diagnosis'=>$diagnosis,'decision'=>CampaignDecision::suggest($stats),'simulated'=>true];
+  $decisions=$this->outreach->s->all('SELECT d.decision,d.justification,d.created_at,u.name author FROM campaign_decisions d JOIN users u ON u.id=d.author_id WHERE d.campaign_id=? AND d.visit_key=? ORDER BY d.id DESC',[$id,DemoWorkspace::key()]);foreach($decisions as &$decision)$decision['justification']=Crypto::decrypt($decision['justification']);unset($decision);
+  $stats=$this->statistics($r);$diagnosis=$this->diagnosis($r,$stats);unset($d['frozen']);return ['id'=>(int)$r['id'],'name'=>$r['name'],'kind'=>$r['kind'],'version'=>(int)$r['version'],'parent_id'=>$r['parent_id'],'status'=>$r['status'],'population'=>$n,'data'=>$d,'decisions'=>$decisions,'suppressed'=>$n<10,'statistics'=>$n>=10?$stats:null,'diagnosis'=>$n>=10?$diagnosis:null,'decision'=>CampaignDecision::suggest($stats),'simulated'=>true];
+ }
+ public function recordDecision(int $id,array $d):array{
+  $this->manage();$this->row($id);$decision=Input::choice($d,'decision',['maintain','adjust','redesign','end','pause','wait']);$justification=Input::text($d,'justification',1500);
+  $this->outreach->s->insert('campaign_decisions',['campaign_id'=>$id,'visit_key'=>DemoWorkspace::key(),'author_id'=>$this->outreach->user['id'],'decision'=>$decision,'justification'=>Crypto::encrypt($justification),'created_at'=>date('Y-m-d H:i:s')]);Audit::record($this->outreach->s,$this->outreach->user,'campaign_decision','campaign_experiment',$id);return $this->detail($id);
+ }
+ public function export():array{
+  $this->manage();$rows=[['campanha','tipo','indicador','efeito_pp','limite_inferior','limite_superior','custo_por_retorno','sugestão']];
+  foreach($this->listing() as $c){$s=$c['statistics'];$num=fn($v)=>$v===null?'não apurável':number_format($v,2,',','.');$rows[]=[$c['name'],$c['kind'],$c['data']['main_metric'],$num($s['effect_pp']??null),$num($s['lower_pp']??null),$num($s['upper_pp']??null),$s&&$s['cost_per_recovered']!==null?$num($s['cost_per_recovered']):'sem ganho',$c['decision']['label']];}
+  $csv='';foreach($rows as $row){$cells=[];foreach($row as $v){if(preg_match('/^[=+@\\t\\r-]/',(string)$v))$v="'".$v;$cells[]='"'.str_replace('"','""',(string)$v).'"';}$csv.=implode(';',$cells)."\r\n";}return ['csv'=>$csv];
  }
  public function diagnosis(array $row,array $stats):array {
   $d=$row['data'];$funnels=$d['funnels']??['A'=>['sent'=>$stats['sent'],'read'=>$stats['sent'],'responded'=>$stats['responded72'],'scheduled'=>$stats['scheduled'],'attended'=>$stats['attended']]];
