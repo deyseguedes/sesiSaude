@@ -8,8 +8,15 @@ final class LocalProfileAccess
 {
     public const ROLES = ['admin','manager','doctor','nurse','navigator','worker','dependent'];
 
+    public static function publicDemo(): bool
+    {
+        return ($_ENV['APP_ENV'] ?? '') === 'demo'
+            && ($_ENV['PUBLIC_DEMO_ACCESS'] ?? '') === 'true'
+            && preg_match('/^viva_elo_demo_[a-f0-9]{12}$/D',$_ENV['DB_DATABASE'] ?? '') === 1;
+    }
     public static function enabled(): bool
     {
+        if(self::publicDemo()) return true;
         return ($_ENV['APP_ENV'] ?? '') === 'local'
             && ($_ENV['LOCAL_PROFILE_ACCESS'] ?? '') === 'true'
             && ($_SERVER['VIVA_PUBLIC_ACCESS'] ?? '') !== '1'

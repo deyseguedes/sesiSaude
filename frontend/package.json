@@ -12,6 +12,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "build:server": "node scripts/build-server-release.mjs",
+    "publish:demo": "node scripts/build-server-release.mjs && node scripts/build-public-demo.mjs",
     "publish:laragon": "node scripts/build-server-release.mjs --install-laragon",
     "preview": "vite preview --host 127.0.0.1"
   },

@@ -55,6 +55,13 @@ foreach(['VIVA_PUBLIC_ACCESS','REDIRECT_VIVA_PUBLIC_ACCESS','HTTP_X_FORWARDED_FO
     $_SERVER[$flag]='1';check(!\App\Services\LocalProfileAccess::enabled(),'Public gateway and proxy cannot use local identities');unset($_SERVER[$flag]);
 }
 check(\App\Services\LocalProfileAccess::enabled(),'Direct local profiles remain available');
+$_ENV['PUBLIC_DEMO_ACCESS']='true';$_ENV['APP_ENV']='demo';$_ENV['DB_DATABASE']='viva_elo';
+check(!\App\Services\LocalProfileAccess::publicDemo(),'Real database cannot enable public identities');
+$_ENV['DB_DATABASE']='viva_elo_demo_012345abcdef';
+check(\App\Services\LocalProfileAccess::publicDemo(),'Explicit isolated demo can enable public identities');
+$_SERVER['VIVA_PUBLIC_ACCESS']='1';check(\App\Services\LocalProfileAccess::enabled(),'Fictional demo accepts profiles on public gateway');
+$_ENV['APP_ENV']='production';check(!\App\Services\LocalProfileAccess::enabled(),'Production never accepts public demo identities');
+unset($_SERVER['VIVA_PUBLIC_ACCESS']);
 $_ENV = [];
 try {
     Database::connect();

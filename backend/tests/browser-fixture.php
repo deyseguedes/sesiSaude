@@ -11,7 +11,7 @@ if(($request['action']??'')==='drop') {
     if(!preg_match('/^viva_elo_test_[a-f0-9]{12}$/D',$name)) throw new RuntimeException('Invalid QA database');
     $admin->exec("DROP DATABASE `$name`");echo json_encode(['dropped'=>true]);exit;
 }
-$name='viva_elo_test_'.bin2hex(random_bytes(6));$password=bin2hex(random_bytes(16));
+$name=(($request['public_demo']??false)===true?'viva_elo_demo_':'viva_elo_test_').bin2hex(random_bytes(6));$password=bin2hex(random_bytes(16));
 $admin->exec("CREATE DATABASE `$name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 $overrides=array_merge(array_intersect_key($_ENV,array_flip(['DB_HOST','DB_PORT','DB_USERNAME','DB_PASSWORD'])),['APP_ENV'=>'local','APP_KEY'=>base64_encode(random_bytes(32)),'DB_DATABASE'=>$name,'DEMO_PASSWORD'=>$password]);
 $env=array_merge(getenv(),$overrides);

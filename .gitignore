@@ -8,6 +8,7 @@
 /frontend/public/demo-data.json
 /share-demo/
 /server-release/
+/public-demo/
 /public/
 *.log
 /backend/storage/sessions/

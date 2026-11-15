@@ -26,25 +26,32 @@ Requisitos: Apache 2.4 com mod_rewrite e AllowOverride All, PHP 8.2+ com PDO MyS
 
 O frontend acessa /api/v1 na própria origem. O Apache encaminha /api/... para public/api.php, que carrega a aplicação PHP fora da raiz pública. Demais rotas Vue retornam index.html; os arquivos assets são servidos diretamente. Não publique a raiz inteira do repositório.
 
-## Compartilhar pela internet com túnel
+## Compartilhar pela internet sem senha — demonstração interativa
 
-O gateway local do túnel está configurado em http://127.0.0.1:8099, separado do acesso local comum. Ele usa o mesmo frontend compilado e a mesma API, mas define VIVA_PUBLIC_ACCESS=1 e HTTPS=on no Apache. O serviço do túnel deve encaminhar exclusivamente para essa porta.
+Link atual: https://acclaim-heftiness-clever.ngrok-free.dev. A pessoa escolhe um dos sete perfis, sem digitar usuário ou senha. O frontend usa a API PHP real e grava alterações, em uma base **separada e exclusivamente fictícia**. As alterações são compartilhadas entre visitantes.
 
-Nesse gateway, a seleção sem senha fica desabilitada, o endpoint de seleção local retorna 404 e dados clínicos exigem sessão autenticada. Cookies de sessão são Secure. O endereço vivaelo.test continua com a seleção local já autorizada. Cabeçalhos de proxy também desabilitam identidades locais, mesmo se um túnel for apontado por engano ao host comum.
+O gateway local em http://127.0.0.1:8099 aponta para public-demo/public, com VIVA_PUBLIC_ACCESS=1 e HTTPS=on no Apache. O ngrok encaminha exclusivamente para essa porta, com inspeção de conteúdo desabilitada. O banco original continua no acesso local vivaelo.test e não é exposto pelo seletor público.
 
-O usuário autorizou explicitamente compartilhar o banco atual pelo ngrok com login obrigatório. O túnel HTTPS foi ativado para a porta 8099, com inspeção de conteúdo desabilitada. Endereço verificado: https://acclaim-heftiness-clever.ngrok-free.dev.
+Para preparar ou atualizar essa demonstração:
 
-Foram verificados frontend/API disponíveis, cookies Secure, ausência de seleção local, acesso clínico anônimo bloqueado com 401, seleção local bloqueada com 404 e arquivos privados bloqueados com 403. Não foi criada conta nem alterada senha para essa publicação.
+```powershell
+cd frontend
+npm run publish:demo
+```
 
-Para iniciar novamente quando o agente estiver desligado, mantenha Apache e MySQL ativos e execute:
+A primeira execução cria um banco novo de nome viva_elo_demo_<identificador>, aplica migrações e carga fictícia. As seguintes atualizam os arquivos e preservam a configuração, o banco e as sessões da demonstração. Nenhuma chave, senha de usuário ou dado clínico é importado do banco original; a conexão privada ao servidor MySQL fica no .env privado da instância de demonstração. Não adicione dados reais nessa base.
+
+A entrada por perfil na internet exige conjuntamente APP_ENV=demo, PUBLIC_DEMO_ACCESS=true e nome de banco com o padrão isolado esperado. Essas condições não habilitam seleção pública no banco original ou em produção. Cada perfil mantém as permissões por papel, empresa e vínculo. A instância de demonstração tem sessões e chave de criptografia próprias.
+
+Computador, Apache, MySQL e ngrok precisam permanecer ligados. Para iniciar o agente novamente quando estiver desligado:
 
 ```powershell
 ngrok http http://127.0.0.1:8099 --inspect=false
 ```
 
-Use o endereço HTTPS informado pelo agente; ele pode mudar. Não encaminhe o túnel para a porta 80, pois o gateway dedicado da publicação é a porta 8099. A página inicial gratuita do ngrok pode pedir que o visitante confirme “Visit Site” antes de abrir a aplicação.
+Use o endereço HTTPS informado pelo agente; ele pode mudar. A página gratuita do ngrok pode pedir “Visit Site” antes da aplicação. O seletor público não autentica identidades reais: é uma demonstração, e o aviso de dados fictícios permanece na interface.
 
-A transmissão pelo túnel não substitui as permissões da aplicação. A pessoa acessa com usuário e senha cadastrados. Computador, Apache, MySQL e agente do túnel precisam permanecer ligados para o endereço funcionar.
+A opção de publicar o banco original com login continua tecnicamente protegida por VIVA_PUBLIC_ACCESS; não direcione um túnel ao host local comum para obter acesso sem senha. Para voltar a uma publicação autenticada do banco original, altere conscientemente o DocumentRoot do gateway e preserve os controles existentes.
 
 ## Verificação
 

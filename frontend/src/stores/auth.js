@@ -4,7 +4,7 @@ import { shareDemo } from '../services/share-demo.js'
 export const roles = { admin: 'Administrador SESI', worker: 'Trabalhador', dependent: 'Dependente', navigator: 'Navegador de Cuidado', manager: 'Gestor empresarial', doctor: 'Médico', nurse: 'Enfermeiro' }
 export const managementLevels = { none: 'Assistencial / individual', coordination: 'Coordenação APS', company: 'Gestão empresarial', platform: 'Gestão da plataforma' }
 export const useAuthStore = defineStore('auth', {
-  state: () => ({ user: null, csrf: '', ready: false, localProfiles: [] }),
+  state: () => ({ user: null, csrf: '', ready: false, localProfiles: [], publicDemo: false }),
   actions: {
     async demo(role) {
       await this.load()
@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', {
       const body = await requestJson('/api/v1/auth/session')
       this.user = body.data.user; this.csrf = body.data.csrf_token; this.ready = true
       this.localProfiles = body.data.local_profiles || []
+      this.publicDemo = body.data.public_demo === true
     },
     async login(email, password) {
       await this.load()

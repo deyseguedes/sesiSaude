@@ -15,7 +15,7 @@ final class AuthController
             $user = (new Store(Database::connect()))->one('SELECT id,name,role,company_id,management_level FROM users WHERE id=? AND active=1', [$_SESSION['user_id']]);
         }
         $profiles = LocalProfileAccess::enabled() ? LocalProfileAccess::profiles(new Store(Database::connect())) : [];
-        Response::send(200, ['user' => $user, 'csrf_token' => $_SESSION['csrf'], 'local_profiles' => $profiles]);
+        Response::send(200, ['user' => $user, 'csrf_token' => $_SESSION['csrf'], 'local_profiles' => $profiles, 'public_demo' => LocalProfileAccess::publicDemo()]);
     }
     public function localProfile(): void
     {
