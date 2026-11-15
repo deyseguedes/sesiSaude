@@ -11,7 +11,7 @@ O VIVA+ ELO organiza o cuidado de trabalhadores das indústrias contratantes e s
 
 | Ambiente | Entrada | Grava alterações? | Dados |
 | --- | --- | --- | --- |
-| Demonstração interativa no ngrok | Seleção entre oito perfis, sem usuário ou senha | Sim; compartilhadas entre visitantes | Fictícios, em banco separado |
+| Demonstração interativa no ngrok | Seleção entre oito perfis, sem usuário ou senha | Roteiro por visita; cadastros legados compartilhados | Fictícios, em banco separado |
 | Aplicação local no computador | http://vivaelo.test; seleção por perfil habilitada nesta instalação | Sim | Banco da instalação local |
 | Aplicação pela mesma rede Wi-Fi | http://192.168.106.96; login cadastrado | Sim | Banco da instalação local |
 | Demonstração estática anterior do Sites | Seleção de perfil | Não | Cenário fictício fixo, somente consulta |
@@ -50,7 +50,7 @@ O **perfil** descreve a função; o **nível de gestão** acrescenta responsabil
 | Perfil | Uso principal | Limite |
 | --- | --- | --- |
 | Administrador SESI | Indústrias autorizadas, estrutura, profissionais, equipes, contratos e acessos | Não recebe prontuários apenas por ser administrador |
-| Gestor empresarial | Cadastro, vínculo empresarial, contratos, campanhas e agregados da empresa | Sem prontuário ou risco individual |
+| Gestor empresarial | Cadastro, vínculo empresarial, contratos, campanhas e agregados da empresa | Sem prontuário, risco, plano ou motivos clínicos |
 | Médico | Pacientes vinculados, resumo, evolução, plano, risco e retorno | Exige vínculo assistencial |
 | Enfermeiro | Fila, acompanhamento, registros de enfermagem, contatos e retornos | Consulta risco confirmado, mas não o altera |
 | Navegador de Cuidado | Acolhimento administrativo, barreiras e campanhas vinculadas | Sem notas clínicas ou alteração de risco |
@@ -94,18 +94,24 @@ O conteúdo acompanha seu perfil: enfermagem recebe o roteiro da fila; médico r
 
 Para consultar os 18 capítulos sem sair da aplicação, escolha **Ver manual completo aqui** no guia. O manual abre em um painel sobre a tela atual. Feche o painel para continuar seu trabalho no mesmo lugar.
 
-### 3.2 Demonstração acessível e gestão dos resultados
+### 3.2 Roteiro da banca, importação e resultados
 
-Atualização de 15/11/2026: a base pública tem 100 pessoas inteiramente sintéticas. Não foi importada uma planilha da organização; o CSV criado para o projeto está em `backend/database/fixtures/100-pessoas-sinteticas.csv`.
+A atualização de 15/11/2026 inclui 100 pessoas sintéticas e Marcos (DEMO-0001). Não foi usada uma planilha da organização. Na entrada, **Começar a demonstração** restaura o roteiro da visita e abre a fila. Os três botões permitem seguir para celular ao vivo e resultados.
 
-- **Trabalhador:** abre no canal de celular. Carla responde por botões; Seu José pode ouvir a mensagem e enviar um áudio simulado com pedido de contato. O áudio é uma fala sintetizada pelo navegador, sem microfone ou transcrição automática. A opção de ligação cria um pedido de contato, sem telefonar.
-- **Enfermagem:** recebe a resposta no banco demonstrativo; a fila verifica atualizações a cada dois segundos enquanto nenhuma ficha está aberta. Uma linha por pessoa agrupa pendências, que podem ser expandidas. Confirmação nunca equivale a comparecimento.
-- **Administrador SESI:** abre com funil, participação, adesão e resultado de risco. O exemplo independente da Equipe Norte apresenta 54,9% contra 46,0%, ganho de 8,9 pontos, faixa de 3% e travas aprovadas. Seus 510 retornos devidos não são atribuídos às 100 pessoas da base.
-- **Médico:** abre na carteira de pacientes; tocar em uma pessoa abre o resumo antes da consulta.
-- **Líder:** recebe somente nome e horário das respostas autorizadas no cenário. Sem prontuário ou risco. Para retirar o aviso, envie nova resposta no canal com a autorização desmarcada.
-- **Segurança:** o menu explica as proteções existentes e as propostas ainda não implantadas.
+- **Enfermagem:** Marcos abre a convocação sem resposta. Clique em “Por que aparece nesta posição?” para ver prazo e tempo sem resposta. Confirmar o tira dessa convocação; uma barreira voluntária o mantém na fila. Outras pendências assistenciais continuam disponíveis.
+- **Trabalhador:** o celular do Marcos oferece Confirmo, Preciso remarcar, Não posso ir e apoio. Remarcar oferece horários da tabela de disponibilidade após o turno. O envio externo é simulado e a escolha não ocupa agenda real. Carla e Seu José continuam no link “Outros exemplos”.
+- **Modo ao vivo:** a equipe autorizada vê o celular e a fila lado a lado, atualizada a cada dois segundos. O trabalhador sozinho não recebe a fila de outras pessoas.
+- **Gestão SESI:** funil de devidos, mensagens, respostas, confirmação/remarcação e comparecimento; participação, adesão e risco; estimativa operacional e barreiras agregadas. Há filtros de período e empresa.
+- **Gestor empresarial:** boletim separado, sem risco, plano ou motivos clínicos. Recortes menores que dez pessoas são suprimidos na API.
+- **Campanhas:** cinco históricos simulados e uma convocação ao vivo. Abra um cartão para conferir fórmula, comparação, intervalo de confiança, travas e sugestão. A coordenação registra decisão e justificativa; uma nova versão preserva o histórico.
+- **Importar exportação:** CSV/XLSX, mapeamento e prévia. Matrícula, nome, empresa e status são obrigatórios. A gravação importa válidas e informa erros por linha. O gerador só completa cuidado vazio na demonstração.
+- **Médico:** abre na carteira e no resumo antes da consulta.
+- **Líder:** o cenário acessível de Carla e Seu José mostra somente nome e horário autorizados. Nova resposta sem autorização retira o aviso.
+- **Prêmio coletivo:** Equipe Norte é exemplo independente: 54,9% contra 46,0%, ganho de 8,9 pontos e faixa de 3%. Não é pagamento nem apuração das 100 pessoas.
 
-As mudanças do cenário são compartilhadas entre visitantes. O banco real do Laragon não recebe a carga sintética. Enfermagem não recebe acesso a contratos e convites por ter nível de coordenação. Datas de apresentação seguem dd/mm/aaaa, horários sem segundos e números com vírgula decimal.
+**Restaurar demonstração** reinicia o roteiro por sessão. Importações, respostas e decisões de campanhas são individuais; prontuários, cadastros e agendas legados continuam compartilhados. A restauração não apaga esses registros. O banco real do Laragon não recebe a carga sintética.
+
+Para gravação, use /entrar/enfermeiro?ir=/live&restaurar=1&gravacao=1. O modo mantém o selo Simulação e oculta ajuda e banners. Vídeos são produzidos pela equipe fora da plataforma; links YouTube e Drive podem ser incorporados no editor. Sem vídeo configurado, o bloco não aparece.
 
 ### 3.3 Menos cliques
 
@@ -623,7 +629,7 @@ A simulação não comprova evidências, não arquiva apuração oficial, não c
 
 ## 14. Roteiros completos para treinamento
 
-Use somente situações inventadas; alterações na demonstração são compartilhadas.
+Use somente situações inventadas. Respostas e decisões do roteiro são por sessão; alterações legadas são compartilhadas.
 
 ### 14.1 Do cadastro ao atendimento
 
@@ -724,11 +730,11 @@ A plataforma registra autoria/histórico. Isso ainda não representa auditoria p
 | Conteúdos e campanhas | Disponível; materiais precisam de preparação/revisão |
 | Jornada simbólica do trabalhador | Disponível quando a empresa adere |
 | Prêmio coletivo | Simulação manual; sem apuração oficial ou pagamento |
-| Importação SOC/S+ e conciliação de agendamentos | Ainda não integradas |
+| Importação APS e devolução | CSV/XLSX validados e CSV de retorno; integração automática com SOC/S+ não implantada |
 | WhatsApp e áudio | Canal simulado disponível na demonstração; sem integração externa ou transcrição automática |
 | Painel do líder e autorização de aviso | Cenário demonstrativo com nome e horário; a última resposta com autorização desmarcada retira o aviso |
 | Elegibilidade semestral e benefício/RH | Critérios e código ilustrativo disponíveis na demonstração; apuração oficial e resgate real pendentes |
-| Carteira congelada, linha de base automática e fechamento do prêmio | Ainda não disponíveis |
+| Público congelado de campanhas | Disponível no início do experimento; fechamento oficial de prêmio ainda não disponível |
 | Boletim completo com mínimo proposto de dez pessoas | Previsto |
 | PostgreSQL e arquitetura pós-quântica completa | Evolução documentada; instalação atual usa MySQL |
 

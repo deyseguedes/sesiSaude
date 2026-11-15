@@ -1,5 +1,7 @@
 # Evolução demonstrativa dos painéis — 15/11/2026
 
+> Histórico da primeira atualização do dia. Para o estado atual com Marcos, importação, roteiro e campanhas, consulte o README e o guia completo de uso.
+
 ## Cenários entregues
 
 - Trabalhador abre diretamente no canal de celular da demonstração, sem cadastro adicional.
