@@ -1,4 +1,5 @@
 <script setup>
+import ConvocationQueue from '../components/ConvocationQueue.vue'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { apiGet, apiRequest } from '../services/api.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -34,7 +35,7 @@ function quickFilter(preset) {
 
 const error = ref(''), notice = ref(''), busy = ref(false), initialized = ref(false), search = ref(''), selectedId = ref(null), action = ref(''), creating = ref(false), createInitial = ref({}), taskPatient = ref(''), taskProfile = ref(null)
 const normalize = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-const grouped = ref(true)
+const grouped = ref(true),convocationOnly=ref(false)
 const filteredItems = computed(() => (data.value?.items || []).filter(i => normalize(i.patient_name + ' ' + i.title).includes(normalize(search.value))))
 const items = computed(() => {if(!grouped.value)return filteredItems.value;const groups=new Map();for(const item of filteredItems.value){if(!groups.has(item.patient_id))groups.set(item.patient_id,{...item,pending_count:0});groups.get(item.patient_id).pending_count++;if(item.kind==='worker_channel')groups.get(item.patient_id).channel_reply_title=item.title}return [...groups.values()]})
 const contactLabels = { phone: 'Ligação', in_person: 'Presencial', other: 'Outro canal', reached: 'Contato realizado', no_answer: 'Sem resposta', invalid_contact: 'Contato inválido' }
@@ -126,10 +127,11 @@ onBeforeUnmount(()=>{clearInterval(liveTimer);window.removeEventListener('elo-ch
 </script>
 <template>
   <div class="section-heading flex-wrap gap-3 mb-4"><div><p class="eyebrow">CENTRAL DE CONTINUIDADE · ENFERMAGEM</p><h1>Fila do dia</h1><p class="text-secondary mb-0">Quem precisa de acompanhamento e qual é o próximo passo.</p></div><div class="d-flex flex-wrap gap-2"><RouterLink to="/care-dashboard" class="btn btn-outline-success">Indicadores assistenciais</RouterLink><button class="btn btn-outline-success" :disabled="busy || loading" @click="refresh"><AppIcon name="cycle" :size="17" /> Atualizar fila</button><button class="btn btn-success" :disabled="busy || !data" @click="newTask"><AppIcon name="plus" :size="17" /> Criar tarefa</button></div></div>
+  <div v-if="auth.publicDemo" class="d-flex gap-2 mb-3"><button class="btn btn-sm" :class="convocationOnly?'btn-success':'btn-outline-success'" @click="convocationOnly=!convocationOnly">Convocação sem resposta</button><RouterLink to="/live" class="btn btn-sm btn-outline-success">Abrir modo ao vivo</RouterLink></div><ConvocationQueue v-if="auth.publicDemo" compact/>
   <p v-if="error || loadError" class="alert alert-danger" role="alert">{{ error || loadError }}</p><p v-if="notice && !selectedId" class="alert alert-success">{{ notice }}</p>
-  <p v-if="auth.publicDemo" class="small text-success">Canal simulado conectado · fila atualizada automaticamente a cada 2 segundos. <RouterLink to="/worker-channel">Testar Carla e Seu José →</RouterLink></p><label class="form-check mb-3"><input class="form-check-input" type="checkbox" v-model="grouped"><span class="form-check-label">Uma linha por pessoa · agrupar pendências</span></label><p class="privacy-note">Prioridade administrativa por prazo, pedido de ajuda e tempo de espera. Não representa risco clínico.</p>
+  <p v-if="auth.publicDemo" class="small text-success">Canal simulado conectado · fila atualizada automaticamente a cada 2 segundos. <RouterLink to="/accessible-channel">Testar Carla e Seu José →</RouterLink></p><label class="form-check mb-3"><input class="form-check-input" type="checkbox" v-model="grouped"><span class="form-check-label">Uma linha por pessoa · agrupar pendências</span></label><p class="privacy-note">Prioridade administrativa por prazo, pedido de ajuda e tempo de espera. Não representa risco clínico.</p>
   <div v-if="data" class="task-strip worklist-metrics mb-4"><div><strong>{{ data.metrics.total }}</strong><span>pendências no filtro</span></div><div><strong>{{ data.metrics.overdue }}</strong><span>com prazo passado</span></div><div><strong>{{ data.metrics.help }}</strong><span>pedidos de apoio</span></div></div>
-  <section class="card card-body mb-4"><div><label for="queue-search" class="form-label">Buscar pessoa ou pendência</label><input id="queue-search" v-model="search" type="search" class="form-control" placeholder="Digite um nome"></div><div class="filter-chips mt-3" aria-label="Atalhos da fila">
+  <h2 v-if="auth.publicDemo&&!convocationOnly" class="h4 mt-4">Outras pendências do cuidado</h2><section v-if="!convocationOnly" class="card card-body mb-4"><div><label for="queue-search" class="form-label">Buscar pessoa ou pendência</label><input id="queue-search" v-model="search" type="search" class="form-control" placeholder="Digite um nome"></div><div class="filter-chips mt-3" aria-label="Atalhos da fila">
 <button class="btn btn-sm" :class="!filter.assigned_to && !filter.deadline && !filter.help_requested && !filter.contact_state && filter.status === 'active' ? 'btn-success' : 'btn-outline-success'" :disabled="busy" @click="quickFilter('all')">Todas abertas</button>
 <button class="btn btn-sm" :class="Number(filter.assigned_to) === Number(auth.user.id) ? 'btn-success' : 'btn-outline-success'" :disabled="busy" @click="quickFilter('mine')">Minhas</button>
 <button class="btn btn-sm" :class="filter.deadline === 'overdue' ? 'btn-success' : 'btn-outline-success'" :disabled="busy" @click="quickFilter('overdue')">Prazo passado</button>

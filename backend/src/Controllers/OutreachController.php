@@ -7,6 +7,7 @@ use App\Repositories\Store;
 final class OutreachController {
  private OutreachService $service;
  public function __construct(){Session::start();$s=new Store(Database::connect());$this->service=new OutreachService($s,Identity::require($s));}
+ public function export():void{Response::send(200,$this->service->export());}
  public function phone():void{Response::send(200,$this->service->phone());}
  public function reply():void{Response::send(200,$this->service->reply(Input::body()));}
  public function queue():void{Response::send(200,$this->service->queue());}

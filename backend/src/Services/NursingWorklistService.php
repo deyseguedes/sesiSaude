@@ -127,6 +127,10 @@ final class NursingWorklistService
             $marks=implode(',',array_fill(0,count($ids),'?'));
             $rows=$this->care->store->all("SELECT i.*,p.name AS patient_name,t.name AS team_name,COALESCE(l.name,(SELECT su.name FROM appointments ap JOIN service_units su ON su.id=ap.service_unit_id WHERE ap.patient_id=i.patient_id AND ap.company_id=i.company_id ORDER BY ap.scheduled_at DESC LIMIT 1)) AS service_unit,u.name AS professional_name,a.name AS assigned_name FROM care_pending_items i JOIN patients p ON p.id=i.patient_id AND p.company_id=i.company_id LEFT JOIN teams t ON t.id=i.team_id AND t.company_id=i.company_id LEFT JOIN service_units l ON l.id=i.service_unit_id AND l.company_id=i.company_id LEFT JOIN users u ON u.id=i.professional_id AND u.company_id=i.company_id LEFT JOIN users a ON a.id=i.assigned_to AND a.company_id=i.company_id WHERE i.company_id=? AND i.patient_id IN ($marks)",[$this->care->user['company_id'],...$ids]);
         }
+        if(LocalProfileAccess::publicDemo()){
+            $outreach=new OutreachService($this->care->store,$this->care->user);$q=$outreach->queue();$hidden=array_column([...$q['items'],...$q['waiting']],'patient_id');foreach($outreach->people() as $p)if($p['registration']==='DEMO-0001')$hidden[]=$p['patient_id'];
+            $rows=array_values(array_filter($rows,fn($r)=>!in_array($r['patient_id'],$hidden)));
+        }
         $options=['teams'=>[],'professionals'=>[],'units'=>[]];
         foreach($rows as $row) foreach([['teams','team_id','team_name'],['professionals','professional_id','professional_name'],['units','service_unit_id','service_unit']] as [$group,$id,$name]) if($row[$id]) $options[$group][(int)$row[$id]]=['id'=>(int)$row[$id],'name'=>$row[$name]];
         foreach($options as &$option) $option=array_values($option); unset($option);

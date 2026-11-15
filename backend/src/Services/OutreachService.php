@@ -31,16 +31,16 @@ final class OutreachService {
   return ['message'=>match($choice){'confirm'=>'Pronto! A enfermeira já vê sua confirmação.','reschedule'=>'Novo horário escolhido. Reagendamento pronto para enviar ao sistema da APS.','cannot'=>'Obrigado por contar. A enfermagem recebeu sua dificuldade.',default=>'Pedido de apoio recebido pela equipe.'},'phone'=>$this->phone()];
  }
  public function queue():array{
-  $this->guard(['nurse','doctor','admin']);$now=new \DateTimeImmutable('today');$items=[];$waiting=[];
-  foreach($this->people() as $p){if(($p['status']??'')!=='ATIVO'||!empty($p['replied_at'])&&in_array($p['state'],['confirmed','rescheduled'],true)||empty($p['return_date']))continue;
-   $days=(int)$now->diff(new \DateTimeImmutable($p['return_date']))->format('%r%a');if($days>30)continue;
-   $age=(int)(new \DateTimeImmutable(substr($p['message_sent_at']??date('Y-m-d'),0,10)))->diff($now)->format('%r%a');
-   $p['days_due']=$days;$p['message_age']=$age;$p['why']=($days<0?'retorno vencido há '.abs($days).' dias':'retorno vence em '.$days.' dias').'; mensagem sem resposta há '.$age.' dias';
-   if($p['reply']==='cannot')$p['why'].='; dificuldade voluntária: '.self::barrier($p['barrier']);
-   if($age>=3||in_array($p['reply'],['cannot','support'],true))$items[]=$p;else $waiting[]=$p;
-  }
-  usort($items,fn($a,$b)=>$a['days_due']<=>$b['days_due']?:($b['reply']==='cannot')<=>($a['reply']==='cannot')?:$b['message_age']<=>$a['message_age']?:($b['risk_current']??0)<=>($a['risk_current']??0));
-  return ['items'=>$items,'waiting'=>$waiting,'simulated'=>true];
+  $this->guard(['nurse','doctor','admin']);$config=require dirname(__DIR__,2).'/config/outreach.php';$items=[];$waiting=[];
+  $counts=[];foreach($this->s->all("SELECT patient_id,COUNT(*) n FROM care_pending_items WHERE company_id=? AND status<>'resolved' GROUP BY patient_id",[$this->user['company_id']]) as $r)$counts[$r['patient_id']]=(int)$r['n'];
+  foreach($this->people() as $person){$p=OutreachRules::classify($person,date('Y-m-d'),$config);if(!$p)continue;$p['pending_count']=$counts[$p['patient_id']??0]??0;$p['cpf']=empty($p['cpf'])?'':'***.***.***-'.substr($p['cpf'],-2);$p['phone']=empty($p['phone'])?'':'(**) *****-'.substr($p['phone'],-4);if($p['category']==='unanswered')$items[]=$p;else $waiting[]=$p;}
+  usort($items,[OutreachRules::class,'compare']);return ['items'=>$items,'waiting'=>$waiting,'simulated'=>true];
+ }
+ public function export():array{
+  $this->guard(['nurse','doctor','admin']);$rows=[['matrícula','nome','data','hora','situação','motivo','origem','gerado em']];
+  foreach($this->people() as $p){$status=match($p['reply']){'confirm'=>'CONFIRMADO','reschedule'=>'REMARCADO','cannot'=>'NÃO PODE',default=>null};if(!$status)continue;$date=new \DateTimeImmutable($p['scheduled_at']);$rows[]=[$p['registration'],$p['name'],$date->format('d/m/Y'),$date->format('H:i'),$status,$p['barrier']?self::barrier($p['barrier']):'','VIVA+ ELO',date('d/m/Y H:i')];}
+  $csv='';foreach($rows as $row){$cells=[];foreach($row as $cell){$cell=(string)$cell;if(preg_match('/^[=+@\\t\\r-]/',$cell))$cell="'".$cell;$cells[]='"'.str_replace('"','""',$cell).'"';}$csv.=implode(';',$cells)."\r\n";}
+  Audit::record($this->s,$this->user,'outreach_exported','company',(int)$this->user['company_id']);return ['csv'=>$csv,'layout'=>'layout a ajustar ao sistema do SESI'];
  }
  public static function barrier(?string $key):string{return ['schedule'=>'Horário ou turno','transport'=>'Transporte','attendance_prize'=>'Receio de perder hora ou prêmio de assiduidade','unnecessary'=>'Não vê necessidade','other'=>'Outro'][$key??'']??'Sem motivo informado';}
  public function overlay(array $cases):array{

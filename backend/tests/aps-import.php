@@ -13,4 +13,13 @@ $generated=ApsImportService::generate(['registration'=>'X','risk_current'=>4,'pl
 verify($generated===ApsImportService::generate(['registration'=>'X','risk_current'=>4,'plan_status'=>'NÃO ADERIU'],0,'2026-11-15'),'Generator deterministic');
 $old=DemoWorkspace::key();DemoWorkspace::reset();verify(DemoWorkspace::key()!==$old,'Restore uses new isolated scope');
 verify(DemoWorkspace::people($s,1)===[],'New visitor does not see prior visitor import');
+
+$config=require dirname(__DIR__).'/config/outreach.php';
+$base=['registration'=>'DEMO-0001','status'=>'ATIVO','state'=>'pending','return_date'=>'2026-11-25','message_sent_at'=>'2026-11-10 10:00:00','risk_current'=>3,'reply'=>null];
+$rule=App\Services\OutreachRules::classify($base,'2026-11-15',$config);
+verify($rule['category']==='unanswered'&&$rule['why']==='retorno vence em 10 dias; mensagem sem resposta há 5 dias','Explainable baseline rule');
+verify(App\Services\OutreachRules::classify(array_replace($base,['state'=>'confirmed']),'2026-11-15',$config)===null,'Confirmed leaves call queue');
+verify(App\Services\OutreachRules::classify(array_replace($base,['message_sent_at'=>'2026-11-14']),'2026-11-15',$config)['category']==='waiting','Recent message stays in separate section');
+verify(App\Services\OutreachRules::compare(['registration'=>'A','days_due'=>-1,'reply'=>null,'unanswered_count'=>1,'risk_current'=>1],['registration'=>'B','days_due'=>2,'reply'=>'cannot','unanswered_count'=>5,'risk_current'=>4])<0,'Overdue wins before risk');
+
 ob_end_flush();echo "OK: {$count} combined APS checks\n";
