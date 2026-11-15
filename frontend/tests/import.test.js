@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {parseCsv,mapHeaders} from '../src/utils/import-aps.js'
+test('CSV mapping ignores case and accents and supports quoted cells',()=>{assert.deepEqual(mapHeaders(['MATRÍCULA','Nome','Empresa','STATUS']),{0:'registration',1:'name',2:'company',3:'status'});assert.deepEqual(parseCsv('nome;empresa\n"Pessoa; teste";"Indústria ""A"""'),[['nome','empresa'],['Pessoa; teste','Indústria "A"']]);assert.throws(()=>parseCsv('nome\n"aberto'))})

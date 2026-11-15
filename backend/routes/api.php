@@ -5,6 +5,10 @@ use App\Controllers\HealthController;
 use App\Controllers\OperationsController as Operations;
 
 return [
+ '/api/v1/aps/people'=>['GET'=>[App\Controllers\ApsController::class,'people']],
+ '/api/v1/aps/import'=>['POST'=>[App\Controllers\ApsController::class,'import']],
+ '/api/v1/aps/import/last'=>['GET'=>[App\Controllers\ApsController::class,'last']],
+ '/api/v1/demo/reset'=>['POST'=>[App\Controllers\ApsController::class,'reset']],
     '/api/v1/demo/leader' => ['GET'=>[App\Controllers\DemoExperienceController::class,'leader']],
     '/api/v1/demo/channel' => ['GET'=>[App\Controllers\DemoExperienceController::class,'channel']],
     '/api/v1/demo/channel/reply' => ['POST'=>[App\Controllers\DemoExperienceController::class,'reply']],

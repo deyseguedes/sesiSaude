@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import WorkerChannelView from '../views/WorkerChannelView.vue'
 import SecurityView from '../views/SecurityView.vue'
+import ImportView from '../views/ImportView.vue'
 import HomeView from '../views/HomeView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -24,6 +25,7 @@ const router = createRouter({
   history: createWebHistory(),
   scrollBehavior(to, from, saved) { return saved || (to.path === from.path ? false : { top: 0 }) },
   routes: [
+ {path:'/import',component:ImportView,meta:{auth:true,roles:['admin','nurse']}},
     { path: '/worker-channel', component: WorkerChannelView, meta: { auth: true, roles: ['worker','admin','doctor','nurse','navigator'] } },
     { path: '/security', component: SecurityView, meta: { auth: true } },
     { path: '/nursing-worklist', component: NursingWorklistView, meta: { auth: true, roles: ['doctor', 'nurse'] } },

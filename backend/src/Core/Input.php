@@ -3,11 +3,11 @@ declare(strict_types=1);
 namespace App\Core;
 final class Input
 {
-    public static function body(): array
+    public static function body(int $limit=65536): array
     {
         if (!str_starts_with(strtolower($_SERVER['CONTENT_TYPE'] ?? ''), 'application/json')) throw new HttpException(415,'JSON_REQUIRED','Envie application/json.');
-        $raw=file_get_contents('php://input', length: 65537);
-        if (strlen($raw)>65536) throw new HttpException(413,'PAYLOAD_TOO_LARGE','Limite de 64 KB excedido.');
+        $raw=file_get_contents('php://input', length: $limit+1);
+        if (strlen($raw)>$limit) throw new HttpException(413,'PAYLOAD_TOO_LARGE','Limite do corpo da requisi??o excedido.');
         try { $data=json_decode($raw,true,32,JSON_THROW_ON_ERROR); } catch (\JsonException) { self::fail('JSON inválido'); }
         if (!is_array($data) || array_is_list($data)) self::fail('Objeto JSON obrigatório');
         return $data;
