@@ -15,7 +15,7 @@ const plan = computed(() => summary.value?.plans.focus)
 const stamp = value => {
   if (!value) return 'Sem registro'
   const date = new Date(String(value).replace(' ', 'T') + '-03:00')
-  return Number.isNaN(date.getTime()) ? 'Data não informada' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Bahia', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date)
+  return Number.isNaN(date.getTime()) ? 'Data não informada' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Bahia', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date)
 }
 const value = reading => reading.value_num ?? reading.value_category
 function open(section, planId, indicatorId) { emit('navigate', { section, planId, indicatorId }) }

@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import WorkerChannelView from '../views/WorkerChannelView.vue'
+import SecurityView from '../views/SecurityView.vue'
 import HomeView from '../views/HomeView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -22,6 +24,8 @@ const router = createRouter({
   history: createWebHistory(),
   scrollBehavior(to, from, saved) { return saved || (to.path === from.path ? false : { top: 0 }) },
   routes: [
+    { path: '/worker-channel', component: WorkerChannelView, meta: { auth: true, roles: ['worker','admin','doctor','nurse','navigator'] } },
+    { path: '/security', component: SecurityView, meta: { auth: true } },
     { path: '/nursing-worklist', component: NursingWorklistView, meta: { auth: true, roles: ['doctor', 'nurse'] } },
     { path: '/care-dashboard', component: DashboardView, meta: { auth: true, roles: ['doctor','nurse'] } },
     { path: '/login', component: LoginView },
@@ -47,7 +51,7 @@ router.beforeEach(async (to) => {
   try { if (!auth.ready) await auth.load() } catch { return '/login' }
   if (!auth.user) return '/login'
   if (to.meta.roles && !to.meta.roles.includes(auth.user.role)) return '/'
-  if (to.meta.management && (!auth.user.management_level || auth.user.management_level === 'none')) return '/'
+  if (to.meta.management && (!['admin','manager'].includes(auth.user.role) || !auth.user.management_level || auth.user.management_level === 'none')) return '/'
   return true
 })
 export default router

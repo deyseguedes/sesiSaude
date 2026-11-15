@@ -21,20 +21,21 @@ export function defaultPlan(plans, requested) {
 export function formatDate(value) {
   if (!value) return '—'
   const date = new Date(`${String(value).slice(0, 10)}T12:00:00-03:00`)
-  return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Bahia', day: '2-digit', month: 'short', year: 'numeric' }).format(date)
+  return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Bahia', day: '2-digit', month: '2-digit', year: 'numeric' }).format(date)
 }
 
 export function formatDateTime(value) {
   if (!value) return '—'
-  const date = new Date(String(value).replace(' ', 'T') + '-03:00')
-  return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Bahia', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date)
+  const raw = String(value).replace(' ', 'T')
+  const date = new Date(raw + (/(Z|[+-]\d{2}:?\d{2})$/.test(raw) ? '' : '-03:00'))
+  return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Bahia', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date)
 }
 
 export function navigationFor(user) {
   if (!user) return { primary: [], secondary: [], actions: [] }
   const clinical = ['doctor', 'nurse'].includes(user.role)
   const beneficiary = ['worker', 'dependent'].includes(user.role)
-  const management = !!user.management_level && user.management_level !== 'none'
+  const management = ['admin','manager'].includes(user.role) && !!user.management_level && user.management_level !== 'none'
   const primary = [{ to: '/', label: 'Início', icon: 'home' }]
   const secondary = [], actions = []
   if (beneficiary) {
@@ -60,5 +61,6 @@ export function navigationFor(user) {
     (clinical ? secondary : primary).push({ to: '/education-editor', label: 'Conteúdos', icon: 'book' })
     actions.push({ to: '/education-editor?new=content', label: 'Preparar conteúdo educativo', detail: 'Vídeo, roteiro e revisão', icon: 'book' })
   }
+  secondary.push({to:'/security',label:'Segurança e privacidade',icon:'book'})
   return { primary, secondary, actions }
 }

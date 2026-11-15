@@ -25,7 +25,7 @@ test('beneficiaries get only individual navigation', () => {
   for (const role of ['worker', 'dependent']) {
     const nav = navigationFor({ role, management_level: 'none' })
     assert.deepEqual(nav.primary.map(n => n.to), ['/', '/find-care', '/my-care'])
-    assert.equal(nav.secondary.length, 0)
+    assert.deepEqual(nav.secondary.map(n=>n.to), ['/security'])
     assert.ok(nav.actions.every(a => !a.to.startsWith('/management')))
   }
 })
@@ -35,15 +35,16 @@ test('management navigation does not grant clinical links', () => {
   assert.ok(![...nav.primary, ...nav.secondary].some(n => ['/patients', '/my-agenda', '/continuity'].includes(n.to)))
   assert.ok(!nav.actions.some(a => a.to.includes('new=slot')))
 })
-test('clinical coordination keeps clinical work primary and management secondary', () => {
+test('clinical coordination does not grant contracts or invitations', () => {
   const nav = navigationFor({ role: 'nurse', management_level: 'coordination' })
   assert.ok(nav.primary.some(n => n.to === '/patients'))
-  assert.ok(nav.secondary.some(n => n.to === '/management'))
+  assert.ok(![...nav.primary,...nav.secondary,...nav.actions].some(n => n.to.startsWith('/management')))
   assert.ok(!navigationFor({ role: 'doctor', management_level: 'none' }).actions.some(a => a.to.startsWith('/management')))
 })
 test('navigation for a signed-out user is empty', () => assert.deepEqual(navigationFor(null), { primary: [], secondary: [], actions: [] }))
 test('dates are formatted for the care timezone', () => {
-  assert.match(formatDate('2026-11-14'), /14.*nov.*2026/)
-  assert.match(formatDateTime('2026-11-14 09:30:00'), /14.*nov.*09:30/)
+  assert.equal(formatDate('2026-11-14'), '14/11/2026')
+  assert.match(formatDateTime('2026-11-14 09:30:00'), /14\/11\/2026.*09:30/)
+  assert.equal(formatDateTime('2026-11-14T12:30:00Z'),formatDateTime('2026-11-14 09:30:00'))
   assert.equal(formatDate(null), '—')
 })

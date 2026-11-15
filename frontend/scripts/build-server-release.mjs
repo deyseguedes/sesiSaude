@@ -20,7 +20,7 @@ await rm(checked(output,root),{recursive:true,force:true})
 await mkdir(path.join(output,'public'),{recursive:true})
 await cp(compiled,path.join(output,'public'),{recursive:true})
 await rm(path.join(output,'public/demo-data.json'),{force:true})
-for(const entry of ['bootstrap.php','environment.php','composer.json','composer.lock','src','routes','vendor','database','public/index.php','bin/migrate.php','bin/key.php']) {
+for(const entry of ['bootstrap.php','environment.php','composer.json','composer.lock','src','routes','vendor','database','public/index.php','bin/migrate.php','bin/key.php','bin/seed-experience.php']) {
  const destination=path.join(output,'backend',entry)
  await mkdir(path.dirname(destination),{recursive:true})
  await cp(path.join(backend,entry),destination,{recursive:true})

@@ -5,6 +5,10 @@ use App\Controllers\HealthController;
 use App\Controllers\OperationsController as Operations;
 
 return [
+    '/api/v1/demo/leader' => ['GET'=>[App\Controllers\DemoExperienceController::class,'leader']],
+    '/api/v1/demo/channel' => ['GET'=>[App\Controllers\DemoExperienceController::class,'channel']],
+    '/api/v1/demo/channel/reply' => ['POST'=>[App\Controllers\DemoExperienceController::class,'reply']],
+    '/api/v1/demo/management' => ['GET'=>[App\Controllers\DemoExperienceController::class,'management']],
     '/api/v1/recognition/teams' => ['GET'=>[Operations::class,'recognitionTeams']],
     '/api/v1/recognition/teams/simulate' => ['POST'=>[Operations::class,'simulateRecognition']],
     '/api/v1/professional/reactivation' => ['GET'=>[App\Controllers\ClinicalController::class,'reactivation']],

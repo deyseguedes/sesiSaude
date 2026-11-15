@@ -20,4 +20,7 @@ if(!existing){
  const content=Object.entries(values).map(([key,value])=>key+'='+JSON.stringify(String(value)).replace(/\$/g,'\\$')).join('\n')+'\n'
  await writeFile(path.join(runtime,'backend/.env'),content,{mode:0o600})
 }
+const seed=spawnSync(process.env.PHP_BINARY||'php',['bin/seed-experience.php'],{cwd:path.join(runtime,'backend'),encoding:'utf8',windowsHide:true})
+if(seed.status!==0)throw Error('Could not prepare fictional experience: '+seed.stderr)
+console.log(seed.stdout.trim())
 console.log('Interactive fictional demo ready; the original application database is unchanged.')

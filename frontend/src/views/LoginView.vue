@@ -15,6 +15,7 @@ onMounted(async () => {
   try { await auth.load() } catch (e) { error.value = e.message } finally { initializing.value = false }
 })
 const profiles = [
+  { role: 'leader', icon: 'people', detail: 'Horários autorizados, participação agregada e kit do líder.' },
   { role: 'admin', icon: 'building', detail: 'Indústrias, contratos, equipes e níveis de gestão.' },
   { role: 'manager', icon: 'building', detail: 'Visão empresarial, trabalhadores e campanhas.' },
   { role: 'doctor', icon: 'heart', detail: 'Pacientes, resumo do prontuário e planos de cuidado.' },

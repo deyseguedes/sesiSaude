@@ -1,0 +1,9 @@
+<script setup>
+import {onMounted,ref} from 'vue'
+import {apiGet} from '../services/api.js'
+import {formatDateTime} from '../utils/workflow.js'
+const data=ref(null),error=ref('')
+async function load(){try{data.value=await apiGet('/demo/leader')}catch(e){error.value=e.message}}
+onMounted(load)
+</script>
+<template><p class="eyebrow">LÍDER DE SETOR · DEMONSTRAÇÃO</p><h1>Apoiar sem acessar dados de saúde</h1><p>Somente nome e horário de quem autorizou. Sem diagnóstico, risco, prontuário ou motivo clínico.</p><button class="btn btn-outline-success mb-3" @click="load">Atualizar autorizações</button><p v-if="error" class="alert alert-danger">{{error}}</p><section v-if="data" class="card card-body mb-4"><h2 class="h5">Horários autorizados</h2><p v-if="!data.authorized.length">Nenhum aviso autorizado. A ausência de nome não informa participação nem condição de saúde.</p><p v-for="p in data.authorized" :key="p.name">{{p.name}} · {{formatDateTime(p.scheduled_at)}}</p><p class="small">A autorização é demonstrativa e acompanha a última resposta enviada no canal. Ao enviar nova resposta sem autorização, o aviso deixa esta lista.</p></section><section class="card card-body mb-4"><h2 class="h5">Participação agregada</h2><p>{{data?.participation ?? 'Grupo pequeno: informação suprimida'}} pessoas na base sintética. Grupo mínimo: 10.</p><p>Contato perdido: nenhum aviso autorizado neste cenário. Não exibir nomes por falta de resposta sem autorização específica.</p></section><section class="card card-body"><h2 class="h5">Kit do líder</h2><ul><li>Facilite o horário combinado sem pedir justificativa clínica.</li><li>Ofereça apoio para acessar áudio ou falar com a equipe.</li><li>Não pressione por participação, resultado de saúde ou resgate de benefício.</li></ul><p>O líder integra o reconhecimento da equipe; não tem benefício isolado.</p></section></template>

@@ -26,12 +26,12 @@ try{
  await send('Runtime.enable');await send('Page.enable');await send('Network.enable');await send('Network.setExtraHTTPHeaders',{headers:{'ngrok-skip-browser-warning':'viva-guide-qa'}})
  const origin=process.env.GUIDE_QA_URL||'https://acclaim-heftiness-clever.ngrok-free.dev'
  const requests=[];ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.method==='Network.requestWillBeSent')requests.push({method:m.params.request.method,url:m.params.request.url})})
- await send('Page.navigate',{url:origin+'/login'});await wait('document.querySelectorAll(".demo-profile").length===7')
+ await send('Page.navigate',{url:origin+'/login'});await wait('document.querySelectorAll(".demo-profile").length===8')
  const ensure=async()=>{if(!await evaluate('!!document.querySelector(".screen-guide-dialog[open]")'))await start()}
  const choose=async target=>{await evaluate('(()=>{const e=document.querySelector("#guide-screen");e.value='+JSON.stringify(target)+';e.dispatchEvent(new Event("change",{bubbles:true}));return true})()');await wait('location.pathname==='+JSON.stringify(target)+' && !!document.querySelector(".screen-guide-dialog[open]")');await pause(400)}
  let visits=0
- for(const [i,role] of ['admin','manager','doctor','nurse','navigator','worker','dependent'].entries()){
-  await evaluate('document.querySelectorAll(".demo-profile")['+i+'].click();true');await wait('!!document.querySelector(".workspace-content h1")')
+ for(const [i,role] of ['admin','manager','doctor','nurse','navigator','worker','dependent','leader'].entries()){
+  await evaluate('(()=>{const name='+JSON.stringify({admin:'Administrador SESI',manager:'Gestor empresarial',doctor:'Médico',nurse:'Enfermeiro',navigator:'Navegador de Cuidado',worker:'Trabalhador',dependent:'Dependente',leader:'Líder de setor'}[role])+';[...document.querySelectorAll(".demo-profile")].find(e=>e.textContent.includes(name)).click();return true})()');await wait('!!document.querySelector(".workspace-content h1")')
   await ensure()
   const routes=await evaluate('[...document.querySelectorAll("#guide-screen option")].map(o=>o.value)')
   for(const route of routes){
@@ -61,7 +61,7 @@ try{
    console.log('PASS management tabs, guided form opening and interactive typing without saving')
   }
   if(role==='doctor'){
-   await choose('/patients');await next();await next();await click('[data-testid="screen-guide-interact"]')
+   await choose('/patients');await wait('!!document.querySelector(".patient-link")');await next();await next();await wait('!!document.querySelector("[data-testid=screen-guide-interact]:not(:disabled)")');await click('[data-testid="screen-guide-interact"]')
    await wait('/^\\/patients\\/\\d+$/.test(location.pathname) && !!document.querySelector("[data-guide-patient-section]")');await pause(500)
    for(const [index,section] of [[0,'records'],[1,'indicators'],[3,'goals'],[4,'overview']]){
     await evaluate('document.querySelectorAll(".clinical-quick-actions button")['+index+'].click();true')
@@ -71,7 +71,7 @@ try{
    console.log('PASS guided patient navigation and clinical subsections')
   }
   if(role==='nurse'){
-   await choose('/');await next();await next();await next();await click('[data-testid="screen-guide-interact"]')
+   await choose('/');await wait('!!document.querySelector(".worklist-person button")');await next();await next();await next();await wait('!!document.querySelector("[data-testid=screen-guide-interact]:not(:disabled)")');await click('[data-testid="screen-guide-interact"]')
    await wait('!!document.querySelector("dialog.side-panel[open] .summary-facts")');await pause(500)
    await evaluate('(()=>{const e=[...document.querySelectorAll("dialog.side-panel[open] button")].find(e=>e.textContent==="Registrar contato");e.click();return true})()')
    await wait('document.querySelector(".screen-guide-heading")?.textContent.includes("CAMPO A CAMPO")')
@@ -85,7 +85,7 @@ try{
    console.log('PASS guided follow-up opening, field interaction, draft preservation and mobile')
   }
   if(await evaluate('!!document.querySelector(".screen-guide-dialog[open]")'))await close()
-  await click('.user-summary button');await wait('document.querySelectorAll(".demo-profile").length===7')
+  await click('.user-summary button');await wait('document.querySelectorAll(".demo-profile").length===8')
   console.log('PASS every available screen: '+role)
  }
  await send('Page.navigate',{url:origin+'/system'});await wait('!!document.querySelector("#connection-title")');await start();await assert('document.querySelector("[data-testid=screen-guide-card] h2").textContent.includes("Status")','System guide missing');await close()

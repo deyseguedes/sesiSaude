@@ -8,9 +8,9 @@ import {findGuideTarget,readGuideContext,openGuideTarget,focusGuideTarget} from 
 import SidePanel from './SidePanel.vue'
 const auth=useAuthStore(),route=useRoute(),router=useRouter(),dialog=ref(null),card=ref(null),trigger=ref(null),titleId=useId(),host=shallowRef(document.body)
 const active=ref(false),manual=ref(false),index=ref(0),panel=ref(''),context=ref({}),ring=ref(null),position=ref({left:'16px',bottom:'20px'}),missing=ref(false),actionReady=ref(false)
-const screens=computed(()=>{if(!auth.user)return[{to:'/login',label:'Escolher perfil'},{to:'/system',label:'Status da conexão'}];const n=navigationFor(auth.user);const list=[...n.primary,...n.secondary];if(['doctor','nurse'].includes(auth.user.role))list.push({to:'/nursing-worklist',label:'Fila de acompanhamento'},{to:'/care-dashboard',label:'Indicadores assistenciais'});return list.filter((s,i,a)=>a.findIndex(v=>v.to===s.to)===i)})
+const screens=computed(()=>{if(!auth.user)return[{to:'/login',label:'Escolher perfil'},{to:'/system',label:'Status da conexão'}];const n=navigationFor(auth.user);const list=[...n.primary,...n.secondary];if(auth.publicDemo&&['worker','admin','doctor','nurse','navigator'].includes(auth.user.role))list.push({to:'/worker-channel',label:'Canal do trabalhador'});if(['doctor','nurse'].includes(auth.user.role))list.push({to:'/nursing-worklist',label:'Fila de acompanhamento'},{to:'/care-dashboard',label:'Indicadores assistenciais'});return list.filter((s,i,a)=>a.findIndex(v=>v.to===s.to)===i)})
 function navigate(event){if(screens.value.some(s=>s.to===event.target.value)){preferredForm=null;router.push(event.target.value)}}
-const steps=computed(()=>guideFor(auth.user,route.path,panel.value,context.value)),current=computed(()=>steps.value[index.value]||steps.value[0])
+const steps=computed(()=>guideFor(auth.user,route.path==='/'&&auth.publicDemo&&auth.user?.role==='worker'?'/worker-channel':route.path,panel.value,context.value)),current=computed(()=>steps.value[index.value]||steps.value[0])
 let interval,previousFocus,preferredForm=null,signature='',syncing=false
 function locate(scroll=false){
  if(!active.value)return

@@ -89,9 +89,17 @@ Todas usam a senha definida no ambiente durante a carga.
 Na demonstração, o administrador tem gestão de plataforma, o gestor tem gestão
 empresarial e a enfermeira tem coordenação APS. Os níveis não liberam prontuários.
 
+## Cenários dos painéis
+
+A demonstração dinâmica inclui 100 pessoas sintéticas, canal acessível do
+trabalhador, atualização automática da fila, painel de resultados, exemplo do
+prêmio coletivo e perfil demonstrativo do líder. Veja [escopo, limites e
+validação](docs/evolucao-paineis-demonstracao.md). A carga sintética é restrita
+ao banco separado da demonstração.
+
 ## Guia de uso
 
-O [guia completo editável](docs/guia-completo-de-uso.md) cobre os sete perfis,
+O [guia completo editável](docs/guia-completo-de-uso.md) cobre os perfis disponíveis,
 fluxos, atalhos, celular, problemas frequentes e limites da versão.
 O botão **Guia na tela** oferece orientação contextual com destaque visual e
 passos por perfil em todas as telas, abas e seções. É possível clicar e preencher

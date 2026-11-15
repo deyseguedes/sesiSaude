@@ -11,7 +11,7 @@ O VIVA+ ELO organiza o cuidado de trabalhadores das indústrias contratantes e s
 
 | Ambiente | Entrada | Grava alterações? | Dados |
 | --- | --- | --- | --- |
-| Demonstração interativa no ngrok | Seleção entre sete perfis, sem usuário ou senha | Sim; compartilhadas entre visitantes | Fictícios, em banco separado |
+| Demonstração interativa no ngrok | Seleção entre oito perfis, sem usuário ou senha | Sim; compartilhadas entre visitantes | Fictícios, em banco separado |
 | Aplicação local no computador | http://vivaelo.test; seleção por perfil habilitada nesta instalação | Sim | Banco da instalação local |
 | Aplicação pela mesma rede Wi-Fi | http://192.168.106.96; login cadastrado | Sim | Banco da instalação local |
 | Demonstração estática anterior do Sites | Seleção de perfil | Não | Cenário fictício fixo, somente consulta |
@@ -94,7 +94,20 @@ O conteúdo acompanha seu perfil: enfermagem recebe o roteiro da fila; médico r
 
 Para consultar os 18 capítulos sem sair da aplicação, escolha **Ver manual completo aqui** no guia. O manual abre em um painel sobre a tela atual. Feche o painel para continuar seu trabalho no mesmo lugar.
 
-### 3.2 Menos cliques
+### 3.2 Demonstração acessível e gestão dos resultados
+
+Atualização de 15/11/2026: a base pública tem 100 pessoas inteiramente sintéticas. Não foi importada uma planilha da organização; o CSV criado para o projeto está em `backend/database/fixtures/100-pessoas-sinteticas.csv`.
+
+- **Trabalhador:** abre no canal de celular. Carla responde por botões; Seu José pode ouvir a mensagem e enviar um áudio simulado com pedido de contato. O áudio é uma fala sintetizada pelo navegador, sem microfone ou transcrição automática. A opção de ligação cria um pedido de contato, sem telefonar.
+- **Enfermagem:** recebe a resposta no banco demonstrativo; a fila verifica atualizações a cada dois segundos enquanto nenhuma ficha está aberta. Uma linha por pessoa agrupa pendências, que podem ser expandidas. Confirmação nunca equivale a comparecimento.
+- **Administrador SESI:** abre com funil, participação, adesão e resultado de risco. O exemplo independente da Equipe Norte apresenta 54,9% contra 46,0%, ganho de 8,9 pontos, faixa de 3% e travas aprovadas. Seus 510 retornos devidos não são atribuídos às 100 pessoas da base.
+- **Médico:** abre na carteira de pacientes; tocar em uma pessoa abre o resumo antes da consulta.
+- **Líder:** recebe somente nome e horário das respostas autorizadas no cenário. Sem prontuário ou risco. Para retirar o aviso, envie nova resposta no canal com a autorização desmarcada.
+- **Segurança:** o menu explica as proteções existentes e as propostas ainda não implantadas.
+
+As mudanças do cenário são compartilhadas entre visitantes. O banco real do Laragon não recebe a carga sintética. Enfermagem não recebe acesso a contratos e convites por ter nível de coordenação. Datas de apresentação seguem dd/mm/aaaa, horários sem segundos e números com vírgula decimal.
+
+### 3.3 Menos cliques
 
 - **O que você precisa fazer?** localiza ações do perfil.
 - **Ctrl + K** abre a busca de ações no computador.
@@ -315,7 +328,7 @@ Quando a empresa adere:
 
 Cada conquista vale uma vez; máximo de 60 pontos nessa jornada. Agendar repetidamente ou atualizar a tela não multiplica pontos.
 
-São pontos simbólicos, sem valor financeiro ou mudança de prioridade clínica. O benefício semestral com check-ins e código para resgate no RH ainda não está disponível.
+São pontos simbólicos, sem valor financeiro ou mudança de prioridade clínica. Na demonstração pública, essa jornada foi substituída pela apresentação dos critérios de elegibilidade semestral. O exemplo de Carla e seu código ilustrativo não são apuração oficial nem benefício válido no RH.
 
 ## 7. Dependentes e família
 
@@ -621,7 +634,7 @@ Use somente situações inventadas; alterações na demonstração são comparti
 5. Como trabalhador, demonstre a escolha de horário no seu espaço.
 6. Confira o resultado na agenda profissional.
 
-O seletor público tem sete contas predefinidas. Uma pessoa criada pelo convite não vira automaticamente um novo botão de perfil; teste seu acesso próprio com apoio do responsável pelo treinamento.
+O seletor público tem oito contas predefinidas, incluindo o líder demonstrativo. Uma pessoa criada pelo convite não vira automaticamente um novo botão de perfil; teste seu acesso próprio com apoio do responsável pelo treinamento.
 
 ### 14.2 Da consulta ao retorno
 
@@ -712,9 +725,9 @@ A plataforma registra autoria/histórico. Isso ainda não representa auditoria p
 | Jornada simbólica do trabalhador | Disponível quando a empresa adere |
 | Prêmio coletivo | Simulação manual; sem apuração oficial ou pagamento |
 | Importação SOC/S+ e conciliação de agendamentos | Ainda não integradas |
-| WhatsApp em tempo real | Ainda não integrado |
-| Painel específico do líder e consentimento revogável de aviso | Ainda não disponíveis |
-| Check-ins semestrais e código de benefício/RH | Ainda não disponíveis |
+| WhatsApp e áudio | Canal simulado disponível na demonstração; sem integração externa ou transcrição automática |
+| Painel do líder e autorização de aviso | Cenário demonstrativo com nome e horário; a última resposta com autorização desmarcada retira o aviso |
+| Elegibilidade semestral e benefício/RH | Critérios e código ilustrativo disponíveis na demonstração; apuração oficial e resgate real pendentes |
 | Carteira congelada, linha de base automática e fechamento do prêmio | Ainda não disponíveis |
 | Boletim completo com mínimo proposto de dez pessoas | Previsto |
 | PostgreSQL e arquitetura pós-quântica completa | Evolução documentada; instalação atual usa MySQL |

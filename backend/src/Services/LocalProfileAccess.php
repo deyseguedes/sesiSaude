@@ -6,7 +6,7 @@ use App\Repositories\Store;
 
 final class LocalProfileAccess
 {
-    public const ROLES = ['admin','manager','doctor','nurse','navigator','worker','dependent'];
+    public const ROLES = ['admin','manager','doctor','nurse','navigator','worker','dependent','leader'];
 
     public static function publicDemo(): bool
     {
@@ -38,7 +38,7 @@ final class LocalProfileAccess
 
     public static function account(Store $store, string $role): ?array
     {
-        if (!self::enabled() || !in_array($role, self::ROLES, true)) return null;
+        if (!self::enabled() || !in_array($role, self::ROLES, true) || ($role==='leader' && !self::publicDemo())) return null;
         // Only explicitly seeded demonstration accounts; never select an arbitrary real user.
         return $store->one('SELECT id,name,role,company_id,management_level FROM users WHERE email=? AND role=? AND active=1', [$role.'@demo.vivaelo.test', $role]);
     }

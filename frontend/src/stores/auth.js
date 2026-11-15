@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { requestJson } from '../services/http.js'
 import { shareDemo } from '../services/share-demo.js'
-export const roles = { admin: 'Administrador SESI', worker: 'Trabalhador', dependent: 'Dependente', navigator: 'Navegador de Cuidado', manager: 'Gestor empresarial', doctor: 'Médico', nurse: 'Enfermeiro' }
+export const roles = { leader: 'Líder de setor', admin: 'Administrador SESI', worker: 'Trabalhador', dependent: 'Dependente', navigator: 'Navegador de Cuidado', manager: 'Gestor empresarial', doctor: 'Médico', nurse: 'Enfermeiro' }
 export const managementLevels = { none: 'Assistencial / individual', coordination: 'Coordenação APS', company: 'Gestão empresarial', platform: 'Gestão da plataforma' }
 export const useAuthStore = defineStore('auth', {
   state: () => ({ user: null, csrf: '', ready: false, localProfiles: [], publicDemo: false }),

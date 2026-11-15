@@ -10,10 +10,13 @@ export function guideFor(user,path,panel='',context={}) {
  ]
  if(path==='/register')return [step('#main-content h1','Cadastro por convite','Confira se o convite recebido corresponde a você. Na demonstração, utilize apenas dados fictícios.'),step('#main-content form','Preencha seus dados','Confira nome, nascimento, contato e as informações solicitadas. A ativação depende da validação da gestão.'),step('#main-content form','Leia antes de concluir','Confira o aviso e conclua quando os dados estiverem corretos. Convite inválido ou expirado exige uma nova emissão.')]
  if(!user||path==='/login')return [
-  step('.demo-entry, #email','Entre no espaço correto','Na demonstração, escolha um dos sete perfis. Em um ambiente com contas reais, utilize seu acesso cadastrado.'),
+  step('.demo-entry, #email','Entre no espaço correto','Na demonstração, escolha um dos perfis disponíveis. Em um ambiente com contas reais, utilize seu acesso cadastrado.'),
   step('.demo-profile, #password','Confira o ambiente','A demonstração interativa usa dados fictícios e grava alterações compartilhadas. Não informe dados reais nela.'),
   step('.demo-entry, form','Comece pelo seu perfil','Feche o guia e escolha seu perfil. Depois, use Guia na tela novamente para receber orientações sobre a página em que estiver.')
  ]
+ if(path==='/worker-channel')return [step('#channel-person','Escolha Carla ou Seu José','Este canal simula mensagens neutras. Carla usa botões; Seu José pode ouvir e enviar um áudio de exemplo.'),step('[data-testid="worker-channel"]','Ouça e responda','Use Ouvir mensagem ou os botões. Cada resposta escolhida atualiza somente a fila demonstrativa. Não há envio ao WhatsApp nem gravação do microfone.'),step('.workspace-content','Confira a fila','Na enfermagem, a resposta aparece automaticamente em até dois segundos. Confirmação não comprova comparecimento.')]
+ if(path==='/'&&user.role==='leader')return [step('.workspace-content h1','Apoie sem acessar prontuários','O líder recebe somente horários autorizados; não recebe diagnóstico nem risco.'),step('.workspace-content section','Confira a autorização','A lista usa a autorização da última resposta no canal simulado. Enviar nova resposta sem autorização remove o aviso.'),step('.workspace-content','Conheça o kit do líder','Facilite a rotina sem pressionar. A participação é agregada e o reconhecimento não é isolado.')]
+ if(path==='/security')return [step('.workspace-content h1','Conheça os limites de acesso','Confira o que cada perfil pode consultar.'),step('.workspace-content section','Proteções atuais e propostas','Leia o que já existe e o que ainda depende de implantação, incluindo a proposta pós-quântica.')]
  const clinical=['doctor','nurse'].includes(user.role)
  if(/^\/patients\/\d+$/.test(path)&&clinical)return [
   step('.workspace-content h1','Confira o paciente','Confirme a pessoa antes de consultar ou registrar. Seu acesso depende do vínculo assistencial.'),
@@ -69,15 +72,10 @@ export function guideFor(user,path,panel='',context={}) {
   step('.workspace-content','Revise e publique','Salve o rascunho e faça a revisão exigida. Conteúdo assistencial depende de revisão clínica habilitada.'),
   step('.workspace-content','Use nos ciclos','Depois de publicado, o material pode ser associado a uma campanha. A plataforma não grava o vídeo por você.')
  ]
- if(path==='/patients'&&clinical)return [
+ if((path==='/patients'||(path==='/'&&user.role==='doctor'))&&clinical)return [
   step('.workspace-content h1','Pacientes vinculados','A lista contém apenas pessoas com vínculo assistencial autorizado para sua equipe.'),
   step('#patient-search','Busque pelo nome','Digite o nome e abra o acompanhamento. Se não encontrar, confira o vínculo com a coordenação.'),
   step('.patient-link','Abra o prontuário','Consulte o resumo e o plano. Dentro do paciente, Guia na tela explica risco, retorno e registros.',{kind:'open',label:'Abrir um paciente',target:'.patient-link'})
- ]
- if(path==='/'&&user.role==='doctor')return [
-  step('.workspace-content h1','Seu espaço clínico','Consulte os indicadores e os pacientes vinculados. O reconhecimento coletivo é apresentado como proposta em simulação.'),
-  step('#clinical-patient-search','Abra o paciente com menos cliques','Digite o nome e use o atalho para registrar evolução ou medição no acompanhamento.'),
-  step('.command-trigger','Encontre uma ação','Use esta busca ou Ctrl + K para localizar os atalhos disponíveis para você.')
  ]
  if(path==='/'&&['worker','dependent'].includes(user.role))return [
   step('.workspace-content h1','Seu espaço de cuidado','Confira o perfil e acompanhe seus atendimentos, conteúdos e campanhas.'),

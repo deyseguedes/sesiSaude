@@ -18,7 +18,7 @@ final class IndustryService
         $level=$this->user['management_level']??'none';
         if($resource==='accounts' || $resource==='companies') throw new HttpException(403,'FORBIDDEN','Permissão de administração da plataforma necessária.');
         if($resource==='care_operations' && $level==='coordination' && in_array($this->user['role'],['doctor','nurse'],true)) return;
-        if($resource!=='care_operations' && in_array($level,['company','coordination'],true)) return;
+        if($resource!=='care_operations' && $level==='company' && $this->user['role']==='manager') return;
         throw new HttpException(403,'FORBIDDEN','Nível de gestão insuficiente para este recurso.');
     }
     public function audit(string $event,string $resource,int $id): void { Audit::record($this->store,array_replace($this->user,['company_id'=>$this->company]),$event,$resource,$id); }

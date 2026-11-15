@@ -1,4 +1,5 @@
 <script setup>
+import { formatDateTime } from "../utils/workflow.js"
 import { computed, ref, watch } from 'vue'
 import { apiGet, apiRequest } from '../services/api.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -50,7 +51,7 @@ async function save(){
  <p v-else-if="record?.available" class="mb-0"><strong>Risco {{ record.risk }}</strong> · retorno em {{ formatDate(record.due_date) }} · {{ record.doctor_name }}</p>
  <p v-else-if="record" class="text-secondary mb-0">Ainda não há risco e retorno confirmados pelo médico.</p>
  <p v-if="record?.available" class="small text-secondary mt-3 mb-0">Avaliação: {{ formatDate(record.assessment_date) }} · {{ record.team_name }} · confirmado por {{ record.doctor_name }}. {{ record.attendance?'Comparecimento médico posterior registrado em '+formatDate(record.attendance.scheduled_at.slice(0,10))+'.':'Agendar ou confirmar horário não comprova comparecimento.' }}</p>
- <details v-if="record?.history?.length" class="small mt-3"><summary>Histórico de confirmações</summary><p v-for="e in record.history" :key="e.id" class="border-top pt-2 mb-2">{{ e.author_name }} · {{ e.created_at }} · versão {{ e.version }}<br>Risco {{ e.payload.after.risk }} · retorno {{ formatDate(e.payload.after.due_date) }}<br>{{ e.payload.reason }}</p></details>
+ <details v-if="record?.history?.length" class="small mt-3"><summary>Histórico de confirmações</summary><p v-for="e in record.history" :key="e.id" class="border-top pt-2 mb-2">{{ e.author_name }} · {{ formatDateTime(e.created_at) }} · versão {{ e.version }}<br>Risco {{ e.payload.after.risk }} · retorno {{ formatDate(e.payload.after.due_date) }}<br>{{ e.payload.reason }}</p></details>
  <p v-if="shareDemo" class="small text-secondary mt-2 mb-0">Demonstração somente para consulta.</p>
 </section>
 </template>
