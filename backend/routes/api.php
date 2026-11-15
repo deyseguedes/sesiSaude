@@ -5,6 +5,9 @@ use App\Controllers\HealthController;
 use App\Controllers\OperationsController as Operations;
 
 return [
+ '/api/v1/demo/outreach/phone'=>['GET'=>[App\Controllers\OutreachController::class,'phone']],
+ '/api/v1/demo/outreach/reply'=>['POST'=>[App\Controllers\OutreachController::class,'reply']],
+ '/api/v1/demo/outreach/queue'=>['GET'=>[App\Controllers\OutreachController::class,'queue']],
  '/api/v1/aps/people'=>['GET'=>[App\Controllers\ApsController::class,'people']],
  '/api/v1/aps/import'=>['POST'=>[App\Controllers\ApsController::class,'import']],
  '/api/v1/aps/import/last'=>['GET'=>[App\Controllers\ApsController::class,'last']],

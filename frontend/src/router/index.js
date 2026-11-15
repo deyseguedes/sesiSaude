@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import WorkerChannelView from '../views/WorkerChannelView.vue'
 import SecurityView from '../views/SecurityView.vue'
+import MarcosView from '../views/MarcosView.vue'
+import LiveView from '../views/LiveView.vue'
 import ImportView from '../views/ImportView.vue'
 import HomeView from '../views/HomeView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
@@ -25,8 +27,10 @@ const router = createRouter({
   history: createWebHistory(),
   scrollBehavior(to, from, saved) { return saved || (to.path === from.path ? false : { top: 0 }) },
   routes: [
+ {path:'/accessible-channel',component:WorkerChannelView,meta:{auth:true,roles:['worker','admin','doctor','nurse','navigator']}},
+ {path:'/live',component:LiveView,meta:{auth:true,roles:['admin','nurse','doctor']}},
  {path:'/import',component:ImportView,meta:{auth:true,roles:['admin','nurse']}},
-    { path: '/worker-channel', component: WorkerChannelView, meta: { auth: true, roles: ['worker','admin','doctor','nurse','navigator'] } },
+    { path: '/worker-channel', component: MarcosView, meta: { auth: true, roles: ['worker','admin','doctor','nurse','navigator'] } },
     { path: '/security', component: SecurityView, meta: { auth: true } },
     { path: '/nursing-worklist', component: NursingWorklistView, meta: { auth: true, roles: ['doctor', 'nurse'] } },
     { path: '/care-dashboard', component: DashboardView, meta: { auth: true, roles: ['doctor','nurse'] } },

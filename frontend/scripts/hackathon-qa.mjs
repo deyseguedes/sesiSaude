@@ -36,5 +36,22 @@ try{
  result=await api('/aps/import','POST',{...input,preview:false});if(result.body.data.imported!==1)throw Error('Import commit')
  await api('/demo/reset','POST')
  const people=await api('/aps/people');if(people.body.data.length!==100||!people.body.data.some(p=>p.registration==='DEMO-0001'))throw Error('Restore baseline '+JSON.stringify(people))
+
+ await api('/auth/local-profile','POST',{role:'nurse'});await api('/demo/reset','POST')
+ let q=await api('/demo/outreach/queue');if(q.body.data.items[0]?.registration!=='DEMO-0001')throw Error('Marcos must lead baseline queue')
+ let phone=await api('/demo/outreach/phone');if(!phone.body.data.slots.length)throw Error('No compatible shared agenda slots')
+ await send('Page.navigate',{url:origin+'/live'});await wait('!!document.querySelector("[data-demo=btn-confirmo]")')
+ await click('[data-demo="btn-confirmo"]');await wait('!document.querySelector("[data-demo=fila-item-DEMO-0001]")')
+ q=await api('/demo/outreach/queue');if(q.body.data.items.some(p=>p.registration==='DEMO-0001'))throw Error('Confirmation stays in queue')
+ const savedCookies=await send('Network.getAllCookies');await send('Network.clearBrowserCookies')
+ await api('/auth/local-profile','POST',{role:'nurse'});q=await api('/demo/outreach/queue');if(q.body.data.items[0]?.registration!=='DEMO-0001')throw Error('Visitor state leaked')
+ await send('Network.setCookies',{cookies:savedCookies.cookies.map(({name,value,domain,path,secure,httpOnly,sameSite,expires})=>({name,value,domain,path,secure,httpOnly,...(sameSite?{sameSite}:{}),...(expires>0?{expires}:{})}))})
+ q=await api('/demo/outreach/queue');if(q.body.data.items.some(p=>p.registration==='DEMO-0001'))throw Error('First session lost state')
+ await api('/demo/reset','POST');phone=await api('/demo/outreach/phone')
+ let res=await api('/demo/outreach/reply','POST',{choice:'reschedule',slot_id:Number(phone.body.data.slots[0].id)});if(res.status!==200||res.body.data.phone.state!=='rescheduled')throw Error('Reschedule')
+ await api('/demo/reset','POST');await api('/demo/outreach/reply','POST',{choice:'cannot',barrier:'schedule'})
+ q=await api('/demo/outreach/queue');if(q.body.data.items[0]?.barrier!=='schedule')throw Error('Voluntary barrier')
+ await api('/demo/reset','POST');console.log('PASS task 4: live confirmation, compatible reschedule, barrier and independent visitor sessions')
+
  if(errors.length)throw Error(errors.join('\n'));console.log('PASS task 2: import preview, valid commit, reset and 100-person baseline with Marcos; no console exceptions')
 }finally{if(ws)ws.close();chrome.kill();await Promise.race([once(chrome,'exit'),pause(1000)]);if(path.resolve(profile).startsWith(path.resolve(cache)+path.sep))await rm(profile,{recursive:true,force:true,maxRetries:3,retryDelay:200})}

@@ -28,7 +28,8 @@ final class ContinuityService
     {
         $patients=$this->care->access->patients(); $ids=array_column($patients,'id'); if (!$ids) return [];
         $marks=implode(',',array_fill(0,count($ids),'?'));
-        return $this->care->store->all("SELECT c.*,p.name AS patient_name,a.scheduled_at,a.status AS appointment_status FROM continuity_cases c JOIN patients p ON p.id=c.patient_id JOIN appointments a ON a.id=c.appointment_id WHERE c.company_id=? AND c.patient_id IN ($marks) ORDER BY a.scheduled_at,c.id",[$this->care->user['company_id'],...$ids]);
+        $rows=$this->care->store->all("SELECT c.*,p.name AS patient_name,a.scheduled_at,a.status AS appointment_status FROM continuity_cases c JOIN patients p ON p.id=c.patient_id JOIN appointments a ON a.id=c.appointment_id WHERE c.company_id=? AND c.patient_id IN ($marks) ORDER BY a.scheduled_at,c.id",[$this->care->user['company_id'],...$ids]);
+        return (new OutreachService($this->care->store,$this->care->user))->overlay($rows);
     }
     public function detail(int $id): array
     {

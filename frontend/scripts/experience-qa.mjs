@@ -41,7 +41,7 @@ try{
  await login('Trabalhador')
  await wait('!!document.querySelector("[data-testid=semester-eligibility]")')
  if((await api('/demo/management')).status!==403)throw Error('Worker accessed management')
- await go('/worker-channel');await wait('document.querySelectorAll("#channel-person option").length===2')
+ await go('/accessible-channel');await wait('document.querySelectorAll("#channel-person option").length===2')
  await evaluate('(()=>{[...document.querySelectorAll("[data-testid=worker-channel] button")].find(e=>e.textContent.includes("Eu vou")).click();return true})()');await wait('!!document.querySelector(".alert-success")')
  const channel=await api('/demo/channel'),carla=channel.body.data.people.find(p=>p.display_name==='Carla'),jose=channel.body.data.people.find(p=>p.display_name==='Seu José')
  if(!carla||!jose)throw Error('Missing accessible scenarios')
