@@ -73,3 +73,12 @@ CREATE TABLE clinical_return_plans (id INTEGER PRIMARY KEY AUTO_INCREMENT, compa
 CREATE INDEX idx_clinical_returns_due ON clinical_return_plans(company_id,due_date);
 CREATE TABLE clinical_return_events (id INTEGER PRIMARY KEY AUTO_INCREMENT, return_plan_id INTEGER NOT NULL, author_id INTEGER NOT NULL, version INTEGER NOT NULL, event_type VARCHAR(40) NOT NULL, payload TEXT NOT NULL, created_at DATETIME NOT NULL, UNIQUE(return_plan_id,version), FOREIGN KEY(return_plan_id) REFERENCES clinical_return_plans(id), FOREIGN KEY(author_id) REFERENCES users(id));
 INSERT INTO schema_migrations (name, applied_at) VALUES ('012_clinical_returns.sql', CURRENT_TIMESTAMP);
+
+-- 013_hackathon.sql
+CREATE TABLE aps_people (id INTEGER PRIMARY KEY AUTO_INCREMENT, company_id INTEGER NOT NULL, patient_id INTEGER, visit_key VARCHAR(64) NOT NULL DEFAULT 'template', registration VARCHAR(80) NOT NULL, cpf_hash VARCHAR(64), payload TEXT NOT NULL, test_data INTEGER NOT NULL DEFAULT 0, updated_at DATETIME NOT NULL, UNIQUE(company_id,visit_key,registration), UNIQUE(company_id,visit_key,cpf_hash));
+CREATE TABLE aps_imports (id INTEGER PRIMARY KEY AUTO_INCREMENT, company_id INTEGER NOT NULL, visit_key VARCHAR(64) NOT NULL, author_id INTEGER NOT NULL, filename VARCHAR(190) NOT NULL, report TEXT NOT NULL, created_at DATETIME NOT NULL);
+CREATE TABLE outreach_events (id INTEGER PRIMARY KEY AUTO_INCREMENT, company_id INTEGER NOT NULL, visit_key VARCHAR(64) NOT NULL, patient_id INTEGER NOT NULL, campaign_id INTEGER, variant VARCHAR(10), event_type VARCHAR(40) NOT NULL, payload TEXT NOT NULL, created_at DATETIME NOT NULL);
+CREATE INDEX idx_outreach_patient ON outreach_events(company_id,visit_key,patient_id,event_type,created_at);
+CREATE TABLE campaign_experiments (id INTEGER PRIMARY KEY AUTO_INCREMENT, company_id INTEGER NOT NULL, visit_key VARCHAR(64) NOT NULL DEFAULT 'template', parent_id INTEGER, version INTEGER NOT NULL DEFAULT 1, name VARCHAR(190) NOT NULL, kind VARCHAR(40) NOT NULL, status VARCHAR(30) NOT NULL, payload TEXT NOT NULL, created_at DATETIME NOT NULL);
+CREATE TABLE campaign_decisions (id INTEGER PRIMARY KEY AUTO_INCREMENT, campaign_id INTEGER NOT NULL, visit_key VARCHAR(64) NOT NULL, author_id INTEGER NOT NULL, decision VARCHAR(40) NOT NULL, justification TEXT NOT NULL, created_at DATETIME NOT NULL);
+INSERT INTO schema_migrations (name, applied_at) VALUES ('013_hackathon.sql', CURRENT_TIMESTAMP);

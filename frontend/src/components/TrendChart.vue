@@ -1,4 +1,6 @@
 <script setup>
+import {formatDateTime} from '../utils/workflow.js'
+import {formatarNumero} from '../utils/format.js'
 import { ref, watch, onBeforeUnmount, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 const props = defineProps({ measurements: { type: Array, default: () => [] }, indicator: Object })
@@ -11,7 +13,7 @@ watch(() => [props.measurements, props.indicator], async () => {
   chart = new Chart(canvas.value, {
     type: 'line',
     data: { datasets: ['professional', 'self_reported'].map((source, index) => ({ label: source === 'professional' ? 'Medição profissional' : 'Autorrelato', data: rows.filter(m => m.source === source).map(m => ({ x: m.collected_at, y: Number(m.value_num) })), borderColor: index ? '#b56e16' : '#087f6d', backgroundColor: index ? '#b56e16' : '#087f6d', borderDash: index ? [5, 5] : [], tension: 0.15 })) },
-    options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'category', labels: [...new Set(rows.map(m => m.collected_at))], title: { display: true, text: 'Coleta · horário de Brasília' } }, y: { title: { display: true, text: props.indicator.unit } } } },
+    options: { locale:'pt-BR',animation:document.body.classList.contains('demo-recording')?false:undefined,plugins:{tooltip:{callbacks:{title:items=>formatDateTime(items[0]?.label),label:ctx=>ctx.dataset.label+': '+formatarNumero(ctx.parsed.y,2)}}},responsive: true, maintainAspectRatio: false, scales: { x: { ticks:{callback:function(v){return formatDateTime(this.getLabelForValue(v))}},type: 'category', labels: [...new Set(rows.map(m => m.collected_at))], title: { display: true, text: 'Coleta · horário de Brasília' } }, y: { title: { display: true, text: props.indicator.unit } } } },
   })
 }, { immediate: true, deep: true })
 onBeforeUnmount(() => chart?.destroy())

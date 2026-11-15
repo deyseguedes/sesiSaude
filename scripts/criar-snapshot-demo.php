@@ -6,6 +6,7 @@ if(PHP_SAPI!=='cli'||!LocalProfileAccess::publicDemo())throw new RuntimeExceptio
 $s=new App\Repositories\Store(App\Core\Database::connect());$visit=$argv[1]??'template';
 if($visit!=='template'&&!preg_match('/^[a-f0-9]{40}$/D',$visit))throw new RuntimeException('ID de visita inválido.');
 $rows=$s->all('SELECT * FROM aps_people WHERE visit_key=? AND test_data=1 ORDER BY id',[$visit]);
+if($rows&&!in_array('DEMO-0001',array_column($rows,'registration'),true)){$marcos=$s->one('SELECT * FROM aps_people WHERE company_id=? AND visit_key=? AND registration=? AND test_data=1',[$rows[0]['company_id'],'template','DEMO-0001']);if($marcos)$rows[]=$marcos;}
 if(!$rows)throw new RuntimeException('Nenhum dado de teste para salvar.');
 $directory=dirname(__DIR__).'/dados-evento';if(!is_dir($directory))mkdir($directory,0700,true);
 file_put_contents($directory.'/demo-snapshot.enc',Crypto::encrypt(json_encode($rows,JSON_THROW_ON_ERROR)),LOCK_EX);

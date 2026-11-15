@@ -20,6 +20,7 @@ final class DemoWorkspace {
    $saved=json_decode(Crypto::decrypt(file_get_contents($snapshot)),true,512,JSON_THROW_ON_ERROR);
    if(is_array($saved))$rows=array_values(array_filter($saved,fn($r)=>(int)($r['company_id']??0)===$company&&(int)($r['test_data']??0)===1));
   }
+  if(LocalProfileAccess::publicDemo()&&!in_array('DEMO-0001',array_column($rows,'registration'),true)){$marcos=$s->one('SELECT * FROM aps_people WHERE company_id=? AND visit_key=? AND registration=? AND test_data=1',[$company,'template','DEMO-0001']);if($marcos)$rows[]=$marcos;}
   foreach($rows as &$row)$row['data']=json_decode(Crypto::decrypt($row['payload']),true,512,JSON_THROW_ON_ERROR);unset($row);return $rows;
  }
 }

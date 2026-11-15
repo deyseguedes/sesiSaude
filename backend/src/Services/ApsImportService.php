@@ -9,7 +9,7 @@ final class ApsImportService {
  public function authorize():void{if(!in_array($this->user['role'],['admin','nurse'],true))throw new HttpException(403,'FORBIDDEN','Somente SESI e enfermagem podem importar.');}
  public static function date(mixed $value):?string {
   if($value===null||trim((string)$value)==='')return null;$v=trim((string)$value);
-  if(is_numeric($v)){if((float)$v<1||(float)$v>73415||(int)$v===60)throw new \InvalidArgumentException('Data Excel inválida');return (new DateTimeImmutable('1899-12-30'))->modify('+'.(int)$v.' days')->format('Y-m-d');}
+  if(is_numeric($v)){if((float)$v<1||(float)$v>73415||(int)$v===60)throw new \InvalidArgumentException('Data Excel inválida');return (new DateTimeImmutable((int)$v<60?'1899-12-31':'1899-12-30'))->modify('+'.(int)$v.' days')->format('Y-m-d');}
   $format=str_contains($v,'/')?'!d/m/Y':'!Y-m-d';$d=DateTimeImmutable::createFromFormat($format,$v);$errors=DateTimeImmutable::getLastErrors();
   if(!$d||($errors&&($errors['warning_count']||$errors['error_count'])))throw new \InvalidArgumentException('Data inválida');
   return $d->format('Y-m-d');
@@ -32,7 +32,7 @@ final class ApsImportService {
  }
  public function import(array $d):array {
   $this->authorize();$rows=$d['rows']??null;if(!is_array($rows)||!array_is_list($rows)||count($rows)>1000||!count($rows))Input::fail('até 1000 linhas');
-  $mapping=$d['mapping']??[];foreach(['registration','name','company','status'] as $required)if(!in_array($required,$mapping,true))Input::fail('coluna obrigatória: '.$required);
+  $mapping=$d['mapping']??[];if(!is_array($mapping))Input::fail('mapeamento');$selected=array_values(array_filter($mapping,fn($v)=>$v!==''));if(count($selected)!==count(array_unique($selected)))Input::fail('coluna mapeada mais de uma vez');foreach(['registration','name','company','status'] as $required)if(!in_array($required,$mapping,true))Input::fail('coluna obrigatória: '.$required);
   $preview=($d['preview']??true)!==false;$generate=($d['generate']??false)===true;
   if($generate&&!LocalProfileAccess::publicDemo())throw new HttpException(422,'DEMO_ONLY','Gerador disponível somente no banco fictício.');
   $report=['imported'=>0,'valid'=>0,'errors'=>[],'warnings'=>[],'preview'=>[],'generated'=>$generate];$valid=[];$registrations=[];$cpfs=[];
@@ -43,8 +43,8 @@ final class ApsImportService {
    foreach(['registration','name','company','status'] as $key)if(empty($r[$key]))throw new \InvalidArgumentException('Campo obrigatório: '.$key);
    foreach(['birth_date','entry_date','last_consultation','return_date','plan_sent_at'] as $key)if(!empty($r[$key]))$r[$key]=self::date($r[$key]);
    if(!empty($r['birth_date'])&&$r['birth_date']>date('Y-m-d'))throw new \InvalidArgumentException('Nascimento no futuro');
-   foreach(['risk_initial','risk_current'] as $key)if(!empty($r[$key])&&!in_array($r[$key],['1','2','3','4'],true))throw new \InvalidArgumentException('Risco fora de 1 a 4');
-   foreach(['status'=>['ATIVO','INATIVO'],'sex'=>['M','F','OUTRO','NÃO INFORMADO'],'multiprofessional'=>['SIM','NÃO'],'plan_status'=>['ADERIU TOTALMENTE','ADERIU PARCIALMENTE','AGUARDANDO RESPOSTA','NÃO ADERIU']] as $key=>$choices)if(!empty($r[$key])&&!in_array(mb_strtoupper($r[$key]),$choices,true))throw new \InvalidArgumentException('Valor inválido: '.$key);else if(!empty($r[$key]))$r[$key]=mb_strtoupper($r[$key]);
+   foreach(['risk_initial','risk_current'] as $key)if(isset($r[$key])&&$r[$key]!==''&&!in_array($r[$key],['1','2','3','4'],true))throw new \InvalidArgumentException('Risco fora de 1 a 4');
+   foreach(['status'=>['ATIVO','INATIVO'],'sex'=>['M','F','OUTRO','NÃO INFORMADO'],'multiprofessional'=>['SIM','NÃO'],'plan_status'=>['ADERIU TOTALMENTE','ADERIU PARCIALMENTE','AGUARDANDO RESPOSTA','NÃO ADERIU']] as $key=>$choices)if(isset($r[$key])&&$r[$key]!==''&&!in_array(mb_strtoupper($r[$key]),$choices,true))throw new \InvalidArgumentException('Valor inválido: '.$key);else if(isset($r[$key])&&$r[$key]!=='')$r[$key]=mb_strtoupper($r[$key]);
    $cpf=preg_replace('/\D/','',$r['cpf']??'');if($cpf!==''&&strlen($cpf)!==11)throw new \InvalidArgumentException('CPF deve ter 11 dígitos');
    if(isset($registrations[$r['registration']])||($cpf!==''&&isset($cpfs[$cpf])))throw new \InvalidArgumentException('Matrícula ou CPF duplicado no arquivo');
    if($cpf!==''&&$this->s->one('SELECT id FROM aps_people WHERE company_id=? AND visit_key=? AND cpf_hash=? AND registration<>?',[$this->user['company_id'],DemoWorkspace::key(),hash('sha256',$cpf),$r['registration']]))throw new \InvalidArgumentException('CPF já vinculado a outra matrícula');
@@ -64,5 +64,5 @@ final class ApsImportService {
   });
   return $report;
  }
- public function last():array{$this->authorize();$r=$this->s->one('SELECT * FROM aps_imports WHERE company_id=? AND visit_key=? ORDER BY id DESC LIMIT 1',[$this->user['company_id'],DemoWorkspace::key()]);return $r?['created_at'=>$r['created_at'],'filename'=>$r['filename'],'report'=>json_decode(Crypto::decrypt($r['report']),true)]:['created_at'=>null];}
+ public function last():array{$this->authorize();$r=$this->s->one('SELECT * FROM aps_imports WHERE company_id=? AND visit_key=? ORDER BY id DESC LIMIT 1',[$this->user['company_id'],DemoWorkspace::key()]);return $r?['visit_id'=>DemoWorkspace::key(),'created_at'=>$r['created_at'],'filename'=>$r['filename'],'report'=>json_decode(Crypto::decrypt($r['report']),true)]:['created_at'=>null];}
 }

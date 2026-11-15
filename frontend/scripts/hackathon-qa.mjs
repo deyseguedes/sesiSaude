@@ -1,3 +1,4 @@
+import {deflateRawSync} from 'node:zlib'
 import {spawn} from 'node:child_process'
 import {once} from 'node:events'
 import {createServer} from 'node:net'
@@ -41,6 +42,10 @@ try{
  let q=await api('/demo/outreach/queue');if(q.body.data.items[0]?.registration!=='DEMO-0001')throw Error('Marcos must lead baseline queue')
  let phone=await api('/demo/outreach/phone');if(!phone.body.data.slots.length)throw Error('No compatible shared agenda slots')
  await send('Page.navigate',{url:origin+'/live'});await wait('!!document.querySelector("[data-demo=btn-confirmo]")')
+ await wait('[...document.querySelectorAll("button")].some(b=>b.textContent.includes("Ver todas as"))')
+ await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("Ver todas as")).click();true');await wait('!!document.querySelector("#convocation-search")')
+ await evaluate('(()=>{const s=document.querySelector("#convocation-search");s.value="Marcos";s.dispatchEvent(new Event("input",{bubbles:true}));return true})()');await wait('document.querySelectorAll("[data-demo^=fila-item-]").length===1')
+ await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("Mostrar cinco primeiras")).click();true')
  await click('[data-demo="btn-confirmo"]');await wait('!document.querySelector("[data-demo=fila-item-DEMO-0001]")')
  q=await api('/demo/outreach/queue');if(q.body.data.items.some(p=>p.registration==='DEMO-0001'))throw Error('Confirmation stays in queue')
  const savedCookies=await send('Network.getAllCookies');await send('Network.clearBrowserCookies')
@@ -84,6 +89,28 @@ try{
 
  await send('Page.navigate',{url:origin+'/privacy'});await wait('!!document.querySelector("[data-demo=privacidade]")');await assert('document.querySelector("[data-demo=privacidade]").textContent.includes("No protótipo")&&document.querySelector("[data-demo=privacidade]").textContent.includes("No MVP")','Privacy columns')
  await assert('document.querySelector("[data-demo=privacidade] details").open===false','PQC must stay collapsed');console.log('PASS task 11: privacy page separates implemented controls and roadmap')
+
+
+
+ await api('/auth/local-profile','POST',{role:'admin'})
+ const baseVersion=(await api('/experiments/1')).body.data;const versionBody={...baseVersion.data,kind:baseVersion.kind,name:'Versão de teste QA',cycle:'Ciclo 2',...Object.fromEntries(Object.entries(baseVersion.data.criteria||{}).map(([k,v])=>['filter_'+k,v]))}
+ const createdVersion=await api('/experiments/1/versions','POST',versionBody);if(createdVersion.status!==201||createdVersion.body.data.version!==2||createdVersion.body.data.frozen_count!==100)throw Error('Version creation or frozen audience '+JSON.stringify(createdVersion))
+ const versionDetail=await api('/experiments/'+createdVersion.body.data.id);if(Number(versionDetail.body.data.parent_id)!==1)throw Error('Version history link')
+ console.log('PASS campaign version: cloned configuration, new frozen audience and parent history preserved')
+
+ function crc32(buffer){let crc=0xffffffff;for(const byte of buffer){crc^=byte;for(let k=0;k<8;k++)crc=(crc>>>1)^((crc&1)?0xedb88320:0)}return (crc^0xffffffff)>>>0}
+ function zip(entries){const locals=[],central=[];let offset=0;for(const [name,text] of entries){const filename=Buffer.from(name),data=Buffer.from(text),compressed=deflateRawSync(data),crc=crc32(data),head=Buffer.alloc(30);head.writeUInt32LE(0x04034b50,0);head.writeUInt16LE(20,4);head.writeUInt16LE(8,8);head.writeUInt32LE(crc,14);head.writeUInt32LE(compressed.length,18);head.writeUInt32LE(data.length,22);head.writeUInt16LE(filename.length,26);locals.push(head,filename,compressed);const c=Buffer.alloc(46);c.writeUInt32LE(0x02014b50,0);c.writeUInt16LE(20,4);c.writeUInt16LE(20,6);c.writeUInt16LE(8,10);c.writeUInt32LE(crc,16);c.writeUInt32LE(compressed.length,20);c.writeUInt32LE(data.length,24);c.writeUInt16LE(filename.length,28);c.writeUInt32LE(offset,42);central.push(c,filename);offset+=head.length+filename.length+compressed.length}const dir=Buffer.concat(central),end=Buffer.alloc(22);end.writeUInt32LE(0x06054b50,0);end.writeUInt16LE(entries.length,8);end.writeUInt16LE(entries.length,10);end.writeUInt32LE(dir.length,12);end.writeUInt32LE(offset,16);return Buffer.concat([...locals,dir,end])}
+ const sheetRows=[['MATRÍCULA','Nome','Empresa','STATUS','Data de nascimento','Risco atual'],['QA-XLSX-1','Pessoa XLSX teste','Empresa fictícia Aurora','ATIVO',32462,3],['QA-XLSX-2','Risco inválido teste','Empresa fictícia Aurora','ATIVO',32462,0]]
+ const worksheet='<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+sheetRows.map((row,i)=>'<row r="'+(i+1)+'">'+row.map((v,j)=>typeof v==='number'?'<c r="'+String.fromCharCode(65+j)+(i+1)+'"><v>'+v+'</v></c>':'<c r="'+String.fromCharCode(65+j)+(i+1)+'" t="inlineStr"><is><t>'+v+'</t></is></c>').join('')+'</row>').join('')+'</sheetData></worksheet>'
+ const fixture=path.join(cache,'aps-import-qa.xlsx');await writeFile(fixture,zip([['[Content_Types].xml','<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>'],['_rels/.rels','<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],['xl/workbook.xml','<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="APS" sheetId="1" r:id="rId1"/></sheets></workbook>'],['xl/_rels/workbook.xml.rels','<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'],['xl/worksheets/sheet1.xml',worksheet]]))
+ await send('Page.navigate',{url:origin+'/entrar/admin-sesi?ir=/import&gravacao=0'});await wait('!!document.querySelector("#aps-file")')
+ const documentNode=await send('DOM.getDocument');const fileNode=await send('DOM.querySelector',{nodeId:documentNode.root.nodeId,selector:'#aps-file'});await send('DOM.setFileInputFiles',{nodeId:fileNode.nodeId,files:[fixture]})
+ await wait('[...document.querySelectorAll("button")].some(b=>b.textContent.includes("Validar e mostrar"))')
+ await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("Validar e mostrar")).click();true')
+ await wait('document.body.textContent.includes("1 válidas") && document.body.textContent.includes("1 erros")')
+ await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("Importar 1 linhas")).click();true')
+ await wait('document.body.textContent.includes("1 importadas")')
+ await api('/demo/reset','POST');console.log('PASS real XLSX upload: deflate ZIP, mapped headers, Excel dates, zero-risk rejection and valid-line commit')
 
  if(errors.length)throw Error(errors.join('\n'));console.log('PASS task 2: import preview, valid commit, reset and 100-person baseline with Marcos; no console exceptions')
 }finally{if(ws)ws.close();chrome.kill();await Promise.race([once(chrome,'exit'),pause(1000)]);if(path.resolve(profile).startsWith(path.resolve(cache)+path.sep))await rm(profile,{recursive:true,force:true,maxRetries:3,retryDelay:200})}

@@ -334,7 +334,7 @@ Quando a empresa adere:
 
 Cada conquista vale uma vez; máximo de 60 pontos nessa jornada. Agendar repetidamente ou atualizar a tela não multiplica pontos.
 
-São pontos simbólicos, sem valor financeiro ou mudança de prioridade clínica. Na demonstração pública, essa jornada foi substituída pela apresentação dos critérios de elegibilidade semestral. O exemplo de Carla e seu código ilustrativo não são apuração oficial nem benefício válido no RH.
+São pontos simbólicos, sem valor financeiro ou mudança de prioridade clínica. Na demonstração pública, essa jornada aparece ao lado dos critérios de elegibilidade semestral. O progresso de Marcos (2 de 4 check-ins) é sintético; não constitui apuração oficial nem benefício válido no RH.
 
 ## 7. Dependentes e família
 

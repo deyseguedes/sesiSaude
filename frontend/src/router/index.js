@@ -66,6 +66,7 @@ router.beforeEach(async (to) => {
    await auth.load();const role=({'admin-sesi':'admin','gestor-empresa':'manager',medico:'doctor',enfermeiro:'nurse',navegador:'navigator',trabalhador:'worker',dependente:'dependent',lider:'leader'})[to.params.profile]
    if(!role||!auth.localProfiles.includes(role))return {path:'/login',query:{entrada:'indisponivel'}}
    if(auth.user?.role!==role)await auth.demo(role)
+   if(to.query.gravacao==='0'&&auth.publicDemo)await apiRequest('/demo/recording','POST',{enabled:false})
    if(to.query.restaurar==='1'&&auth.publicDemo)await apiRequest('/demo/reset','POST')
    if(to.query.gravacao==='1'&&auth.publicDemo){const r=await apiRequest('/demo/recording','POST');sessionStorage.setItem('elo-demo-clock',r.clock)}
    let path=typeof to.query.ir==='string'?to.query.ir:'/'
@@ -81,6 +82,7 @@ router.beforeEach(async (to) => {
   await auth.demo(role)
  }
  if(!auth.user)return '/login'
+ if(auth.publicDemo&&to.query.gravacao==='0')await apiRequest('/demo/recording','POST',{enabled:false})
  if(auth.publicDemo&&to.query.gravacao==='1'&&!sessionStorage.getItem('elo-demo-clock')){const r=await apiRequest('/demo/recording','POST');sessionStorage.setItem('elo-demo-clock',r.clock)}
  if(to.meta.roles&&!to.meta.roles.includes(auth.user.role))return '/'
  if(to.meta.management&&(!['admin','manager'].includes(auth.user.role)||!auth.user.management_level||auth.user.management_level==='none'))return '/'

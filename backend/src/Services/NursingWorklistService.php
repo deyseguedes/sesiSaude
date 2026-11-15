@@ -158,7 +158,7 @@ final class NursingWorklistService
             $contact=$this->care->store->one('SELECT payload FROM care_pending_events WHERE item_id=? AND event_type=? ORDER BY id DESC LIMIT 1',[$row['id'],'contact']);
             $row['last_contact_outcome']=$contact?(json_decode(Crypto::decrypt($contact['payload']),true)['outcome']??null):null;
             $row['overdue']=$row['due_at']<$now && $row['status']!=='resolved';
-            $row['priority_reason']=($row['overdue']?'Prazo previsto já passou. ':'Prazo previsto: '.substr($row['due_at'],0,10).'. ').((int)$row['help_requested']?'Pedido expresso de apoio. ':'').'Ordem administrativa; não representa risco clínico.';
+            $row['priority_reason']=($row['overdue']?'Prazo previsto já passou. ':'Prazo previsto: '.(new \DateTimeImmutable($row['due_at']))->format('d/m/Y').'. ').((int)$row['help_requested']?'Pedido expresso de apoio. ':'').'Ordem administrativa; não representa risco clínico.';
         } unset($row);
         Audit::record($this->care->store,$this->care->user,'worklist_read','nursing_worklist',0);
         return ['items'=>$rows,'filters'=>$options,'patients'=>$patients,'generated_at'=>$now,'metrics'=>['total'=>count($rows),'overdue'=>count(array_filter($rows,fn($r)=>$r['overdue'])),'help'=>count(array_filter($rows,fn($r)=>(int)$r['help_requested']===1 && $r['status']!=='resolved'))]];
