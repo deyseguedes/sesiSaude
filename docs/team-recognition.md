@@ -24,7 +24,7 @@ O mesmo percentual proposto é aplicado aos integrantes elegíveis, proporcional
 - POST /api/v1/recognition/teams/simulate: restrito à gestão empresarial/administrador autorizado, com sessão e CSRF.
 - company_id opcional segue a autorização de empresa já existente; team_id precisa pertencer à empresa.
 - Leituras e simulações ficam auditadas. Pagamento sempre retorna payment_authorized=false.
-- O link público continua somente para consulta, com equipes fictícias e simulador desabilitado.
+- O link estático do Sites continua somente para consulta. Na demonstração interativa do ngrok, equipes são fictícias e o simulador pode ser utilizado pelos perfis autorizados, sem liberar pagamento.
 
 ## Próxima apuração oficial
 

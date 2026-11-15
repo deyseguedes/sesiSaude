@@ -89,6 +89,15 @@ Todas usam a senha definida no ambiente durante a carga.
 Na demonstração, o administrador tem gestão de plataforma, o gestor tem gestão
 empresarial e a enfermeira tem coordenação APS. Os níveis não liberam prontuários.
 
+## Guia de uso
+
+O [guia completo editável](docs/guia-completo-de-uso.md) cobre os sete perfis,
+fluxos, atalhos, celular, problemas frequentes e limites da versão.
+A versão online fica em `/guia-de-uso.html`, com busca e índice; o PDF em
+`/guia-de-uso.pdf`. A plataforma apresenta o link na entrada, no rodapé e no menu do celular.
+Para atualizar HTML, texto para download e PDF após editar o guia, execute
+`npm run guide:build` na pasta `frontend` e publique a aplicação novamente.
+
 ## Publicar no próprio Laragon
 
 Para servir a aplicação completa pelo Apache, com gravação no banco existente:

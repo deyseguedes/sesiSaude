@@ -34,6 +34,6 @@ O comparecimento registrado pela equipe retira o retorno da fila ativa na sincro
 
 ## Limites
 
-Este fluxo fornece risco e retorno de origem para futura apuração coletiva. Ainda não congela carteiras, calcula linha de base ou autoriza prêmio. Não integra SOC/WhatsApp. A demo pública contém somente dados fictícios, com gravação desabilitada.
+Este fluxo fornece risco e retorno de origem para futura apuração coletiva. Ainda não congela carteiras, calcula linha de base ou autoriza prêmio. Não integra SOC/WhatsApp. A demonstração estática do Sites contém dados fictícios e não grava. A demonstração interativa atual do ngrok grava em banco fictício separado, sem acesso ao banco original.
 
 Validações cobrem acesso por perfil/empresa/vínculo, versões, rebaixamento, datas, criptografia, duplicidade, filtros, agendamento sem conclusão, comparecimento posterior e reabertura após correção.
