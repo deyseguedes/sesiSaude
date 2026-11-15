@@ -59,5 +59,14 @@ try{
  await api('/auth/local-profile','POST',{role:'manager'});const bulletin=await api('/demo/outreach/dashboard');if(!bulletin.body.data)throw Error('Corporate response '+JSON.stringify(bulletin));if(bulletin.body.data.kind!=='company'||bulletin.body.data.levels||bulletin.body.data.barriers||bulletin.body.data.recognition)throw Error('Corporate clinical disclosure')
  const small=await api('/demo/outreach/dashboard?from=2026-11-25&to=2026-11-25');if(!small.body.data.suppressed)throw Error('Small group not suppressed')
  await api('/auth/local-profile','POST',{role:'admin'});await api('/demo/reset','POST');console.log('PASS task 6: live funnel, corporate separation and API suppression')
+
+ const campaigns=await api('/experiments');const expected=['maintain','redesign','pause','adjust','wait','wait'];if(campaigns.body.data.length<6)throw Error('Missing six campaigns')
+ for(let i=0;i<6;i++)if(campaigns.body.data[i].decision.code!==expected[i])throw Error('Unexpected campaign decision '+i)
+ const priorLive=campaigns.body.data[5].statistics.scheduled;await api('/demo/outreach/reply','POST',{choice:'confirm'});const changedLive=await api('/experiments/6');if(changedLive.body.data.statistics.scheduled!==priorLive+1)throw Error('Live campaign not updated')
+ await send('Page.navigate',{url:origin+'/campaign-management/6'});await wait('!!document.querySelector("[data-demo=campanha-detalhe]")')
+ if((await api('/experiments/6/decision','POST',{decision:'wait',justification:'Validação fictícia: aguardar período e amostra.'})).status!==200)throw Error('Decision audit')
+ if(!(await api('/experiments/export')).body.data.csv.includes('Convocação'))throw Error('Campaign CSV export')
+ await api('/demo/reset','POST');console.log('PASS tasks 7a-f: six decisions, live attribution, detail UI, decision audit and export')
+
  if(errors.length)throw Error(errors.join('\n'));console.log('PASS task 2: import preview, valid commit, reset and 100-person baseline with Marcos; no console exceptions')
 }finally{if(ws)ws.close();chrome.kill();await Promise.race([once(chrome,'exit'),pause(1000)]);if(path.resolve(profile).startsWith(path.resolve(cache)+path.sep))await rm(profile,{recursive:true,force:true,maxRetries:3,retryDelay:200})}

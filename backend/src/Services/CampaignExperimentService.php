@@ -46,21 +46,21 @@ final class CampaignExperimentService {
   $csv='';foreach($rows as $row){$cells=[];foreach($row as $v){if(preg_match('/^[=+@\\t\\r-]/',(string)$v))$v="'".$v;$cells[]='"'.str_replace('"','""',(string)$v).'"';}$csv.=implode(';',$cells)."\r\n";}return ['csv'=>$csv];
  }
  public function diagnosis(array $row,array $stats):array {
-  $d=$row['data'];$funnels=$d['funnels']??['A'=>['sent'=>$stats['sent'],'read'=>$stats['sent'],'responded'=>$stats['responded72'],'scheduled'=>$stats['scheduled'],'attended'=>$stats['attended']]];
+  $d=$row['data'];$funnels=$d['funnels']??['A'=>['sent'=>$stats['sent'],'read'=>$stats['sent'],'responded'=>$stats['responded_total'],'scheduled'=>$stats['scheduled'],'attended'=>$stats['attended']]];
   if($row['kind']==='orientation'&&!isset($d['funnels']))$funnels=['A'=>['invited'=>$stats['n1'],'interested'=>$stats['responded72'],'welcomed'=>$stats['scheduled'],'participating'=>$stats['scheduled'],'completed'=>$stats['attended']]];
   return CampaignDiagnosis::read($stats,$funnels,$d['segments']??[],$row['kind'],$d['barriers']??[]);
  }
  public function statistics(array $row):array{
   $d=$row['data'];if(isset($d['history']))return CampaignStatistics::calculate($d['history']+['minimum_gain_pp'=>$d['minimum_gain_pp']??4,'max_cost'=>$d['max_cost']??126,'period_ended'=>true]);
   $people=$this->outreach->people();$frozen=$d['frozen']??[];$membership=array_column($frozen,'variant','person_id');$source=[];foreach($people as $p)if(isset($membership[$p['person_id']])){$p['variant']=$membership[$p['person_id']];$source[]=$p;}
-  $metric=$d['main_metric']??'on_time';$a=[];$b=[];$hours=[];$sent=0;$responded=0;$scheduled=0;$attended=0;$onTime=0;$checkins=0;$adhered=0;
+  $metric=$d['main_metric']??'on_time';$a=[];$b=[];$hours=[];$sent=0;$responded=0;$scheduled=0;$attended=0;$onTime=0;$checkins=0;$adhered=0;$respondedTotal=0;
   $events=$this->outreach->s->all('SELECT patient_id,payload,created_at FROM outreach_events WHERE company_id=? AND visit_key=? AND campaign_id=? AND event_type=? ORDER BY id',[$this->outreach->user['company_id'],DemoWorkspace::key(),$row['id'],'reply']);$replies=[];foreach($events as $event)$replies[$event['patient_id']]=$event;
   foreach($source as $p){$reply=$replies[$p['person_id']]??null;$choice=$reply?json_decode(Crypto::decrypt($reply['payload']),true)['choice']:null;$responseHours=$reply?max(0,(strtotime($reply['created_at'])-strtotime($p['message_sent_at']))/3600):null;
    $isA=$p['variant']==='A';$success=match($metric){'response'=>$responseHours!==null&&$responseHours<=72,'attendance'=>!empty($p['attended_at']),'checkin'=>($p['checkins_answered']??0)>0,'adherence'=>in_array($p['plan_status']??'',['ADERIU TOTALMENTE','ADERIU PARCIALMENTE'],true),default=>!empty($p['attended_at'])&&substr($p['attended_at'],0,10)<=$p['return_date']};
    if($isA)$a[]=(int)$success;else $b[]=(int)$success;
-   if($isA){$sent+=(int)!empty($p['message_sent_at']);$responded+=(int)($responseHours!==null&&$responseHours<=72);if($responseHours!==null)$hours[]=$responseHours;$scheduled+=(int)in_array($choice,['confirm','reschedule'],true);$attended+=(int)!empty($p['attended_at']);$onTime+=(int)(!empty($p['attended_at'])&&substr($p['attended_at'],0,10)<=$p['return_date']);$checkins+=(int)(($p['checkins_answered']??0)>0);$adhered+=(int)in_array($p['plan_status']??'',['ADERIU TOTALMENTE','ADERIU PARCIALMENTE'],true);}
+   if($isA){$respondedTotal+=(int)($reply!==null);$sent+=(int)!empty($p['message_sent_at']);$responded+=(int)($responseHours!==null&&$responseHours<=72);if($responseHours!==null)$hours[]=$responseHours;$scheduled+=(int)in_array($choice,['confirm','reschedule'],true);$attended+=(int)!empty($p['attended_at']);$onTime+=(int)(!empty($p['attended_at'])&&substr($p['attended_at'],0,10)<=$p['return_date']);$checkins+=(int)(($p['checkins_answered']??0)>0);$adhered+=(int)in_array($p['plan_status']??'',['ADERIU TOTALMENTE','ADERIU PARCIALMENTE'],true);}
   }
-  return CampaignStatistics::calculate(['n1'=>count($a),'n2'=>count($b),'x1'=>array_sum($a),'x2'=>array_sum($b),'sent'=>$sent,'responded72'=>$responded,'response_hours'=>$hours,'scheduled'=>$scheduled,'attended'=>$attended,'on_time'=>$onTime,'checkins'=>$checkins,'adhered'=>$adhered,'minimum_gain_pp'=>$d['minimum_gain_pp']??4,'max_cost'=>$d['max_cost']??126,'message_cost'=>$d['message_cost']??.05,'period_ended'=>($d['measurement_to']??'9999')<date('Y-m-d')]);
+  return CampaignStatistics::calculate(['n1'=>count($a),'n2'=>count($b),'x1'=>array_sum($a),'x2'=>array_sum($b),'sent'=>$sent,'responded_total'=>$respondedTotal,'responded72'=>$responded,'response_hours'=>$hours,'scheduled'=>$scheduled,'attended'=>$attended,'on_time'=>$onTime,'checkins'=>$checkins,'adhered'=>$adhered,'minimum_gain_pp'=>$d['minimum_gain_pp']??4,'max_cost'=>$d['max_cost']??126,'message_cost'=>$d['message_cost']??.05,'period_ended'=>($d['measurement_to']??'9999')<date('Y-m-d')]);
  }
  public function start(int $id):array{
   $this->manage();$r=$this->row($id);if($r['visit_key']!==DemoWorkspace::key())throw new HttpException(403,'FORBIDDEN','Duplique o exemplo antes de alterar.');
