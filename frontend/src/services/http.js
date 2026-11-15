@@ -35,7 +35,10 @@ export async function requestJson(url, options = {}) {
   }
   if (!response.ok || payload.error !== null) {
     const message = payload.error?.message
-    throw new Error(typeof message === 'string' && message.trim() ? message : fallbackMessage(response.status))
+    const error=new Error(typeof message === 'string' && message.trim() ? message : fallbackMessage(response.status))
+    error.status=response.status
+    error.code=payload.error?.code
+    throw error
   }
   return payload
 }
