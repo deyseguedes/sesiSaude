@@ -93,6 +93,9 @@ empresarial e a enfermeira tem coordenação APS. Os níveis não liberam prontu
 
 O [guia completo editável](docs/guia-completo-de-uso.md) cobre os sete perfis,
 fluxos, atalhos, celular, problemas frequentes e limites da versão.
+O botão **Guia na tela** oferece orientação contextual com destaque visual e
+passos por perfil. O ícone de livro nos painéis explica o formulário/ficha atual;
+o manual completo também abre dentro da aplicação.
 A versão online fica em `/guia-de-uso.html`, com busca e índice; o PDF em
 `/guia-de-uso.pdf`. A plataforma apresenta o link na entrada, no rodapé e no menu do celular.
 Para atualizar HTML, texto para download e PDF após editar o guia, execute

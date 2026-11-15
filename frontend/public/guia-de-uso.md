@@ -82,7 +82,15 @@ Antes de atender ou registrar: confirme pessoa, empresa, equipe e autorização.
 | Navegador | Início, Retornos, Acolhimento |
 | Administração e gestão | Início, Gestão, Campanhas, Conteúdos |
 
-### 3.1 Menos cliques
+### 3.1 Guia interativo na própria tela
+
+Toque em **Guia na tela** para iniciar uma orientação sobre a página atual. O guia destaca uma área e mostra sua função. Use **Próximo**, **Anterior** e **Concluir guia**, ou feche no botão de fechar/Escape. Nenhum dado é preenchido ou salvo automaticamente.
+
+O conteúdo acompanha seu perfil: enfermagem recebe o roteiro da fila; médico recebe orientações clínicas; trabalhador recebe orientações de atendimento; gestão recebe seu fluxo administrativo. Dentro de uma ficha ou formulário, o ícone de livro no cabeçalho abre o **Guia deste painel**.
+
+Para consultar os 18 capítulos sem sair da aplicação, escolha **Ver manual completo aqui** no guia. O manual abre em um painel sobre a tela atual. Feche o painel para continuar seu trabalho no mesmo lugar.
+
+### 3.2 Menos cliques
 
 - **O que você precisa fazer?** localiza ações do perfil.
 - **Ctrl + K** abre a busca de ações no computador.
@@ -92,7 +100,7 @@ Antes de atender ou registrar: confirme pessoa, empresa, equipe e autorização.
 - **Salvar e abrir próxima** continua o trabalho na fila.
 - Uma opção obrigatória única pode vir selecionada; autorizações devem ser conferidas por você.
 
-### 3.2 No celular
+### 3.3 No celular
 
 1. Abra o endereço no navegador.
 2. Use a navegação inferior para os acessos frequentes.
