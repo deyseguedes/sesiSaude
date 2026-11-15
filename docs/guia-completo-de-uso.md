@@ -150,6 +150,14 @@ Use **Tab** e **Shift + Tab** para percorrer os controles, **Enter** para aciona
 
 Esses recursos melhoram o acesso à interface; não representam certificação de conformidade nem substituem testes com pessoas com deficiência e leitores de tela.
 
+### 3.5 Vídeo explicativo da plataforma
+
+Na tela de entrada, use o player **Conheça o Life+ em vídeo** para assistir à apresentação de aproximadamente um minuto.
+
+Você também pode abrir **Vídeo da plataforma** no rodapé de qualquer tela ou escolher **Assistir à apresentação do Life+** no guia interativo. A apresentação abre sem sair da página atual.
+
+A reprodução começa pelo seu comando. Use os controles nativos para pausar, ajustar o volume e ampliar a exibição. Ao fechar a apresentação, o vídeo é pausado. Há também um **Resumo da plataforma em texto** abaixo do player.
+
 ## 4. Administrador SESI — preparar a operação
 
 **Caminho: Gestão.** As abas são **Pessoas**, **Unidades e equipes**, **Contratos**, **Agenda** e **Acessos**, conforme nível.

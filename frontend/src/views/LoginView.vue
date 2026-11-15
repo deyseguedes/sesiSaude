@@ -1,5 +1,6 @@
 <script setup>
 import JuryStart from '../components/JuryStart.vue'
+import PlatformIntroVideo from '../components/PlatformIntroVideo.vue'
 import {APP_NAME} from '../config.js'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -39,7 +40,7 @@ async function submit() {
 <template>
   <p v-if="initializing" role="status">Carregando os níveis de acesso…</p>
   <section v-else-if="profileAccess" class="demo-entry">
-    <JuryStart v-if="auth.publicDemo" /><h2 v-if="auth.publicDemo" class="h4">Ou explore por perfil</h2><h1 v-else>{{APP_NAME}}</h1>
+    <JuryStart v-if="auth.publicDemo" /><h1 v-else>{{APP_NAME}}</h1><PlatformIntroVideo class="card card-body my-4" /><h2 v-if="auth.publicDemo" class="h4">Ou explore por perfil</h2>
     <p class="text-secondary fs-5 mt-3">Escolha um perfil e explore seu espaço. Acesso direto, sem senha.</p>
     <p v-if="shareDemo" class="demo-disclosure"><strong>Demonstração com dados fictícios.</strong> Consulta das telas e dos níveis de acesso; alterações e agendamentos não são gravados.</p>
     <p v-else-if="auth.publicDemo" class="demo-disclosure"><strong>Demonstração interativa com dados fictícios.</strong> Escolha seu perfil. O roteiro é individual; use Começar a demonstração para restaurá-lo. Cadastros legados são compartilhados.</p>

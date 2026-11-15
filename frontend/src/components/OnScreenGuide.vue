@@ -6,6 +6,8 @@ import {useAuthStore} from '../stores/auth.js'
 import {guideFor} from '../utils/on-screen-guide.js'
 import {findGuideTarget,readGuideContext,openGuideTarget,focusGuideTarget} from '../utils/guide-dom.js'
 import SidePanel from './SidePanel.vue'
+const emit=defineEmits(['intro'])
+function showIntro(){close();manual.value=false;emit('intro')}
 const auth=useAuthStore(),route=useRoute(),router=useRouter(),dialog=ref(null),card=ref(null),trigger=ref(null),titleId=useId(),host=shallowRef(document.body)
 const active=ref(false),manual=ref(false),index=ref(0),panel=ref(''),context=ref({}),ring=ref(null),position=ref({left:'16px',bottom:'20px'}),missing=ref(false),actionReady=ref(false)
 const screens=computed(()=>{if(!auth.user)return[{to:'/login',label:'Escolher perfil'},{to:'/system',label:'Status da conexão'}];const n=navigationFor(auth.user);const list=[...n.primary,...n.secondary];if(auth.publicDemo&&['worker','admin','doctor','nurse','navigator'].includes(auth.user.role))list.push({to:'/worker-channel',label:'Canal do trabalhador'});if(['doctor','nurse'].includes(auth.user.role))list.push({to:'/nursing-worklist',label:'Fila de acompanhamento'},{to:'/care-dashboard',label:'Indicadores assistenciais'});return list.filter((s,i,a)=>a.findIndex(v=>v.to===s.to)===i)})
@@ -93,6 +95,7 @@ defineExpose({start,openManual})
     <p class="screen-guide-note mb-2">Você pode clicar e preencher a tela com o guia aberto.</p><button v-if="current.action" class="btn btn-sm btn-outline-success w-100 mb-2" :disabled="!actionReady" data-testid="screen-guide-interact" @click="interact">{{ current.action.label }}</button>
     <div class="screen-guide-actions"><button class="btn btn-sm btn-outline-secondary" :disabled="index===0" @click="move(-1)">Anterior</button><button class="btn btn-sm btn-success" @click="index===steps.length-1?close():move(1)">{{ index===steps.length-1?'Concluir guia':'Próximo' }}</button></div>
     <label class="screen-guide-note mt-3" for="guide-screen">Explorar outra tela</label><select id="guide-screen" :value="route.path" class="form-select form-select-sm mt-1" aria-label="Escolher tela do guia" @change="navigate"><option v-if="!screens.some(s=>s.to===route.path)" :value="route.path">Tela atual</option><option v-for="s in screens" :key="s.to" :value="s.to">{{ s.label }}</option></select>
+    <button class="screen-guide-manual-link" @click="showIntro">Assistir à apresentação do Life+</button>
     <button class="screen-guide-manual-link" @click="openManual">Ver manual completo aqui</button>
    </section>
   </div>
