@@ -4,6 +4,8 @@ import SecurityView from '../views/SecurityView.vue'
 import MarcosView from '../views/MarcosView.vue'
 import LiveView from '../views/LiveView.vue'
 import ImportView from '../views/ImportView.vue'
+import DemoEntryView from '../views/DemoEntryView.vue'
+import {apiRequest} from '../services/api.js'
 import HomeView from '../views/HomeView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -27,6 +29,8 @@ const router = createRouter({
   history: createWebHistory(),
   scrollBehavior(to, from, saved) { return saved || (to.path === from.path ? false : { top: 0 }) },
   routes: [
+ {path:'/entrar/:profile',component:DemoEntryView},
+ {path:'/privacy',component:SecurityView,meta:{auth:true}},
  {path:'/accessible-channel',component:WorkerChannelView,meta:{auth:true,roles:['worker','admin','doctor','nurse','navigator']}},
  {path:'/live',component:LiveView,meta:{auth:true,roles:['admin','nurse','doctor']}},
  {path:'/import',component:ImportView,meta:{auth:true,roles:['admin','nurse']}},
@@ -53,12 +57,34 @@ const router = createRouter({
   ],
 })
 router.beforeEach(async (to) => {
-  if (!to.meta.auth) return true
-  const auth = useAuthStore()
-  try { if (!auth.ready) await auth.load() } catch { return '/login' }
-  if (!auth.user) return '/login'
-  if (to.meta.roles && !to.meta.roles.includes(auth.user.role)) return '/'
-  if (to.meta.management && (!['admin','manager'].includes(auth.user.role) || !auth.user.management_level || auth.user.management_level === 'none')) return '/'
-  return true
+ const auth=useAuthStore()
+ if(to.query.gravacao==='0'){sessionStorage.removeItem('elo-recording');sessionStorage.removeItem('elo-demo-clock')}
+ if(to.query.gravacao==='1')sessionStorage.setItem('elo-recording','1')
+ document.body.classList.toggle('demo-recording',sessionStorage.getItem('elo-recording')==='1')
+ if(to.path.startsWith('/entrar/')){
+  try{
+   await auth.load();const role=({'admin-sesi':'admin','gestor-empresa':'manager',medico:'doctor',enfermeiro:'nurse',navegador:'navigator',trabalhador:'worker',dependente:'dependent',lider:'leader'})[to.params.profile]
+   if(!role||!auth.localProfiles.includes(role))return {path:'/login',query:{entrada:'indisponivel'}}
+   if(auth.user?.role!==role)await auth.demo(role)
+   if(to.query.restaurar==='1'&&auth.publicDemo)await apiRequest('/demo/reset','POST')
+   if(to.query.gravacao==='1'&&auth.publicDemo){const r=await apiRequest('/demo/recording','POST');sessionStorage.setItem('elo-demo-clock',r.clock)}
+   let path=typeof to.query.ir==='string'?to.query.ir:'/'
+   if(!path.startsWith('/')||path.startsWith('//')||path.includes('\\\\')||path.startsWith('/entrar'))path='/'
+   let target=router.resolve(path);if(target.matched.some(r=>r.path.includes('pathMatch')))target=router.resolve('/')
+   return {path:target.path,query:{...target.query,...(to.query.gravacao==='1'?{gravacao:'1'}:{})},replace:true}
+  }catch{return {path:'/login',query:{entrada:'indisponivel'}}}
+ }
+ if(!to.meta.auth)return true
+ try{if(!auth.ready)await auth.load()}catch{return '/login'}
+ if(!auth.user&&auth.publicDemo&&(to.query.restaurar==='1'||to.query.gravacao==='1')){
+  const role=to.path.startsWith('/worker-channel')||to.path.startsWith('/find-care')||to.path.startsWith('/my-care')?'worker':to.path.startsWith('/campaign-management')||to.path.startsWith('/management')||to.path==='/import'?'admin':'nurse'
+  await auth.demo(role)
+ }
+ if(!auth.user)return '/login'
+ if(auth.publicDemo&&to.query.gravacao==='1'&&!sessionStorage.getItem('elo-demo-clock')){const r=await apiRequest('/demo/recording','POST');sessionStorage.setItem('elo-demo-clock',r.clock)}
+ if(to.meta.roles&&!to.meta.roles.includes(auth.user.role))return '/'
+ if(to.meta.management&&(!['admin','manager'].includes(auth.user.role)||!auth.user.management_level||auth.user.management_level==='none'))return '/'
+ if(auth.publicDemo&&to.query.restaurar==='1'){await apiRequest('/demo/reset','POST');if(to.query.gravacao==='1'){const r=await apiRequest('/demo/recording','POST');sessionStorage.setItem('elo-demo-clock',r.clock)}const query={...to.query};delete query.restaurar;return {path:to.path,query,replace:true}}
+ return true
 })
 export default router

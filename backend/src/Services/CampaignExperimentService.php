@@ -17,9 +17,9 @@ final class CampaignExperimentService {
   if($payload['criteria']['risk']!==''&&!in_array($payload['criteria']['risk'],['1','2','3','4'],true))Input::fail('risco');
   foreach(['minimum_gain_pp'=>4,'max_cost'=>126,'message_cost'=>.05,'hour_cost'=>25,'benefit_cost'=>0] as $key=>$default){$v=$d[$key]??$default;if(!is_numeric($v)||!is_finite((float)$v)||(float)$v<0||(float)$v>10000000)Input::fail($key);$payload[$key]=(float)$v;}
   if($payload['minimum_gain_pp']<=0||$payload['minimum_gain_pp']>100)Input::fail('meta');
-  $status=$start<=date('Y-m-d')?'active':'planned';$payload['frozen']=$status==='active'?$this->freeze($payload['criteria']):null;$payload['frozen_at']=$status==='active'?date('Y-m-d H:i:s'):null;
+  $status=$start<=DemoClock::today()?'active':'planned';$payload['frozen']=$status==='active'?$this->freeze($payload['criteria']):null;$payload['frozen_at']=$status==='active'?DemoClock::now():null;
   $version=1;if($parent){$old=$this->row($parent);$version=(int)$old['version']+1;}
-  $id=$this->outreach->s->insert('campaign_experiments',['company_id'=>$this->outreach->user['company_id'],'visit_key'=>DemoWorkspace::key(),'parent_id'=>$parent,'version'=>$version,'name'=>$name,'kind'=>$kind,'status'=>$status,'payload'=>Crypto::encrypt(json_encode($payload,JSON_THROW_ON_ERROR)),'created_at'=>date('Y-m-d H:i:s')]);Audit::record($this->outreach->s,$this->outreach->user,'experiment_created','campaign_experiment',$id);return ['id'=>$id,'version'=>$version,'frozen_count'=>count($payload['frozen']??[])];
+  $id=$this->outreach->s->insert('campaign_experiments',['company_id'=>$this->outreach->user['company_id'],'visit_key'=>DemoWorkspace::key(),'parent_id'=>$parent,'version'=>$version,'name'=>$name,'kind'=>$kind,'status'=>$status,'payload'=>Crypto::encrypt(json_encode($payload,JSON_THROW_ON_ERROR)),'created_at'=>DemoClock::now()]);Audit::record($this->outreach->s,$this->outreach->user,'experiment_created','campaign_experiment',$id);return ['id'=>$id,'version'=>$version,'frozen_count'=>count($payload['frozen']??[])];
  }
  private function freeze(array $criteria):array{
   $frozen=[];foreach($this->outreach->people() as $p){$matches=true;foreach($criteria as $key=>$value)if($value!==''&&(string)($p[$key==='risk'?'risk_current':$key]??'')!==$value)$matches=false;if($matches)$frozen[]=['person_id'=>$p['person_id'],'registration'=>$p['registration'],'variant'=>self::variant($p['registration'])];}return $frozen;
@@ -38,7 +38,7 @@ final class CampaignExperimentService {
  }
  public function recordDecision(int $id,array $d):array{
   $this->manage();$this->row($id);$decision=Input::choice($d,'decision',['maintain','adjust','redesign','end','pause','wait']);$justification=Input::text($d,'justification',1500);
-  $this->outreach->s->insert('campaign_decisions',['campaign_id'=>$id,'visit_key'=>DemoWorkspace::key(),'author_id'=>$this->outreach->user['id'],'decision'=>$decision,'justification'=>Crypto::encrypt($justification),'created_at'=>date('Y-m-d H:i:s')]);Audit::record($this->outreach->s,$this->outreach->user,'campaign_decision','campaign_experiment',$id);return $this->detail($id);
+  $this->outreach->s->insert('campaign_decisions',['campaign_id'=>$id,'visit_key'=>DemoWorkspace::key(),'author_id'=>$this->outreach->user['id'],'decision'=>$decision,'justification'=>Crypto::encrypt($justification),'created_at'=>DemoClock::now()]);Audit::record($this->outreach->s,$this->outreach->user,'campaign_decision','campaign_experiment',$id);return $this->detail($id);
  }
  public function export():array{
   $this->manage();$rows=[['campanha','tipo','indicador','efeito_pp','limite_inferior','limite_superior','custo_por_retorno','sugestão']];
@@ -60,10 +60,10 @@ final class CampaignExperimentService {
    if($isA)$a[]=(int)$success;else $b[]=(int)$success;
    if($isA){$respondedTotal+=(int)($reply!==null);$sent+=(int)!empty($p['message_sent_at']);$responded+=(int)($responseHours!==null&&$responseHours<=72);if($responseHours!==null)$hours[]=$responseHours;$scheduled+=(int)in_array($choice,['confirm','reschedule'],true);$attended+=(int)!empty($p['attended_at']);$onTime+=(int)(!empty($p['attended_at'])&&substr($p['attended_at'],0,10)<=$p['return_date']);$checkins+=(int)(($p['checkins_answered']??0)>0);$adhered+=(int)in_array($p['plan_status']??'',['ADERIU TOTALMENTE','ADERIU PARCIALMENTE'],true);}
   }
-  return CampaignStatistics::calculate(['n1'=>count($a),'n2'=>count($b),'x1'=>array_sum($a),'x2'=>array_sum($b),'sent'=>$sent,'responded_total'=>$respondedTotal,'responded72'=>$responded,'response_hours'=>$hours,'scheduled'=>$scheduled,'attended'=>$attended,'on_time'=>$onTime,'checkins'=>$checkins,'adhered'=>$adhered,'minimum_gain_pp'=>$d['minimum_gain_pp']??4,'max_cost'=>$d['max_cost']??126,'message_cost'=>$d['message_cost']??.05,'period_ended'=>($d['measurement_to']??'9999')<date('Y-m-d')]);
+  return CampaignStatistics::calculate(['n1'=>count($a),'n2'=>count($b),'x1'=>array_sum($a),'x2'=>array_sum($b),'sent'=>$sent,'responded_total'=>$respondedTotal,'responded72'=>$responded,'response_hours'=>$hours,'scheduled'=>$scheduled,'attended'=>$attended,'on_time'=>$onTime,'checkins'=>$checkins,'adhered'=>$adhered,'minimum_gain_pp'=>$d['minimum_gain_pp']??4,'max_cost'=>$d['max_cost']??126,'message_cost'=>$d['message_cost']??.05,'period_ended'=>($d['measurement_to']??'9999')<DemoClock::today()]);
  }
  public function start(int $id):array{
   $this->manage();$r=$this->row($id);if($r['visit_key']!==DemoWorkspace::key())throw new HttpException(403,'FORBIDDEN','Duplique o exemplo antes de alterar.');
-  $d=$r['data'];if($d['start_date']>date('Y-m-d'))Input::fail('campanha ainda não começou');if($d['frozen']!==null)return $this->detail($id);$d['frozen']=$this->freeze($d['criteria']);$d['frozen_at']=date('Y-m-d H:i:s');$this->outreach->s->execute('UPDATE campaign_experiments SET payload=?,status=? WHERE id=?',[Crypto::encrypt(json_encode($d,JSON_THROW_ON_ERROR)),'active',$id]);return $this->detail($id);
+  $d=$r['data'];if($d['start_date']>DemoClock::today())Input::fail('campanha ainda não começou');if($d['frozen']!==null)return $this->detail($id);$d['frozen']=$this->freeze($d['criteria']);$d['frozen_at']=DemoClock::now();$this->outreach->s->execute('UPDATE campaign_experiments SET payload=?,status=? WHERE id=?',[Crypto::encrypt(json_encode($d,JSON_THROW_ON_ERROR)),'active',$id]);return $this->detail($id);
  }
 }

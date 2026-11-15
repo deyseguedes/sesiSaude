@@ -13,5 +13,5 @@ export const labels = {
 }
 export const label = (value) => labels[value] || value
 export const options = (values) => values.map(value => ({ value, label: label(value) }))
-export const today = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Bahia' }).format(new Date())
+export const today = () => (typeof sessionStorage!=='undefined'&&sessionStorage.getItem('elo-demo-clock')?.slice(0,10))||new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Bahia' }).format(new Date())
 export const timestamp = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Bahia', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date()).replace(',', '')

@@ -5,7 +5,7 @@ use App\Core\Input;
 final class SuccessDashboard {
  public function __construct(private OutreachService $outreach){}
  public function read(array $filter=[]):array {
-  $this->outreach->guard(['admin','manager']);$user=$this->outreach->user;$from=isset($filter['from'])?Input::date($filter,'from'):date('Y-m-01');$to=isset($filter['to'])?Input::date($filter,'to'):date('Y-m-d',strtotime('+30 days'));if($to<$from)Input::fail('período');
+  $this->outreach->guard(['admin','manager']);$user=$this->outreach->user;$from=isset($filter['from'])?Input::date($filter,'from'):substr(DemoClock::today(),0,7).'-01';$to=isset($filter['to'])?Input::date($filter,'to'):(new \DateTimeImmutable(DemoClock::today()))->modify('+30 days')->format('Y-m-d');if($to<$from)Input::fail('período');
   $all=$this->outreach->people();$companies=array_values(array_unique(array_column($all,'company')));$company=$filter['company']??'';
   if(!is_string($company))Input::fail('empresa');
   if($company!=='')$all=array_values(array_filter($all,fn($p)=>$p['company']===$company));

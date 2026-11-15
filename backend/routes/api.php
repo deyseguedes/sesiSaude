@@ -5,6 +5,7 @@ use App\Controllers\HealthController;
 use App\Controllers\OperationsController as Operations;
 
 return [
+ '/api/v1/demo/recording'=>['POST'=>[App\Controllers\ApsController::class,'recording']],
  '/api/v1/experiments/export'=>['GET'=>[App\Controllers\CampaignExperimentController::class,'export']],
  '/api/v1/experiments/{id}/decision'=>['POST'=>[App\Controllers\CampaignExperimentController::class,'decision']],
  '/api/v1/experiments/{id}/versions'=>['POST'=>[App\Controllers\CampaignExperimentController::class,'version']],

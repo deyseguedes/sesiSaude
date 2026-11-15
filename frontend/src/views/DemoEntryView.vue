@@ -1,0 +1,1 @@
+<template><p role="status">Abrindo o perfil demonstrativo autorizado…</p></template>

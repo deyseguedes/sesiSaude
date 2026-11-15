@@ -68,5 +68,13 @@ try{
  if(!(await api('/experiments/export')).body.data.csv.includes('Convocação'))throw Error('Campaign CSV export')
  await api('/demo/reset','POST');console.log('PASS tasks 7a-f: six decisions, live attribution, detail UI, decision audit and export')
 
+
+ await send('Page.navigate',{url:origin+'/entrar/enfermeiro?ir=/live&restaurar=1&gravacao=1'});await wait('location.pathname==="/live" && !!document.querySelector("[data-demo=msg-marcos]")');await wait('!!document.querySelector("[data-demo=fila-item-DEMO-0001]")')
+ await assert('document.body.classList.contains("demo-recording")&&!document.querySelector("[data-testid=screen-guide-trigger]")','Recording did not hide guide')
+ await send('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});await shot('hackathon-live-1280.png')
+ await send('Page.navigate',{url:origin+'/entrar/trabalhador?ir=/worker-channel&restaurar=1&gravacao=1'});await wait('location.pathname==="/worker-channel" && !!document.querySelector("[data-demo=btn-confirmo]")')
+ await send('Emulation.setDeviceMetricsOverride',{width:375,height:812,deviceScaleFactor:1,mobile:true});await assert('document.documentElement.scrollWidth<=innerWidth','375px overflow');await shot('hackathon-phone-375.png')
+ await send('Emulation.clearDeviceMetricsOverride');console.log('PASS task 8: direct profile routes, recording mode, 1280x720 and 375px')
+
  if(errors.length)throw Error(errors.join('\n'));console.log('PASS task 2: import preview, valid commit, reset and 100-person baseline with Marcos; no console exceptions')
 }finally{if(ws)ws.close();chrome.kill();await Promise.race([once(chrome,'exit'),pause(1000)]);if(path.resolve(profile).startsWith(path.resolve(cache)+path.sep))await rm(profile,{recursive:true,force:true,maxRetries:3,retryDelay:200})}

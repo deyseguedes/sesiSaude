@@ -1,0 +1,12 @@
+body.demo-recording *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+body.demo-recording .workspace-header{min-height:48px;height:48px}
+body.demo-recording .workspace-content{padding:12px 24px}
+body.demo-recording .workspace-footer,body.demo-recording .screen-guide-trigger,body.demo-recording .command-trigger,body.demo-recording .jury-navigation,body.demo-recording [aria-label="Guia deste painel"],body.demo-recording .guest-header button{display:none!important}
+body.demo-recording .recording-seal{display:block;font-size:12px;color:#41625a;margin-bottom:6px}
+body.demo-recording h1{font-size:26px;margin-bottom:8px}
+body.demo-recording .marcos-phone .phone-body{font-size:14px;padding:10px}
+body.demo-recording .marcos-phone .btn-lg{font-size:16px;padding:8px}
+body.demo-recording .campaign-card{font-size:13px;padding:12px;gap:2px}
+body.demo-recording .campaign-card .h5{font-size:16px}
+@media(min-width:992px){body.demo-recording .marcos-phone{max-width:350px}body.demo-recording [data-demo="convocation-queue"]{font-size:13px}body.demo-recording [data-demo="convocation-queue"] .py-2{padding-top:5px!important;padding-bottom:5px!important}}
+@media(max-width:575px){body.demo-recording .workspace-content{padding:12px}}
