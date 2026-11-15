@@ -71,9 +71,9 @@ final class DashboardService
         $this->care->access->roles(['admin','manager']);
         $n=(int)$s->one('SELECT COUNT(*) n FROM patients WHERE company_id=?',[$u['company_id']])['n'];
         // Small groups are suppressed to reduce re-identification in employer views.
-        if($n<5) return ['suppressed'=>true,'message'=>'Indicadores empresariais disponíveis somente para grupos com pelo menos cinco participantes.'];
+        if($n<10) return ['suppressed'=>true,'message'=>'Indicadores empresariais disponíveis somente para grupos com pelo menos dez participantes.'];
         $rows=$s->all('SELECT status,COUNT(*) n FROM appointments WHERE company_id=? GROUP BY status',[$u['company_id']]);
-        foreach($rows as &$row) if((int)$row['n']<5) $row['n']=null; unset($row);
+        foreach($rows as &$row) if((int)$row['n']<10) $row['n']=null; unset($row);
         Audit::record($s,$u,'aggregate_read','company', (int)$u['company_id']);
         return ['suppressed'=>false,'participants'=>$n,'appointment_totals'=>$rows];
     }

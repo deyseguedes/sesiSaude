@@ -27,7 +27,8 @@ final class AuthController
         $user = LocalProfileAccess::account($store, $input['role']);
         if (!$user) throw new HttpException(404, 'NOT_FOUND', 'Perfil local indisponível.');
         Audit::record($store, $user, 'local_profile_login', 'user', (int)$user['id']);
-        session_regenerate_id(true); $_SESSION['user_id'] = (int)$user['id']; $_SESSION['csrf'] = bin2hex(random_bytes(32));
+        // Preserve the prior demo session for concurrent polls; real login still deletes it.
+        session_regenerate_id(!LocalProfileAccess::publicDemo()); $_SESSION['user_id'] = (int)$user['id']; $_SESSION['csrf'] = bin2hex(random_bytes(32));
         Response::send(200, ['user' => $user, 'csrf_token' => $_SESSION['csrf']]);
     }
     public function login(): void
@@ -49,7 +50,7 @@ final class AuthController
     }
     public function logout(): void
     {
-        Session::start(); Session::csrf(); $_SESSION = []; session_regenerate_id(true);
+        Session::start(); Session::csrf(); $_SESSION = []; session_regenerate_id(!LocalProfileAccess::publicDemo());
         $_SESSION['csrf'] = bin2hex(random_bytes(32));
         Response::send(200, ['user' => null, 'csrf_token' => $_SESSION['csrf']]);
     }

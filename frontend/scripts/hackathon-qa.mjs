@@ -81,5 +81,9 @@ try{
  await wait('document.querySelector("[data-testid=worker-journey]")?.textContent.includes("60")')
  const ownSemester=await api('/demo/outreach/semester');if(ownSemester.body.data.eligible||ownSemester.body.data.checkins!==2)throw Error('Semester progress mismatch');console.log('PASS task 10: Marcos journey and private semester progress')
 
+
+ await send('Page.navigate',{url:origin+'/privacy'});await wait('!!document.querySelector("[data-demo=privacidade]")');await assert('document.querySelector("[data-demo=privacidade]").textContent.includes("No protótipo")&&document.querySelector("[data-demo=privacidade]").textContent.includes("No MVP")','Privacy columns')
+ await assert('document.querySelector("[data-demo=privacidade] details").open===false','PQC must stay collapsed');console.log('PASS task 11: privacy page separates implemented controls and roadmap')
+
  if(errors.length)throw Error(errors.join('\n'));console.log('PASS task 2: import preview, valid commit, reset and 100-person baseline with Marcos; no console exceptions')
 }finally{if(ws)ws.close();chrome.kill();await Promise.race([once(chrome,'exit'),pause(1000)]);if(path.resolve(profile).startsWith(path.resolve(cache)+path.sep))await rm(profile,{recursive:true,force:true,maxRetries:3,retryDelay:200})}

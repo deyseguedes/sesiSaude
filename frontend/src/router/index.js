@@ -30,7 +30,7 @@ const router = createRouter({
   scrollBehavior(to, from, saved) { return saved || (to.path === from.path ? false : { top: 0 }) },
   routes: [
  {path:'/entrar/:profile',component:DemoEntryView},
- {path:'/privacy',component:SecurityView,meta:{auth:true}},
+ {path:'/privacy',component:SecurityView},
  {path:'/accessible-channel',component:WorkerChannelView,meta:{auth:true,roles:['worker','admin','doctor','nurse','navigator']}},
  {path:'/live',component:LiveView,meta:{auth:true,roles:['admin','nurse','doctor']}},
  {path:'/import',component:ImportView,meta:{auth:true,roles:['admin','nurse']}},

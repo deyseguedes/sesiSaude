@@ -60,11 +60,11 @@ final class EngagementService
         foreach($rows as &$row) {
             $row['content_ids']=array_map('intval',array_column($this->store->all('SELECT content_id FROM campaign_contents WHERE campaign_id=?',[$row['id']]),'content_id'));
             $n=(int)$this->store->one('SELECT COUNT(*) n FROM campaign_participants WHERE campaign_id=?',[$row['id']])['n'];
-            $row['participants']=$n>=5?$n:null; $row['suppressed']=$n<5; $row['stages']=[];
-            if($n>=5) {
+            $row['participants']=$n>=10?$n:null; $row['suppressed']=$n<10; $row['stages']=[];
+            if($n>=10) {
                 $stages=$this->store->all('SELECT stage,COUNT(*) n FROM campaign_participants WHERE campaign_id=? GROUP BY stage',[$row['id']]);
                 // Complementary suppression avoids deriving a small bucket from totals.
-                if(array_filter($stages,fn($stage)=>(int)$stage['n']<5)) {$row['participants']=null;$row['suppressed']=true;}
+                if(array_filter($stages,fn($stage)=>(int)$stage['n']<10)) {$row['participants']=null;$row['suppressed']=true;}
                 else foreach($stages as $stage) $row['stages'][]=['stage'=>$stage['stage'],'count'=>(int)$stage['n']];
             }
         }
