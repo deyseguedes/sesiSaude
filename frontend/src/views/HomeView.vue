@@ -8,7 +8,7 @@ onMounted(() => system.checkHealth())
 
 <template>
   <h1>Continuidade do cuidado</h1>
-  <p class="lead">Base da plataforma VIVA+ ELO — Fase A.</p>
+  <p class="lead">Base da plataforma Life+ — Fase A.</p>
   <section class="card my-4" aria-labelledby="connection-title">
     <div class="card-body">
       <h2 id="connection-title" class="h5">Conexão com a plataforma</h2>

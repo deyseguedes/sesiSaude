@@ -1,4 +1,4 @@
--- VIVA+ ELO - industria, trabalhadores e dependentes - MySQL 8+
+-- Life+ - industria, trabalhadores e dependentes - MySQL 8+
 -- Instalar SOMENTE em banco vazio. Nao apaga tabelas ou dados.
 -- Para uma base V3 existente, usar composer migrate ou upgrade_industry.sql.
 CREATE DATABASE IF NOT EXISTS viva_elo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

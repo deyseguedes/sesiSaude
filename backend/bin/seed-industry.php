@@ -47,9 +47,10 @@ if(!$tutorial) {
     $editor->publish($industry,$tutorialId,['version'=>1,'review_note'=>'Tutorial fictício revisado para demonstração da plataforma.']);
 } else $tutorialId=(int)$tutorial['id'];
 if(!$store->one('SELECT id FROM education_contents WHERE company_id=? AND title=?',[$demoCompany,'Seu cuidado também merece espaço'])) $editor->content($industry,['title'=>'Seu cuidado também merece espaço','summary'=>'Uma conversa acolhedora sobre rotina, retornos e apoio da equipe APS.','transcript'=>"A rotina da indústria pode exigir muito. Você não precisa enfrentar sozinho as dificuldades para continuar seu acompanhamento.\nConsulte os próximos retornos e converse com a equipe quando precisar de apoio. Horário, transporte e outras barreiras podem ser acolhidos.\nEste é um roteiro inicial para revisão profissional e gravação. Não oferece diagnóstico ou conduta individual.",'category'=>'aps','video_url'=>'','duration_seconds'=>90]);
-$campaign=$store->one('SELECT * FROM campaigns WHERE company_id=? AND title=?',[$demoCompany,'Meu primeiro passo no VIVA+ ELO']);
+$campaign=$store->one('SELECT * FROM campaigns WHERE company_id=? AND title IN (?,?) ORDER BY id LIMIT 1',[$demoCompany,'Meu primeiro passo no Life+','Meu primeiro passo no VIVA+ ELO']);
+if($campaign&&$campaign['title']!=='Meu primeiro passo no Life+')$store->execute('UPDATE campaigns SET title=? WHERE id=?',['Meu primeiro passo no Life+',$campaign['id']]);
 if(!$campaign) {
-    $campaignId=$editor->createCampaign($industry,['title'=>'Meu primeiro passo no VIVA+ ELO','objective'=>'Conhecer a plataforma, localizar os próximos passos e saber como pedir apoio.','cycle_label'=>'Ciclo 1 · conhecer e acolher','start_date'=>date('Y-m-d'),'end_date'=>date('Y-m-d',time()+30*86400),'industry_unit_id'=>$demoUnit,'audience'=>'all','content_ids'=>[$tutorialId]])['id'];
+    $campaignId=$editor->createCampaign($industry,['title'=>'Meu primeiro passo no Life+','objective'=>'Conhecer a plataforma, localizar os próximos passos e saber como pedir apoio.','cycle_label'=>'Ciclo 1 · conhecer e acolher','start_date'=>date('Y-m-d'),'end_date'=>date('Y-m-d',time()+30*86400),'industry_unit_id'=>$demoUnit,'audience'=>'all','content_ids'=>[$tutorialId]])['id'];
     $editor->campaignStatus($industry,$campaignId,['status'=>'active','version'=>1]);
 }
 echo "Demonstração industrial pronta: gestão, dependente, agendas, tutorial e campanha.\n";

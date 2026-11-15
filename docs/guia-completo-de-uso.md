@@ -1,11 +1,11 @@
-# VIVA+ ELO — Guia completo de uso
+# Life+ — Guia completo de uso
 Manual operacional por perfil • edição de 14/11/2026
 
 Este guia orienta o uso da versão atual: acesso, cadastro, gestão, atendimento, continuidade, educação, campanhas e demonstração. As decisões clínicas e os procedimentos institucionais continuam sob responsabilidade da equipe habilitada.
 
 ## 1. Comece por aqui
 
-O VIVA+ ELO organiza o cuidado de trabalhadores das indústrias contratantes e seus dependentes. O fluxo central é: **cadastro validado → agendamento → atendimento realizado → risco e retorno confirmados pelo médico → acompanhamento da enfermagem → retorno registrado**.
+O Life+ organiza o cuidado de trabalhadores das indústrias contratantes e seus dependentes. O fluxo central é: **cadastro validado → agendamento → atendimento realizado → risco e retorno confirmados pelo médico → acompanhamento da enfermagem → retorno registrado**.
 
 ### 1.1 Identifique o ambiente
 

@@ -1,4 +1,4 @@
--- VIVA+ ELO - atualizacao de uma base V3 com migracoes 001 a 004 aplicadas.
+-- Life+ - atualizacao de uma base V3 com migracoes 001 a 004 aplicadas.
 -- Executar UMA unica vez. Fazer backup antes da importacao.
 -- Preserva registros existentes. Para migracao incremental, preferir composer migrate.
 USE viva_elo;

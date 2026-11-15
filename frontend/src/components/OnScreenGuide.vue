@@ -98,7 +98,7 @@ defineExpose({start,openManual})
   </div>
  </dialog></Teleport>
  <SidePanel :open="manual" title="Guia de uso da plataforma" subtitle="Consulte sem sair da tela em que você estava." :guide-help="false" class="screen-guide-manual" @close="manual=false">
-  <iframe v-if="manual" src="/guia-de-uso.html?embedded=1" title="Manual completo do VIVA+ ELO" class="screen-guide-frame" />
+  <iframe v-if="manual" src="/guia-de-uso.html?embedded=1" title="Manual completo do Life+" class="screen-guide-frame" />
  </SidePanel>
 </template>
 <style scoped>

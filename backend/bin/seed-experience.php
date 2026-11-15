@@ -7,7 +7,8 @@ if(PHP_SAPI!=='cli'||!LocalProfileAccess::publicDemo())throw new RuntimeExceptio
 $s=new Store(App\Core\Database::connect());
 $doctor=$s->one('SELECT * FROM users WHERE email=?',['doctor@demo.vivaelo.test']);
 $nurse=$s->one('SELECT * FROM users WHERE email=?',['nurse@demo.vivaelo.test']);
-$c=$doctor['company_id'];$team=$s->one('SELECT id FROM teams WHERE company_id=? ORDER BY id LIMIT 1',[$c]);
+$c=$doctor['company_id'];
+$s->execute('UPDATE campaigns SET title=? WHERE company_id=? AND title=?',['Meu primeiro passo no Life+',$c,'Meu primeiro passo no VIVA+ ELO']);$team=$s->one('SELECT id FROM teams WHERE company_id=? ORDER BY id LIMIT 1',[$c]);
 $unit=$s->one('SELECT id FROM service_units WHERE company_id=? ORDER BY id LIMIT 1',[$c]);
 $industry=$s->one('SELECT id FROM industry_units WHERE company_id=? ORDER BY id LIMIT 1',[$c]);
 $contract=$s->one('SELECT id FROM service_contracts WHERE company_id=? ORDER BY id LIMIT 1',[$c]);

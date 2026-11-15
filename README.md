@@ -1,4 +1,4 @@
-# VIVA+ ELO — Hackathon+ SESI Saúde 2026
+# Life+ — Hackathon+ SESI Saúde 2026
 
 Camada de engajamento ligada ao ecossistema do SESI.
 A equipe apresenta o absenteísmo na APS como desafio; a referência de cerca de 50% é premissa a validar no piloto.
@@ -406,6 +406,6 @@ automaticamente o trecho do WhatsApp. Não há promessa de certificação.
 
 ## Equipe
 
-Equipe do protótipo VIVA+ ELO — Hackathon+ SESI Saúde 2026.
+Equipe do protótipo Life+ — Hackathon+ SESI Saúde 2026.
 Os nomes e as funções serão incluídos quando informados pela equipe;
 o repositório não atribui autoria nominal sem confirmação.

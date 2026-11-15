@@ -44,7 +44,7 @@ final class OutreachService {
  }
  public function export():array{
   $this->guard(['nurse','doctor','admin']);$rows=[['matrícula','nome','data','hora','situação','motivo','origem','gerado em']];
-  foreach($this->people() as $p){$status=match($p['reply']){'confirm'=>'CONFIRMADO','reschedule'=>'REMARCADO','cannot'=>'NÃO PODE',default=>null};if(!$status)continue;$date=new \DateTimeImmutable($p['scheduled_at']);$rows[]=[$p['registration'],$p['name'],$date->format('d/m/Y'),$date->format('H:i'),$status,$p['barrier']?self::barrier($p['barrier']):'','VIVA+ ELO',date('d/m/Y H:i')];}
+  foreach($this->people() as $p){$status=match($p['reply']){'confirm'=>'CONFIRMADO','reschedule'=>'REMARCADO','cannot'=>'NÃO PODE',default=>null};if(!$status)continue;$date=new \DateTimeImmutable($p['scheduled_at']);$rows[]=[$p['registration'],$p['name'],$date->format('d/m/Y'),$date->format('H:i'),$status,$p['barrier']?self::barrier($p['barrier']):'','Life+',date('d/m/Y H:i')];}
   $csv='';foreach($rows as $row){$cells=[];foreach($row as $cell){$cell=(string)$cell;if(preg_match('/^[=+@\\t\\r-]/',$cell))$cell="'".$cell;$cells[]='"'.str_replace('"','""',$cell).'"';}$csv.=implode(';',$cells)."\r\n";}
   Audit::record($this->s,$this->user,'outreach_exported','company',(int)$this->user['company_id']);return ['csv'=>$csv,'layout'=>'layout a ajustar ao sistema do SESI'];
  }

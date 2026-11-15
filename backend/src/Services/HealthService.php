@@ -7,6 +7,6 @@ final class HealthService
 {
     public function status(): array
     {
-        return ['service' => 'VIVA+ ELO API', 'status' => 'ok', 'version' => '3', 'phase' => 'F'];
+        return ['service' => 'Life+ API', 'status' => 'ok', 'version' => '3', 'phase' => 'F'];
     }
 }
