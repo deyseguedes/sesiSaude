@@ -33,7 +33,12 @@ final class CampaignExperimentService {
  public function detail(int $id):array{
   $this->outreach->guard(['admin','nurse','manager']);$r=$this->row($id);$d=$r['data'];$n=count($d['frozen']??[]);
   if($this->outreach->user['role']==='manager')return ['id'=>(int)$r['id'],'name'=>$r['name'],'suppressed'=>$n<10,'participation'=>$n>=10?['invited'=>$n]:null,'simulated'=>true];
-  $stats=$this->statistics($r);unset($d['frozen']);return ['id'=>(int)$r['id'],'name'=>$r['name'],'kind'=>$r['kind'],'version'=>(int)$r['version'],'parent_id'=>$r['parent_id'],'status'=>$r['status'],'population'=>$n,'data'=>$d,'statistics'=>$stats,'simulated'=>true];
+  $stats=$this->statistics($r);$diagnosis=$this->diagnosis($r,$stats);unset($d['frozen']);return ['id'=>(int)$r['id'],'name'=>$r['name'],'kind'=>$r['kind'],'version'=>(int)$r['version'],'parent_id'=>$r['parent_id'],'status'=>$r['status'],'population'=>$n,'data'=>$d,'statistics'=>$stats,'diagnosis'=>$diagnosis,'simulated'=>true];
+ }
+ public function diagnosis(array $row,array $stats):array {
+  $d=$row['data'];$funnels=$d['funnels']??['A'=>['sent'=>$stats['sent'],'read'=>$stats['sent'],'responded'=>$stats['responded72'],'scheduled'=>$stats['scheduled'],'attended'=>$stats['attended']]];
+  if($row['kind']==='orientation'&&!isset($d['funnels']))$funnels=['A'=>['invited'=>$stats['n1'],'interested'=>$stats['responded72'],'welcomed'=>$stats['scheduled'],'participating'=>$stats['scheduled'],'completed'=>$stats['attended']]];
+  return CampaignDiagnosis::read($stats,$funnels,$d['segments']??[],$row['kind'],$d['barriers']??[]);
  }
  public function statistics(array $row):array{
   $d=$row['data'];if(isset($d['history']))return CampaignStatistics::calculate($d['history']+['minimum_gain_pp'=>$d['minimum_gain_pp']??4,'max_cost'=>$d['max_cost']??126,'period_ended'=>true]);

@@ -56,7 +56,7 @@ try{
 
  await api('/auth/local-profile','POST',{role:'admin'});await api('/demo/reset','POST');let dash=await api('/demo/outreach/dashboard');const beforeReplies=dash.body.data.funnel[2].value
  await api('/demo/outreach/reply','POST',{choice:'confirm'});dash=await api('/demo/outreach/dashboard');if(dash.body.data.funnel[2].value!==beforeReplies+1)throw Error('Funnel did not change')
- await api('/auth/local-profile','POST',{role:'manager'});const bulletin=await api('/demo/outreach/dashboard');if(bulletin.body.data.kind!=='company'||bulletin.body.data.levels||bulletin.body.data.barriers||bulletin.body.data.recognition)throw Error('Corporate clinical disclosure')
+ await api('/auth/local-profile','POST',{role:'manager'});const bulletin=await api('/demo/outreach/dashboard');if(!bulletin.body.data)throw Error('Corporate response '+JSON.stringify(bulletin));if(bulletin.body.data.kind!=='company'||bulletin.body.data.levels||bulletin.body.data.barriers||bulletin.body.data.recognition)throw Error('Corporate clinical disclosure')
  const small=await api('/demo/outreach/dashboard?from=2026-11-25&to=2026-11-25');if(!small.body.data.suppressed)throw Error('Small group not suppressed')
  await api('/auth/local-profile','POST',{role:'admin'});await api('/demo/reset','POST');console.log('PASS task 6: live funnel, corporate separation and API suppression')
  if(errors.length)throw Error(errors.join('\n'));console.log('PASS task 2: import preview, valid commit, reset and 100-person baseline with Marcos; no console exceptions')

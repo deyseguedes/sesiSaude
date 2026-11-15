@@ -8,4 +8,6 @@ verify($s1['cost_per_recovered']>0,'Recovered return cost');
 verify(CampaignStatistics::calculate(['n1'=>100,'n2'=>100,'x1'=>40,'x2'=>50])['cost_per_recovered']===null,'No gain has no recovered cost');
 verify(CampaignStatistics::calculate(['n1'=>0,'n2'=>0])['effect_pp']===null,'No zero denominator');
 verify(CampaignStatistics::calculate(['n1'=>100,'n2'=>100,'x1'=>50,'x2'=>50])['sample_per_arm']>2400,'Small effects require program-scale sample');
+$diagnosis=App\Services\CampaignDiagnosis::read($s1,['A'=>['sent'=>420,'read'=>100,'responded'=>90]], [['name'=>'Pequeno','n'=>9,'rate'=>10],['name'=>'Turno 06h às 14h','n'=>30,'rate'=>20]]);
+verify($diagnosis['largest_drop']['to']==='read','Largest loss detected');verify(count($diagnosis['segments'])===1&&$diagnosis['segments'][0]['below_average'],'Segments require ten people and highlight deficit');
 ob_end_flush();echo "OK: {$count} combined campaign checks\n";
