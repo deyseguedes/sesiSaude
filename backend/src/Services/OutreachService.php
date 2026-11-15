@@ -14,14 +14,20 @@ final class OutreachService {
    $people[]=$p;
   }return $people;
  }
+ public function semester():array{
+  $this->guard(['worker','nurse','admin']);$person=null;foreach($this->people() as $p)if($p['registration']==='DEMO-0001')$person=$p;if(!$person)throw new HttpException(404,'NOT_FOUND','Marcos não encontrado.');
+  $attended=(bool)($person['semester_attended']??false)||($person['rescheduled_notice_hours']??0)>=24;$onTime=(bool)($person['semester_return_on_time']??false);$checkins=(int)($person['checkins_answered']??0);
+  $enabled=(bool)$this->s->one('SELECT gamification_enabled FROM companies WHERE id=?',[$this->user['company_id']])['gamification_enabled'];
+  return ['enabled'=>$enabled,'attended'=>$attended,'on_time'=>$onTime,'checkins'=>$checkins,'eligible'=>$attended&&$onTime&&$checkins>=3,'simulated'=>true];
+ }
  public function phone():array{
-  $this->guard(['worker','nurse','doctor','admin']);$p=null;foreach($this->people() as $row)if($row['registration']==='DEMO-0001'){$p=$row;break;}
+  $this->guard(['worker','nurse','doctor','admin','navigator']);$p=null;foreach($this->people() as $row)if($row['registration']==='DEMO-0001'){$p=$row;break;}
   if(!$p)throw new HttpException(404,'NOT_FOUND','Marcos não está nesta base. Restaure o roteiro ou importe sua matrícula.');
   $slots=$this->s->all("SELECT s.id,s.starts_at,s.ends_at,u.name unit FROM appointment_slots s JOIN service_units u ON u.id=s.service_unit_id WHERE s.company_id=? AND s.status='available' AND s.starts_at>? AND s.starts_at<=? AND s.starts_at LIKE ? ORDER BY s.starts_at LIMIT 3",[$this->user['company_id'],DemoClock::now(),$p['return_date'].' 23:59:59','% 14:30:00']);
   return array_intersect_key($p,array_flip(['registration','person_id','name','unit','scheduled_at','state','barrier','reply','replied_at']))+['slots'=>$slots,'campaign_id'=>6,'variant'=>'A','simulated'=>true];
  }
  public function reply(array $d):array{
-  $this->guard(['worker','nurse','doctor','admin']);$choice=Input::choice($d,'choice',['confirm','reschedule','cannot','support']);$phone=$this->phone();$payload=['choice'=>$choice,'simulated'=>true];$now=DemoClock::now();
+  $this->guard(['worker','nurse','doctor','admin','navigator']);$choice=Input::choice($d,'choice',['confirm','reschedule','cannot','support']);$phone=$this->phone();$payload=['choice'=>$choice,'simulated'=>true];$now=DemoClock::now();
   if($choice==='cannot')$payload['barrier']=Input::choice($d,'barrier',['schedule','transport','attendance_prize','unnecessary','other']);
   if($choice==='reschedule'){$slot=Input::id($d,'slot_id');$found=null;foreach($phone['slots'] as $s)if((int)$s['id']===$slot)$found=$s;if(!$found)Input::fail('horário disponível e compatível com o turno');$payload+=['slot_id'=>$slot,'scheduled_at'=>$found['starts_at']];}
   $this->s->transaction(function()use($payload,$phone,$now){

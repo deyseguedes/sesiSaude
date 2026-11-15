@@ -76,5 +76,10 @@ try{
  await send('Emulation.setDeviceMetricsOverride',{width:375,height:812,deviceScaleFactor:1,mobile:true});await assert('document.documentElement.scrollWidth<=innerWidth','375px overflow');await shot('hackathon-phone-375.png')
  await send('Emulation.clearDeviceMetricsOverride');console.log('PASS task 8: direct profile routes, recording mode, 1280x720 and 375px')
 
+
+ await wait('!!document.querySelector("[data-testid=semester-eligibility]") && document.querySelector("[data-testid=semester-eligibility]").textContent.includes("2 de 4")')
+ await wait('document.querySelector("[data-testid=worker-journey]")?.textContent.includes("60")')
+ const ownSemester=await api('/demo/outreach/semester');if(ownSemester.body.data.eligible||ownSemester.body.data.checkins!==2)throw Error('Semester progress mismatch');console.log('PASS task 10: Marcos journey and private semester progress')
+
  if(errors.length)throw Error(errors.join('\n'));console.log('PASS task 2: import preview, valid commit, reset and 100-person baseline with Marcos; no console exceptions')
 }finally{if(ws)ws.close();chrome.kill();await Promise.race([once(chrome,'exit'),pause(1000)]);if(path.resolve(profile).startsWith(path.resolve(cache)+path.sep))await rm(profile,{recursive:true,force:true,maxRetries:3,retryDelay:200})}
