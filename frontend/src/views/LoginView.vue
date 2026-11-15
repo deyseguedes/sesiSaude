@@ -1,4 +1,6 @@
 <script setup>
+import JuryStart from '../components/JuryStart.vue'
+import {APP_NAME} from '../config.js'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
@@ -37,17 +39,17 @@ async function submit() {
 <template>
   <p v-if="initializing" role="status">Carregando os níveis de acesso…</p>
   <section v-else-if="profileAccess" class="demo-entry">
-    <p class="eyebrow">CONHEÇA A PLATAFORMA</p><h1>Um cuidado que conecta<br>indústria, pessoas e famílias.</h1>
+    <JuryStart v-if="auth.publicDemo" /><h2 v-if="auth.publicDemo" class="h4">Ou explore por perfil</h2><h1 v-else>{{APP_NAME}}</h1>
     <p class="text-secondary fs-5 mt-3">Escolha um perfil e explore seu espaço. Acesso direto, sem senha.</p>
     <p v-if="shareDemo" class="demo-disclosure"><strong>Demonstração com dados fictícios.</strong> Consulta das telas e dos níveis de acesso; alterações e agendamentos não são gravados.</p>
-    <p v-else-if="auth.publicDemo" class="demo-disclosure"><strong>Demonstração interativa com dados fictícios.</strong> Escolha seu perfil. Alterações são gravadas e compartilhadas entre visitantes.</p>
+    <p v-else-if="auth.publicDemo" class="demo-disclosure"><strong>Demonstração interativa com dados fictícios.</strong> Escolha seu perfil. O roteiro é individual; use Começar a demonstração para restaurá-lo. Cadastros legados são compartilhados.</p>
     <p v-else class="demo-disclosure"><strong>Ambiente local.</strong> Escolha seu nível de acesso. Cadastros, agendamentos e registros são salvos normalmente.</p>
     <p v-if="error" role="alert" class="alert alert-danger">{{ error }}</p>
     <div class="demo-profiles"><button v-for="p in availableProfiles" :key="p.role" class="demo-profile" :disabled="busy" @click="enterProfile(p.role)"><span class="action-icon"><AppIcon :name="p.icon" /></span><span><strong>{{ roles[p.role] }}</strong><small>{{ p.detail }}</small></span><AppIcon name="arrow" :size="18" /></button></div>
     <p class="small text-secondary mt-4">Para usar outro nível, {{ shareDemo ? 'use “Trocar perfil”' : 'clique em “Sair”' }} no topo da plataforma.</p>
   </section>
   <div v-else class="row justify-content-center"><div class="col-md-6 col-lg-4">
-    <p class="text-success fw-semibold">VIVA+ ELO · APS</p><h1 class="h2">Entre no seu espaço</h1>
+    <p class="text-success fw-semibold">{{APP_NAME}} · APS</p><h1 class="h2">Entre no seu espaço</h1>
     <p class="text-secondary">Acompanhar, acolher e reconectar.</p>
     <form class="card card-body mt-4" @submit.prevent="submit">
       <label for="email" class="form-label">E-mail</label><input id="email" v-model="email" class="form-control mb-3" type="email" autocomplete="username" required maxlength="190">
