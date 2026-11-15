@@ -1,12 +1,15 @@
-const step=(target,title,text)=>({target,title,text})
-export function guideFor(user,path,panel='') {
+import {detailGuide,formGuide} from './guide-contexts.js'
+const step=(target,title,text,action)=>({target,title,text,...(action?{action}:{})})
+export function guideFor(user,path,panel='',context={}) {
+ if(context.form?.fields?.length)return formGuide(context.form)
+ const detailed=detailGuide(user,path,context);if(detailed)return detailed
  if(panel)return [
   step('dialog.side-panel[open] .side-panel-header','Confira o contexto',panel==='Ficha de acompanhamento'?'Esta ficha pertence à pessoa indicada no cabeçalho. Confira o nome antes de registrar.':'Você está em “'+panel+'”. Confira a pessoa, a empresa e o objetivo do formulário.'),
   step('dialog.side-panel[open] .side-panel-body',panel==='Ficha de acompanhamento'?'Acompanhe pela mesma ficha':'Preencha e confira',panel==='Ficha de acompanhamento'?'Leia prazo, próximo atendimento e histórico. Use Registrar contato, Agendar retorno ou Registrar comparecimento quando disponíveis. Agendamento não comprova presença.':'Preencha os campos necessários. Confira as opções já selecionadas e marque autorizações somente depois de verificá-las.'),
   step('dialog.side-panel[open] .form-actions','Salve quando estiver pronto','Use Salvar para registrar. Na fila, Salvar e abrir próxima continua o trabalho. Este guia apenas orienta; ele não preenche nem envia o formulário.')
  ]
  if(path==='/register')return [step('#main-content h1','Cadastro por convite','Confira se o convite recebido corresponde a você. Na demonstração, utilize apenas dados fictícios.'),step('#main-content form','Preencha seus dados','Confira nome, nascimento, contato e as informações solicitadas. A ativação depende da validação da gestão.'),step('#main-content form','Leia antes de concluir','Confira o aviso e conclua quando os dados estiverem corretos. Convite inválido ou expirado exige uma nova emissão.')]
- if(!user)return [
+ if(!user||path==='/login')return [
   step('.demo-entry, #email','Entre no espaço correto','Na demonstração, escolha um dos sete perfis. Em um ambiente com contas reais, utilize seu acesso cadastrado.'),
   step('.demo-profile, #password','Confira o ambiente','A demonstração interativa usa dados fictícios e grava alterações compartilhadas. Não informe dados reais nela.'),
   step('.demo-entry, form','Comece pelo seu perfil','Feche o guia e escolha seu perfil. Depois, use Guia na tela novamente para receber orientações sobre a página em que estiver.')
@@ -22,7 +25,7 @@ export function guideFor(user,path,panel='') {
   step('.workspace-content h1','Sua fila do dia','Aqui estão os próximos passos de acompanhamento. A ordem é administrativa; não representa gravidade clínica.'),
   step('.filter-chips','Encontre quem precisa de acompanhamento','Use Minhas, Prazo passado, Pedidos de apoio, Devidos hoje ou Contato perdido. Um contato realizado depois de uma tentativa sem resposta retira o item de Contato perdido.'),
   step('#queue-search','Busque uma pessoa','Digite o nome ou o motivo da pendência. Se a lista parecer incompleta, confira também os filtros.'),
-  step('.worklist-row','Abra a ficha','Clique no nome ou em Registrar contato. Na ficha, faça contato, organize o agendamento e registre o próximo passo. Use o botão de ajuda do painel para continuar o guia ali.')
+  step('.worklist-row','Abra a ficha','Clique no nome ou em Registrar contato. Na ficha, faça contato, organize o agendamento e registre o próximo passo. O guia continuará dentro da ficha.',{kind:'open',label:'Abrir ficha comigo',target:'.worklist-person button'})
  ]
  if(path==='/find-care'&&['worker','dependent'].includes(user.role))return [
   step('.workspace-content h1','Organize seu atendimento','Confira quem será atendido e escolha presencial ou teleconsulta. A cobertura depende do vínculo e do contrato.'),
@@ -32,7 +35,7 @@ export function guideFor(user,path,panel='') {
  ]
  if(path==='/management'&&user.management_level&&user.management_level!=='none')return [
   step('.workspace-content h1','Confira a empresa','Antes de cadastrar ou alterar, confirme a indústria selecionada e seu nível de gestão. Gestão não concede acesso ao prontuário.'),
-  step('.section-tabs','Escolha a área','Use Pessoas, Unidades e equipes e Contratos. Agenda e Acessos aparecem somente para quem tem permissão.'),
+  step('.section-tabs','Escolha a área','Use Pessoas, Unidades e equipes e Contratos. Agenda e Acessos aparecem somente para quem tem permissão.',{kind:'open',label:'Conhecer Contratos',target:'.section-tabs [data-guide-tab="contracts"]'}),
   step('#people-search','Localize o cadastro','Busque por nome ou e-mail e use os filtros de situação. Valide contato e vínculo antes de liberar o cadastro.'),
   ...(['admin','manager'].includes(user.role)?[step('[data-testid="company-gamification"]','Gamificação e reconhecimento','A empresa decide sobre a jornada do trabalhador. O prêmio coletivo é uma simulação e não autoriza pagamento.')]:[])
  ]
@@ -69,7 +72,7 @@ export function guideFor(user,path,panel='') {
  if(path==='/patients'&&clinical)return [
   step('.workspace-content h1','Pacientes vinculados','A lista contém apenas pessoas com vínculo assistencial autorizado para sua equipe.'),
   step('#patient-search','Busque pelo nome','Digite o nome e abra o acompanhamento. Se não encontrar, confira o vínculo com a coordenação.'),
-  step('.patient-link','Abra o prontuário','Consulte o resumo e o plano. Dentro do paciente, Guia na tela explica risco, retorno e registros.')
+  step('.patient-link','Abra o prontuário','Consulte o resumo e o plano. Dentro do paciente, Guia na tela explica risco, retorno e registros.',{kind:'open',label:'Abrir um paciente',target:'.patient-link'})
  ]
  if(path==='/'&&user.role==='doctor')return [
   step('.workspace-content h1','Seu espaço clínico','Consulte os indicadores e os pacientes vinculados. O reconhecimento coletivo é apresentado como proposta em simulação.'),

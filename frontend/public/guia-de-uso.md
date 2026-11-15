@@ -86,6 +86,10 @@ Antes de atender ou registrar: confirme pessoa, empresa, equipe e autorização.
 
 Toque em **Guia na tela** para iniciar uma orientação sobre a página atual. O guia destaca uma área e mostra sua função. Use **Próximo**, **Anterior** e **Concluir guia**, ou feche no botão de fechar/Escape. Nenhum dado é preenchido ou salvo automaticamente.
 
+Você pode clicar e preencher enquanto o guia permanece aberto. Ele acompanha a troca de tela, abas, seções do prontuário, fichas e formulários. Em formulários, oferece orientações campo a campo; **Preencher este campo** posiciona o cursor, sem alterar o conteúdo. Os atalhos para abrir telas ou fichas exigem seu clique. Salvar, confirmar, enviar ou publicar continuam sob seu controle.
+
+Em **Explorar outra tela**, escolha uma página disponível para seu perfil e continue a orientação. O guia não copia os valores preenchidos para suas explicações.
+
 O conteúdo acompanha seu perfil: enfermagem recebe o roteiro da fila; médico recebe orientações clínicas; trabalhador recebe orientações de atendimento; gestão recebe seu fluxo administrativo. Dentro de uma ficha ou formulário, o ícone de livro no cabeçalho abre o **Guia deste painel**.
 
 Para consultar os 18 capítulos sem sair da aplicação, escolha **Ver manual completo aqui** no guia. O manual abre em um painel sobre a tela atual. Feche o painel para continuar seu trabalho no mesmo lugar.

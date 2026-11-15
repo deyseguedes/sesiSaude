@@ -31,8 +31,8 @@ function submit(next=false) {
 }
 </script>
 <template>
-  <form class="row g-3 workflow-form" @submit.prevent="submit($event.submitter?.value === 'next')" @keydown.ctrl.enter.prevent="$event.currentTarget.requestSubmit()">
-    <div v-for="field in visibleFields" v-show="!field.advanced || advancedOpen" :key="field.name" :class="field.wide || field.type === 'checkbox' ? 'col-12' : 'col-md-6'">
+  <form :data-guide-form-id="prefix" :data-guide-form="submitLabel" class="row g-3 workflow-form" @submit.prevent="submit($event.submitter?.value === 'next')" @keydown.ctrl.enter.prevent="$event.currentTarget.requestSubmit()">
+    <div v-for="field in visibleFields" v-show="!field.advanced || advancedOpen" :key="field.name" :data-guide-field="field.name" :data-guide-label="field.label" :class="field.wide || field.type === 'checkbox' ? 'col-12' : 'col-md-6'">
       <label v-if="!['checkbox_group', 'checkbox'].includes(field.type)" :for="`${prefix}-${field.name}`" class="form-label">{{ field.label }}<span v-if="field.optional" class="optional-label">opcional</span></label>
       <fieldset v-if="field.type === 'checkbox_group'"><legend class="form-label fs-6">{{ field.label }}</legend><label v-for="o in field.options" :key="o.value" class="d-block mb-2"><input v-model="values[field.name]" :value="o.value" class="form-check-input me-2" type="checkbox" :disabled="busy || shareDemo">{{ o.label }}</label></fieldset>
       <select v-else-if="field.options" :id="`${prefix}-${field.name}`" v-model="values[field.name]" class="form-select" :required="!field.optional" :disabled="busy || shareDemo">
