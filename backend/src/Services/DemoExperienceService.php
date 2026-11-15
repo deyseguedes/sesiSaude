@@ -52,7 +52,7 @@ final class DemoExperienceService {
   return ['simulated'=>true,'authorized'=>$authorized,'participation'=>$count>=10?$count:null,'minimum_group'=>10];
  }
  public function management(): array {
-  $this->guard(['admin','manager']);$c=$this->user['company_id'];
+  $this->guard(['admin']);$c=$this->user['company_id'];
   $n=(int)$this->store->one('SELECT COUNT(*) n FROM patients WHERE company_id=?',[$c])['n'];
   $scheduled=(int)$this->store->one('SELECT COUNT(DISTINCT patient_id) n FROM appointments WHERE company_id=?',[$c])['n'];
   $attended=(int)$this->store->one("SELECT COUNT(DISTINCT patient_id) n FROM appointments WHERE company_id=? AND status='attended'",[$c])['n'];

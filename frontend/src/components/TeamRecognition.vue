@@ -22,7 +22,7 @@ const fields=computed(()=>[
 ])
 async function load() {
  const current=++generation;data.value=null;result.value=null;error.value=''
- try { const value=await apiGet('/recognition/teams'+(props.companyId?'?company_id='+props.companyId:''));if(auth.publicDemo && (!props.companyId||Number(props.companyId)===Number(auth.user.company_id)))value.example=(await apiGet('/demo/management')).recognition;if(current===generation)data.value=value }
+ try { const value=await apiGet('/recognition/teams'+(props.companyId?'?company_id='+props.companyId:''));if(auth.publicDemo && auth.user.role==='admin' && (!props.companyId||Number(props.companyId)===Number(auth.user.company_id)))value.example=(await apiGet('/demo/management')).recognition;if(current===generation)data.value=value }
  catch(e){if(current===generation)error.value=e.message}
 }
 watch(()=>props.companyId,load,{immediate:true})

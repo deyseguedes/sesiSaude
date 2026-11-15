@@ -5,6 +5,7 @@ use App\Controllers\HealthController;
 use App\Controllers\OperationsController as Operations;
 
 return [
+ '/api/v1/demo/outreach/dashboard'=>['GET'=>[App\Controllers\OutreachController::class,'dashboard']],
  '/api/v1/demo/outreach/export'=>['GET'=>[App\Controllers\OutreachController::class,'export']],
  '/api/v1/demo/outreach/phone'=>['GET'=>[App\Controllers\OutreachController::class,'phone']],
  '/api/v1/demo/outreach/reply'=>['POST'=>[App\Controllers\OutreachController::class,'reply']],
