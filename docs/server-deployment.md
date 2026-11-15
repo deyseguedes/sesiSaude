@@ -32,7 +32,17 @@ O gateway local do túnel está configurado em http://127.0.0.1:8099, separado d
 
 Nesse gateway, a seleção sem senha fica desabilitada, o endpoint de seleção local retorna 404 e dados clínicos exigem sessão autenticada. Cookies de sessão são Secure. O endereço vivaelo.test continua com a seleção local já autorizada. Cabeçalhos de proxy também desabilitam identidades locais, mesmo se um túnel for apontado por engano ao host comum.
 
-O ngrok está instalado e sua configuração foi validada sem exibir credenciais. A ativação externa está pendente da escolha explícita sobre usar o banco atual com autenticação ou uma base fictícia separada: a revisão automática bloqueou a primeira tentativa por envolver possível exposição de dados clínicos ao serviço externo. Nenhum link público foi criado nessa tentativa.
+O usuário autorizou explicitamente compartilhar o banco atual pelo ngrok com login obrigatório. O túnel HTTPS foi ativado para a porta 8099, com inspeção de conteúdo desabilitada. Endereço verificado: https://acclaim-heftiness-clever.ngrok-free.dev.
+
+Foram verificados frontend/API disponíveis, cookies Secure, ausência de seleção local, acesso clínico anônimo bloqueado com 401, seleção local bloqueada com 404 e arquivos privados bloqueados com 403. Não foi criada conta nem alterada senha para essa publicação.
+
+Para iniciar novamente quando o agente estiver desligado, mantenha Apache e MySQL ativos e execute:
+
+```powershell
+ngrok http http://127.0.0.1:8099 --inspect=false
+```
+
+Use o endereço HTTPS informado pelo agente; ele pode mudar. Não encaminhe o túnel para a porta 80, pois o gateway dedicado da publicação é a porta 8099. A página inicial gratuita do ngrok pode pedir que o visitante confirme “Visit Site” antes de abrir a aplicação.
 
 A transmissão pelo túnel não substitui as permissões da aplicação. A pessoa acessa com usuário e senha cadastrados. Computador, Apache, MySQL e agente do túnel precisam permanecer ligados para o endereço funcionar.
 
