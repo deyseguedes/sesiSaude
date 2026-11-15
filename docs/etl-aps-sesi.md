@@ -35,7 +35,8 @@ Scripts SQL completos são regenerados por composer schema:build.
 
 Não houve importação automática do XLSX fornecido. A interface exige prévia e confirmação da carga.
 Os endpoints HTTP de importação exigem original_base64 e filename. A chamada interna antiga permanece disponível para compatibilidade e testes, sem criar rota que dispense o original.
-O servidor PHP requer as extensões zip, dom, mbstring e openssl. Não depende de Python para a extração.
+O servidor PHP requer dom, mbstring, openssl e zlib. Usa ext-zip quando disponível; se estiver desabilitada, usa o leitor limitado ApsZipReader para ZIP armazenado/deflate, com validação de tamanho e CRC. Não depende de Python para a extração.
+A instância pública do Apache foi validada sem ext-zip: prévia do XLSX fornecido com 100 trabalhadores válidos e a observação 392 separada, sem importação. O ngrok foi conferido servindo os novos arquivos da interface.
 O catálogo backend/config/aps-columns.json é sincronizado por node scripts/sync-aps-columns.mjs; o teste de frontend detecta divergência entre os catálogos.
 
 ## Validação executada

@@ -49,9 +49,8 @@ final class ApsFileReader
   return self::result($rows,$lines,['date_system'=>'1900','sheet_name'=>null,'formula_cells'=>[],'extraction_version'=>2]);
  }
  private static function xlsx(string $bytes):array {
-  if(!class_exists(ZipArchive::class))throw new InvalidArgumentException('O servidor precisa da extensão PHP zip para ler XLSX.');
   $path=tempnam(sys_get_temp_dir(),'aps-');if($path===false)throw new \RuntimeException('Temporary file unavailable');
-  $zip=new ZipArchive();$opened=false;
+  $zip=class_exists(ZipArchive::class)?new ZipArchive():new ApsZipReader();$opened=false;
   try{
    if(file_put_contents($path,$bytes)!==strlen($bytes)||$zip->open($path)!==true)throw new InvalidArgumentException('Arquivo XLSX inválido.');$opened=true;
    if($zip->numFiles>256)throw new InvalidArgumentException('XLSX excede o limite de componentes.');

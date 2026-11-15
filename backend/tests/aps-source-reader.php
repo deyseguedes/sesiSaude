@@ -12,6 +12,13 @@ $fixture='<worksheet><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>MATRÍ
 for($i=3;$i<=1292;$i++)$fixture.='<row r="'.$i.'"><c r="A'.$i.'" s="1"/></row>';
 $fixture.='<row r="1392"><c r="M1392"><f>1+1</f><v>2</v></c></row></sheetData></worksheet>';
 $bytes=apsXlsxFixture($fixture,'date1904="true"');$parsed=ApsFileReader::read($bytes,'fonte.xlsx');
+$zipFile=tempnam(sys_get_temp_dir(),'aps-fallback-');
+try{
+ file_put_contents($zipFile,$bytes);$fallback=new App\Services\ApsZipReader();verify($fallback->open($zipFile)&&$fallback->getFromName('xl/worksheets/sheet7.xml')===$fixture,'Fallback without ext-zip reads compressed worksheet correctly');
+ $entry=$fallback->statIndex(3);$start=$entry['local']+30+unpack('v',substr($bytes,$entry['local']+26,2))[1]+unpack('v',substr($bytes,$entry['local']+28,2))[1];$fallback->close();
+ $corrupt=$bytes;$corrupt[$start+5]=chr(ord($corrupt[$start+5])^255);file_put_contents($zipFile,$corrupt);$fallback=new App\Services\ApsZipReader();$fallback->open($zipFile);
+ try{$fallback->getFromName('xl/worksheets/sheet7.xml');throw new RuntimeException('Corrupt compressed source accepted');}catch(InvalidArgumentException){}
+}finally{unlink($zipFile);}
 verify($parsed['headers']===['MATRÍCULA','NOME COMPLETO']&&count($parsed['rows'])===2,'Server follows workbook relation instead of alphabetical sheet filename');
 verify($parsed['source_lines']===[2,1392]&&$parsed['date_system']==='1904','Server ignores 1290 formatted rows and preserves row references and calendar');
 verify($parsed['formula_cells'][0]['formula']==='1+1'&&$parsed['rows'][1][12]==='2','Server preserves formula and uses cache without calculation');
