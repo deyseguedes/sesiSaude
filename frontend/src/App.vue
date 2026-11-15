@@ -1,7 +1,7 @@
 <script setup>
 import {APP_NAME,APP_SUBTITLE} from './config.js'
 import JuryNavigation from './components/JuryNavigation.vue'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore, roles } from './stores/auth.js'
 import { useWorkspaceStore } from './stores/workspace.js'
@@ -9,6 +9,7 @@ import { navigationFor, normalizeSearch } from './utils/workflow.js'
 import AppIcon from './components/AppIcon.vue'
 import SidePanel from './components/SidePanel.vue'
 import OnScreenGuide from './components/OnScreenGuide.vue'
+import AccessibilityControls from './components/AccessibilityControls.vue'
 import { shareDemo } from './services/share-demo.js'
 const auth = useAuthStore(), workspace = useWorkspaceStore(), router = useRouter(), route = useRoute()
 const recording=computed(()=>route.query.gravacao==='1'||sessionStorage.getItem('elo-recording')==='1')
@@ -25,6 +26,9 @@ function command(action) { commandsOpen.value = false; router.push(action.to) }
 function keyboard(event) { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k' && auth.user) { event.preventDefault(); commandsOpen.value = !commandsOpen.value } }
 watch(() => route.fullPath, () => { menuOpen.value = false; error.value = '' })
 watch(commandsOpen, () => { search.value = '' })
+async function updatePage(focus=true){await nextTick();const main=document.getElementById('main-content');const heading=main?.querySelector('h1');document.title=(heading?.textContent?.trim()||currentTitle.value)+' | '+APP_NAME;if(focus)main?.focus({preventScroll:true})}
+watch(()=>route.path,()=>updatePage())
+onMounted(()=>updatePage(false))
 onMounted(() => window.addEventListener('keydown', keyboard))
 onBeforeUnmount(() => window.removeEventListener('keydown', keyboard))
 </script>
@@ -47,6 +51,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', keyboard))
     <SidePanel :open="menuOpen" title="Seu espaço" @close="menuOpen = false"><nav class="sidebar-links" aria-label="Navegação no celular"><RouterLink v-for="item in [...navigation.primary, ...navigation.secondary]" :key="item.to" :to="item.to" :class="{ 'is-active': route.path === item.to || item.to !== '/' && route.path.startsWith(item.to + '/') }" class="sidebar-link"><AppIcon :name="item.icon" />{{ item.label }}</RouterLink><button class="sidebar-link border-0 w-100 text-start bg-transparent" @click="showGuide">Guia na tela</button></nav><button class="btn btn-outline-secondary mt-4" @click="logout">Sair da conta</button></SidePanel>
     <SidePanel :open="commandsOpen" title="O que você precisa fazer?" subtitle="Ações disponíveis para o seu perfil." @close="commandsOpen = false"><label for="quick-command" class="visually-hidden">Buscar ação</label><input id="quick-command" v-model="search" class="form-control form-control-lg mb-4" type="search" placeholder="Ex.: convidar, paciente, agenda…" autofocus><button v-for="action in commands" :key="action.to" class="command-result" @click="command(action)"><span class="action-icon"><AppIcon :name="action.icon" /></span><span><strong>{{ action.label }}</strong><small>{{ action.detail }}</small></span><AppIcon name="arrow" /></button><p v-if="!commands.length" class="text-secondary">Nenhuma ação encontrada para essa busca.</p></SidePanel>
   </template>
-  <template v-else><header class="guest-header"><RouterLink to="/" class="brand text-decoration-none">{{APP_NAME}}<small>{{APP_SUBTITLE}}</small></RouterLink><button class="btn btn-sm btn-outline-success" @click="showGuide">Guia na tela</button></header><main id="main-content" class="container py-4 py-lg-5"><RouterView /></main><footer class="container py-3"><RouterLink to="/privacy">Privacidade e LGPD</RouterLink></footer></template>
+  <template v-else><header class="guest-header"><RouterLink to="/" class="brand text-decoration-none">{{APP_NAME}}<small>{{APP_SUBTITLE}}</small></RouterLink><button class="btn btn-sm btn-outline-success" @click="showGuide">Guia na tela</button></header><main id="main-content" class="container py-4 py-lg-5" tabindex="-1"><RouterView /></main><footer class="container py-3"><RouterLink to="/privacy">Privacidade e LGPD</RouterLink></footer></template>
   <OnScreenGuide v-if="!recording" ref="screenGuide" />
+  <AccessibilityControls />
 </template>

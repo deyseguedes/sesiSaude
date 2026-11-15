@@ -134,6 +134,22 @@ Para gravação, use /entrar/enfermeiro?ir=/live&restaurar=1&gravacao=1. O modo 
 
 Se houve demora, procure o registro antes de repetir a ação.
 
+### 3.4 Acessibilidade
+
+O botão **Acessibilidade** fica disponível nas telas da plataforma, inclusive antes da escolha de perfil. No celular, aparece acima do botão do guia.
+
+- **Tamanho do texto:** escolha 100%, 125% ou 150%.
+- **Alto contraste:** ativa fundo escuro, texto claro e contornos destacados.
+- **Mais espaço para leitura:** amplia os espaços entre linhas, letras e palavras.
+- **Destacar links:** sublinha os links.
+- **Reduzir animações:** desativa movimentos e transições; a preferência de movimento reduzido do dispositivo também é respeitada.
+
+Os ajustes ficam salvos neste navegador e continuam ao mudar de tela ou recarregar. Se o armazenamento estiver bloqueado, permanecem ativos durante a página atual. Use **Restaurar ajustes padrão** para desfazê-los.
+
+Use **Tab** e **Shift + Tab** para percorrer os controles, **Enter** para acionar botões e **Esc** para fechar o painel. O foco retorna ao botão que o abriu. O link **Ir para o conteúdo** permite pular a navegação; ao trocar de página, o foco vai para o conteúdo principal e o título da aba é atualizado.
+
+Esses recursos melhoram o acesso à interface; não representam certificação de conformidade nem substituem testes com pessoas com deficiência e leitores de tela.
+
 ## 4. Administrador SESI — preparar a operação
 
 **Caminho: Gestão.** As abas são **Pessoas**, **Unidades e equipes**, **Contratos**, **Agenda** e **Acessos**, conforme nível.
