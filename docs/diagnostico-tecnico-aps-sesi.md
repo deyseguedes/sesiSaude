@@ -2,7 +2,7 @@
 
 Data: 15/11/2026.
 Referência: pedido “Sistema Inteligente de Gestão do Cuidado — APS SESI”.
-Estado: revisão do repositório concluída; diagnóstico da planilha pendente do XLSX.
+Estado: relatório preliminar histórico. O XLSX foi fornecido posteriormente e seu diagnóstico está concluído em [Diagnóstico da fonte APS](diagnostico-aps-sesi/README.md).
 
 ## 1. Escopo e evidências
 

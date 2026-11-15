@@ -1,0 +1,549 @@
+{
+  "profile": "APS SESI source diagnostic, not an ETL importer",
+  "source_file": "GESTÃO DO CUIDADO - APS SESI dados fictícios.xlsx",
+  "sha256": "9d1ac1365c424e56a6bdf02e96f6545a62ee45235a509e0992a80d0d4ab2096e",
+  "bytes": 57063,
+  "reference_date": "2026-11-15",
+  "sheet": "Coordenação do cuidado",
+  "dimension": "A1:AF1392",
+  "header_row": 1,
+  "column_count": 32,
+  "worker_count": 100,
+  "worker_row_range": [
+    2,
+    101
+  ],
+  "nonempty_rows": 101,
+  "empty_xml_rows": 1290,
+  "orphan_rows": [
+    {
+      "row": 392,
+      "cells": [
+        {
+          "ref": "M392",
+          "type": "n",
+          "date_style": true
+        }
+      ]
+    }
+  ],
+  "date_system": "1900",
+  "macro_present": false,
+  "external_links": 0,
+  "merged_cells": [],
+  "columns": [
+    {
+      "column": "A",
+      "header": "MATRÍCULA",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "n": 100
+      },
+      "formula_count": 0
+    },
+    {
+      "column": "B",
+      "header": "NOME COMPLETO",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "s": 100
+      },
+      "formula_count": 0
+    },
+    {
+      "column": "C",
+      "header": "STATUS",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "s": 100
+      },
+      "formula_count": 0,
+      "categories": {
+        "INATIVO": 40,
+        "ATIVO": 60
+      }
+    },
+    {
+      "column": "D",
+      "header": "DATA DE NASCIMENTO",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "n": 100
+      },
+      "formula_count": 0,
+      "invalid_rows": [],
+      "future_rows": [],
+      "date_year_range": [
+        1965,
+        2006
+      ]
+    },
+    {
+      "column": "E",
+      "header": "IDADE",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "n": 100
+      },
+      "formula_count": 100
+    },
+    {
+      "column": "F",
+      "header": "CPF",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "s": 100
+      },
+      "formula_count": 0
+    },
+    {
+      "column": "G",
+      "header": "SEXO",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "s": 100
+      },
+      "formula_count": 0,
+      "categories": {
+        "FEMININO": 50,
+        "MASCULINO": 50
+      }
+    },
+    {
+      "column": "H",
+      "header": "DATA DE ENTRADA APS",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "n": 100
+      },
+      "formula_count": 0,
+      "invalid_rows": [],
+      "future_rows": [],
+      "date_year_range": [
+        2023,
+        2026
+      ]
+    },
+    {
+      "column": "I",
+      "header": "TELEFONE",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "s": 100
+      },
+      "formula_count": 0
+    },
+    {
+      "column": "J",
+      "header": "EMPRESA",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "s": 100
+      },
+      "formula_count": 0,
+      "distinct": 6,
+      "group_sizes": [
+        25,
+        18,
+        17,
+        16,
+        15,
+        9
+      ]
+    },
+    {
+      "column": "K",
+      "header": "MÉDICO DE REFERÊNCIA",
+      "filled": 100,
+      "empty": 0,
+      "percent": 100.0,
+      "types": {
+        "s": 100
+      },
+      "formula_count": 0,
+      "distinct": 4,
+      "group_sizes": [
+        29,
+        26,
+        24,
+        21
+      ]
+    },
+    {
+      "column": "L",
+      "header": "ATENDIMENTO COM EQUIPE MULTI?",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0,
+      "categories": {}
+    },
+    {
+      "column": "M",
+      "header": "DATA ÚLTIMA CONSULTA NUTRICIONISTA",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "N",
+      "header": "DATA ÚLTIMA CONSULTA PSICOLOGIA",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "O",
+      "header": "DATA ÚLTIMA CONSULTA MÉDICA",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "P",
+      "header": "HISTÓRICO CONTATO DE CONSTADOS DE 2026",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "Q",
+      "header": "CONTATO DE JULHO/ 2026",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "R",
+      "header": "CONTATO DE AGOSTO / 2026",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "S",
+      "header": "CONTATO DE SETEMBRO / 2026",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "T",
+      "header": "CONTATO DE OUTUBRO / 2026",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "U",
+      "header": "CONTATO DE NOVEMBRO / 2026",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "V",
+      "header": "CONTATO DE DEZEMBRO / 2026",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "W",
+      "header": "PREVISÃO DE RETORNO  CONFORME SOLICITAÇÃO MÉDICA",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "X",
+      "header": "DEMANDAS GERADAS NA ÚLTIMA CONSULTA MÉDICA",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "Y",
+      "header": "CLASSIFICAÇÃO DE RISCO ATUAL",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0,
+      "categories": {}
+    },
+    {
+      "column": "Z",
+      "header": "CLASSIFICAÇÃO DE RISCO INICIAL",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0,
+      "categories": {}
+    },
+    {
+      "column": "AA",
+      "header": "RETORNO DO ATENDIMENTO MÉDICO PARA VERIFICAR CLASSIFICAÇÃO DE RISCO",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "AB",
+      "header": "DATA ENVIO DO PLANO",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "AC",
+      "header": "VERIFICAR ADESÃO DAS METAS",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "AD",
+      "header": "STATUS PLANO DE CUIDADO",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0,
+      "categories": {}
+    },
+    {
+      "column": "AE",
+      "header": "DATA DA COORD CUIDADO",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    },
+    {
+      "column": "AF",
+      "header": "DATA DA PRÓXIMA COORD CUIDADO2",
+      "filled": 0,
+      "empty": 100,
+      "percent": 0.0,
+      "types": {},
+      "formula_count": 0
+    }
+  ],
+  "filled_cells": 1100,
+  "expected_cells": 3200,
+  "fill_percent": 34.375,
+  "duplicates": {
+    "A": {
+      "distinct": 100,
+      "duplicate_row_groups": []
+    },
+    "B": {
+      "distinct": 100,
+      "duplicate_row_groups": []
+    },
+    "F": {
+      "distinct": 100,
+      "duplicate_row_groups": []
+    },
+    "I": {
+      "distinct": 100,
+      "duplicate_row_groups": []
+    }
+  },
+  "invalid_cpf_rows": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101
+  ],
+  "invalid_phone_format_rows": [],
+  "age_cache_difference_rows": [
+    17,
+    26,
+    56,
+    78,
+    80
+  ],
+  "entry_before_birth_rows": [],
+  "formula_count": 100,
+  "formula_patterns": {
+    "IFERROR(INT((TODAY()-D{row})/365.25),\"\")": 4
+  },
+  "validations": [
+    {
+      "type": null,
+      "ranges": "A1:B1392 D1:K1392 M1:X1392 AA1:AC1392 AE1:XFD1392",
+      "formula1": "0"
+    },
+    {
+      "type": "list",
+      "ranges": "L1:L1392",
+      "formula1": "\"SIM,NÃO\""
+    },
+    {
+      "type": "list",
+      "ranges": "Y1:Z1392",
+      "formula1": "\"RISCO 1,RISCO 2,RISCO 3,RISCO 4\""
+    },
+    {
+      "type": "list",
+      "ranges": "C1:C1392",
+      "formula1": "\"ATIVO,INATIVO\""
+    },
+    {
+      "type": "list",
+      "ranges": "AD1:AD1392",
+      "formula1": "\"ADERIU PARCIALMENTE,AGUARDANDO RESPOSTA,ADERIU TOTALMENTE,NÃO ADERIU\""
+    }
+  ]
+}

@@ -6,6 +6,15 @@ O processo quebra entre mensagem enviada e resposta do trabalhador.
 O protótipo leva o retorno ao celular e organiza a fila antes do vencimento.
 O SESI acompanha participação, adesão e risco, com campanhas avaliadas por efeito, custo e travas.
 
+## Diagnóstico da fonte SOC — 15/11/2026
+
+O [diagnóstico do XLSX fornecido](docs/diagnostico-aps-sesi/README.md) contém o
+dicionário real das 32 colunas, qualidade medida e plano ETL. A origem tem
+100 cadastros (60 ativos) e campos assistenciais vazios; não comprova ausência
+de atendimento. A observação M392 está sem trabalhador vinculado.
+A planilha não foi importada no sistema; os cenários já publicados continuam
+sendo a demonstração sintética anterior, não indicadores derivados deste XLSX.
+
 ## Arquitetura
 
 Exportação Klingo/SOC/S+ → importação validada → base consolidada →
