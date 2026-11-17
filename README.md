@@ -1,5 +1,10 @@
 # Life+ — Hackathon+ SESI Saúde 2026
 
+Projeto open source sob a [licença MIT](LICENSE), que permite usar, modificar e
+distribuir o código, inclusive para fins comerciais, preservando o aviso de
+copyright e a licença. Dependências e materiais de terceiros mantêm suas
+respectivas licenças.
+
 Camada de engajamento ligada ao ecossistema do SESI.
 A equipe apresenta o absenteísmo na APS como desafio; a referência de cerca de 50% é premissa a validar no piloto.
 O processo quebra entre mensagem enviada e resposta do trabalhador.
